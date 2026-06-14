@@ -1,0 +1,20 @@
+technology:
+  - name: Hacker News
+    url: https://hnrss.org/frontpage
+
+  - name: InfoQ
+    url: https://www.infoq.com/feed/
+
+  - name: O'Reilly Radar
+    url: https://www.oreilly.com/radar/feed/
+
+economics:
+  - name: OECD
+    url: https://www.oecd.org/rss.xml
+
+world:
+  - name: Reuters World
+    url: https://feeds.reuters.com/Reuters/worldNews
+
+  - name: BBC World
+    url: http://feeds.bbci.co.uk/news/world/rss.xml
