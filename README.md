@@ -34,18 +34,28 @@ output/reports/2026-06-14.md
 
 ## Configuration
 
-Feed sources are configured externally through JSON files.
+### Environment Variables
+
+Copy `.env.example` to `.env` and add your API keys:
+
+```bash
+cp .env.example .env
+```
+
+### Feed Sources
+
+Feed sources are configured through a YAML file.
 
 The repository contains:
 
 ```text
-config/feeds.example.json
+config/feeds.example.yaml
 ```
 
 Create your own:
 
 ```text
-config/feeds.json
+config/feeds.yaml
 ```
 
 and customize the sources as desired.
@@ -60,6 +70,8 @@ and customize the sources as desired.
 * JSON article storage
 * Markdown report generation
 * Daily report archiving
+* AI-powered article summarization (via Google APIs)
+* Intelligence briefing generation
 
 ## Roadmap
 
