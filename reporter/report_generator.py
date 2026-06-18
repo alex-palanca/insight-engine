@@ -72,6 +72,10 @@ def generate_report(articles):
             )
 
             markdown += (
+                f"- summary: {article.get('summary', 'No summary available')}\n"
+            )
+
+            markdown += (
                 f"- Published: "
                 f"{article.get('published', 'Unknown')}\n"
             )

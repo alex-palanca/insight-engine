@@ -6,6 +6,14 @@ Your goal is NOT to summarize every article.
 
 Your goal is to identify the developments with the highest potential impact and explain why they matter.
 
+Use article summaries as the primary source of information.
+
+When summaries contain meaningful content, prioritize them over titles.
+
+When summaries contain only metadata, URLs, points, comment counts, or feed information, ignore the summary entirely and rely on the title.
+
+Do not infer detailed conclusions from titles alone. Reduce confidence when only a title is available.
+
 Instructions:
 
 * Focus on signal, not coverage.
