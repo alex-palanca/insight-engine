@@ -8,9 +8,30 @@ technology:
   - name: O'Reilly Radar
     url: https://www.oreilly.com/radar/feed/
 
+  - name: TechCrunch
+    url: https://techcrunch.com/feed/
+
+  - name: Wired
+    url: https://www.wired.com/feed/rss
+
+  - name: The Verge
+    url: https://www.theverge.com/rss/index.xml
+
 economics:
   - name: OECD
     url: https://www.oecd.org/rss.xml
+
+  - name: The Economist
+    url: https://www.economist.com/finance-and-economics/rss.xml
+
+  - name: Financial Times
+    url: https://www.ft.com/?format=rss
+
+  - name: Bloomberg
+    url: https://www.bloomberg.com/feed/podcast/etf-report.xml
+
+  - name: Expansion
+    url: https://www.expansion.com/rss/portada.xml
 
 world:
   - name: Reuters World
@@ -18,3 +39,9 @@ world:
 
   - name: BBC World
     url: http://feeds.bbci.co.uk/news/world/rss.xml
+
+  - name: The Economist
+    url: https://www.economist.com/the-world-this-week/rss.xml
+
+  - name: China Daily
+    url: http://www.chinadaily.com.cn/rss/world_rss.xml
