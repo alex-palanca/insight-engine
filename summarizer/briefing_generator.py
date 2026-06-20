@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv 
 from google import genai
 from datetime import datetime
+from storage.storage_service import upload_daily_briefing
 
 # Load environment variables from .env file
 load_dotenv()
@@ -53,6 +54,8 @@ def create_intelligence_briefing():
         briefing,
         briefing_path
     )
+
+    upload_daily_briefing(today)
 
 
 def load_prompt(prompt_path: str) -> str:

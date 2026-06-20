@@ -1,6 +1,8 @@
 import feedparser
 import config.feed_loader
+from storage.storage_service import upload_daily_articles
 import json
+from datetime import date
 
 # Maximum number of articles to collect per category
 MAX_ARTICLES_PER_CATEGORY = 30
@@ -73,20 +75,15 @@ def collect_articles():
 
 def save_articles(articles):
 
-    with open(
-        "output/articles/daily_articles.json",
-        "w",
-        encoding="utf-8"
-    ) as f:
-        
-        json.dump(
-            articles,
-            f,
-            indent=2,
-            ensure_ascii=False
-        )
+    filename = f"output/articles/{date.today().isoformat()}.json"
 
-    print(f"Saved {len(articles)} articles to output/articles/daily_articles.json")
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(articles, f, indent=2, ensure_ascii=False)
+
+    print("Uploading articles to S3...")
+    upload_daily_articles(date.today().isoformat())
+
+    print(f"Saved {len(articles)} articles to {filename}")
         
             
 

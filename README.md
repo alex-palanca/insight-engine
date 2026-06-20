@@ -9,21 +9,26 @@ The long-term goal is to create an AI-powered assistant that filters information
 * RSS feed collection from YAML-configured sources
 * Per-category and per-source article limits
 * Article categorization and summary capture
-* JSON storage of collected articles
+* Date-based JSON storage of collected articles (YYYY-MM-DD.json format)
+* S3 integration for article and briefing storage
 * Daily markdown report generation
 * AI-generated intelligence briefings using Google Gemini
-* Streamlit UI for viewing briefings
+* Streamlit UI for viewing briefings with historical access
+* Local based upload of articles and briefings to S3
 
 ## Project Structure
 
 * `main.py` - CLI runner for collection, report generation, and briefing creation
-* `collector/rss_collector.py` - RSS collection and JSON output
+* `collector/rss_collector.py` - RSS collection with date-based JSON output and S3 upload
 * `reporter/report_generator.py` - Markdown report generation
 * `summarizer/briefing_generator.py` - AI briefing generation using Gemini
-* `ui/app.py` - Streamlit app for viewing briefings
+* `ui/app.py` - Streamlit app for viewing today's and historical briefings
+* `ui/services.py` - UI service layer for S3 retrieval and file operations
+* `storage/s3_client.py` - S3 client for cloud storage
+* `storage/storage_service.py` - Storage service abstraction layer
 * `config/feeds.example.yaml` - Sample feed configuration
 * `.env.example` - Required environment variables template
-* `output/articles/` - Collected article JSON files
+* `output/articles/` - Collected article JSON files (named by date: YYYY-MM-DD.json)
 * `output/reports/` - Generated daily markdown reports
 * `output/briefings/` - Generated intelligence briefings
 
@@ -43,23 +48,39 @@ pip install -r requirements.txt
 copy .env.example .env
 ```
 
-2. Set `GOOGLE_API_KEY` in `.env`.
+2. Set required environment variables in `.env`:
+   - `GOOGLE_API_KEY` - Google API key for Gemini
+   - `AWS_ACCESS_KEY_ID` - AWS credentials for S3
+   - `AWS_SECRET_ACCESS_KEY` - AWS credentials for S3
+   - `AWS_S3_BUCKET` - S3 bucket name
 
 3. Copy `config/feeds.example.yaml` to `config/feeds.yaml` and customize feed sources.
 
 ## Usage
 
-Run the full process from the command line:
+### Run the full collection and briefing pipeline:
 
 ```bash
 python main.py
 ```
 
-Run the Streamlit UI:
+This will:
+1. Collect articles from configured RSS feeds
+2. Save articles to `output/articles/YYYY-MM-DD.json` and upload to S3
+3. Generate a markdown report
+4. Generate an AI-powered intelligence briefing
+5. Upload briefing to S3
+
+### View briefings in the Streamlit UI:
 
 ```bash
 streamlit run ui/app.py
 ```
+
+The UI allows you to:
+- View today's intelligence briefing
+- Browse historical briefings
+- Filter briefings by date
 
 ## Feed Configuration
 
@@ -76,28 +97,49 @@ business:
 
 ## Environment Variables
 
-Required variables:
+Required variables in `.env`:
 
-* `GOOGLE_API_KEY` - Google API key used by the Gemini client
+* `GOOGLE_API_KEY` - Google API key for Gemini
+* `AWS_ACCESS_KEY_ID` - AWS access key
+* `AWS_SECRET_ACCESS_KEY` - AWS secret key
+* `AWS_S3_BUCKET` - S3 bucket name for storage
 
-## Notes
+## Architecture Notes
 
-* The app saves raw collected articles in `output/articles/daily_articles.json`.
-* Daily markdown reports are generated in `output/reports/`.
-* AI-generated briefings are saved in `output/briefings/` with filenames like `IB_YYYY-MM-DD.md`.
-* `.env` is excluded from git via `.gitignore` and should never be committed.
+* Articles are collected with per-category limits (default: 30) and per-source limits (default: 5)
+* Articles are saved locally to `output/articles/{date}.json` and uploaded to S3
+* The Streamlit UI retrieves briefings from S3 for viewing
+* All imports use project-root path resolution for flexible execution from any working directory
+* `.env` is excluded from git via `.gitignore` and should never be committed
+
+## Recent Changes
+
+* Date-based article filenames (YYYY-MM-DD.json format) for better organization
+* S3 integration for cloud storage of articles and briefings
+* Fixed import paths to support execution from any working directory
+* Removed unused S3 imports from main.py
+* Streamlit UI now with proper module imports and S3 integration
 
 ## Current Development Stage
 
 ### Implemented
 
-* RSS feed ingestion
+* RSS feed ingestion with category support
 * YAML feed configuration
 * Per-category article limits
 * Per-source article limits
-* Article storage in JSON
+* Date-based article storage in JSON
+* S3 upload of articles and briefings
 * Markdown report generation
-* AI intelligence briefing generation
+* AI intelligence briefing generation with Gemini
+* Streamlit UI with historical briefing browsing
+* Proper import path resolution for flexible execution
+
+### Known Issues
+
+* Pylance linting warnings about import order (style-only, code is functional)
+* Requires AWS credentials for S3 operations
+
 * Streamlit briefing viewer
 
 ### Next Improvements

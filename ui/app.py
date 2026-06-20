@@ -1,31 +1,20 @@
-import streamlit as st
+import sys
 from pathlib import Path
 
+# Ensure the project root is on sys.path so ui imports work from any cwd.
+project_root = Path(__file__).resolve().parents[1]
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
-# Configurable path to the briefings file
-briefing_path = Path("output/briefings")
-
-
-def get_briefing_files():
-    return sorted(briefing_path.glob("*.md"), reverse=True)
-
-
-def briefing_loader(file_path):
-
-    with open(file_path, "r", encoding="utf-8") as f:
-        return f.read()
+import streamlit as st
+from ui import services
 
 
-def get_briefing_date(file_path):
-    """
-    Extract date from:
-    IB_2026-06-22.md
 
-    Returns:
-    2026-06-22
-    """
 
-    return file_path.stem.replace("IB_", "")
+
+
+
 
 def render_icon():
 
@@ -90,7 +79,7 @@ with st.container():
 # Today's briefing
 if page == "Today's Briefing":
 
-    briefing_files = get_briefing_files()
+    briefing_files = services.get_briefing_files()
 
     if not briefing_files:
 
@@ -102,11 +91,11 @@ if page == "Today's Briefing":
 
         latest_briefing = briefing_files[0]
 
-        briefing_date = get_briefing_date(
+        briefing_date = services.get_briefing_date(
             latest_briefing
         )
 
-        content = briefing_loader(
+        content = services.briefing_loader(
             latest_briefing
         )
 
@@ -133,7 +122,7 @@ if page == "Today's Briefing":
 # Historical briefings
 elif page == "Historical Briefings":
 
-    briefing_files = get_briefing_files()
+    briefing_files = services.get_briefing_files()
 
     if not briefing_files:
 
@@ -144,16 +133,16 @@ elif page == "Historical Briefings":
     else:
 
         selected_file = st.selectbox(
-            "Select a briefing file",
-            briefing_files,
-            format_func=lambda x: x.stem
-        )
+        "Select a briefing",
+        briefing_files,
+        format_func=services.get_briefing_date
+)
 
-        briefing_date = get_briefing_date(
+        briefing_date = services.get_briefing_date(
             selected_file
         )
 
-        content = briefing_loader(
+        content = services.briefing_loader(
             selected_file
         )
 
