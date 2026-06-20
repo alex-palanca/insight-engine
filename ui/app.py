@@ -23,10 +23,8 @@ def render_header():
         <div class="hero-card">
             <div class="hero-header-row">
                 <span class="hero-badge">ISOLATE</span>
-                <span class="hero-emoji">📰</span>
             </div>
             <h1>Intelligence Briefing Hub</h1>
-            <p class="hero-description">A clean, modern interface for viewing today&apos;s and historical intelligence briefings.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -51,6 +49,13 @@ st.markdown(
         font-family: Inter, system-ui, sans-serif;
     }
 
+    body,
+    body[data-theme='dark'],
+    :root[data-theme='dark'] {
+        background: linear-gradient(180deg, #f4f7ff 0%, #eef2ff 100%);
+        color: #0f172a;
+    }
+
     body {
         background: linear-gradient(180deg, #f4f7ff 0%, #eef2ff 100%);
     }
@@ -58,15 +63,67 @@ st.markdown(
     .block-container {
         padding: 1.8rem 2rem 2rem;
         max-width: 1180px;
+        margin: 0 auto;
     }
 
     .hero-card {
+        width: 100%;
+        max-width: 1080px;
+        margin: 0 auto 1.5rem;
         border-radius: 28px;
         padding: 1.8rem 2rem;
-        margin-bottom: 1.5rem;
         background: rgba(255, 255, 255, 0.95);
         box-shadow: 0 22px 60px rgba(15, 23, 42, 0.08);
         border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    @media (max-width: 768px) {
+        .block-container {
+            padding: 1rem 1rem 1.5rem;
+        }
+
+        .hero-card {
+            padding: 1.3rem 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .hero-card h1 {
+            font-size: 2rem;
+        }
+
+        .hero-description {
+            max-width: 100%;
+            font-size: 0.95rem;
+        }
+
+        .st-segmented-control > div {
+            padding: 0.2rem;
+        }
+
+        .st-segmented-control button {
+            padding: 0.7rem 0.9rem;
+            font-size: 0.92rem;
+        }
+
+        .stMetric {
+            min-width: 0;
+            width: 100%;
+            margin-bottom: 0.85rem;
+        }
+
+        .stSelectbox>div>button,
+        .stSelectbox>div>div>button,
+        .stButton>button {
+            width: 100%;
+        }
+
+        .briefing-card {
+            padding: 1.4rem 1.4rem;
+        }
+
+        .briefing-card .stMarkdown {
+            font-size: 0.98rem;
+        }
     }
 
     .hero-header-row {
@@ -91,10 +148,6 @@ st.markdown(
         font-size: 0.82rem;
     }
 
-    .hero-emoji {
-        font-size: 1.7rem;
-    }
-
     .hero-card h1 {
         margin: 0;
         font-size: 2.8rem;
@@ -115,6 +168,17 @@ st.markdown(
         border-radius: 20px;
         background: rgba(255, 255, 255, 0.95);
         box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
+        min-width: 260px;
+        padding: 0.8rem 1rem;
+    }
+
+    .stMetric .metric-label,
+    .stMetric .metric-value {
+        word-break: break-word;
+    }
+
+    .stMetric .metric-value {
+        min-height: 2.5rem;
     }
 
     .st-segmented-control > div {
@@ -158,6 +222,33 @@ st.markdown(
     .stMarkdown h3 {
         line-height: 1.75;
     }
+
+    @media (max-width: 768px) {
+        .stMetric {
+            min-width: 0;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .stMetric .metric-value {
+            font-size: 1.1rem;
+        }
+
+        .st-segmented-control button {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .stSelectbox>div>button,
+        .stSelectbox>div>div>button,
+        .stButton>button {
+            width: 100%;
+        }
+
+        .briefing-card {
+            padding: 1.2rem 1.2rem;
+        }
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -187,11 +278,9 @@ if page == "Today's Briefing":
         briefing_date = services.get_briefing_date(latest_briefing)
         content = services.briefing_loader(latest_briefing)
 
-        col1, col2, _ = st.columns([1, 1, 6])
+        col1, _ = st.columns([1, 8])
         with col1:
             st.metric("Date", briefing_date)
-        with col2:
-            st.metric("Status", "Latest")
 
         st.markdown("""
         <div class="briefing-card">
@@ -218,11 +307,9 @@ elif page == "Historical Briefings":
         briefing_date = services.get_briefing_date(selected_file)
         content = services.briefing_loader(selected_file)
 
-        col1, col2, _ = st.columns([1, 1, 6])
+        col1, _ = st.columns([1, 8])
         with col1:
             st.metric("Date", briefing_date)
-        with col2:
-            st.metric("Status", "Historical")
 
         st.markdown("""
         <div class="briefing-card">
