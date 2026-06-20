@@ -21,8 +21,10 @@ Thumbs.db
 # Generated outputs
 output/articles/*
 output/reports/*
+output/briefings/*
 !output/articles/.gitkeep
 !output/reports/.gitkeep
+!output/briefings/.gitkeep
 
 # Environment variables
 .env

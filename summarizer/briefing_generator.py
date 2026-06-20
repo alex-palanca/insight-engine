@@ -27,7 +27,7 @@ def create_intelligence_briefing():
     )
 
     briefing_path = (
-        f"output/reports/"
+        f"output/briefings/"
         f"IB_{today}.md"
     )
 
@@ -133,8 +133,6 @@ def generate_briefing(
         model="gemini-2.5-flash",
         contents=prompt,
     )
-
-    print(response.text)
 
     return response.text if response.text else "No briefing generated."
 

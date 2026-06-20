@@ -1,131 +1,113 @@
 # DAILY BRIEFER
 
-A personal intelligence briefing system that collects articles from curated RSS feeds and generates structured daily reports.
+A personal intelligence briefing system that collects articles from curated RSS feeds, saves them to JSON, generates markdown reports, and creates AI-powered intelligence briefings.
 
 The long-term goal is to create an AI-powered assistant that filters information noise and produces concise, high-signal intelligence briefings focused on personalized curated sources.
 
 ## Current Features
 
-* RSS feed collection
-* Configurable feed sources
-* Article categorization
-* JSON article storage
-* Markdown report generation
-* Daily timestamped reports in .md
+* RSS feed collection from YAML-configured sources
+* Per-category and per-source article limits
+* Article categorization and summary capture
+* JSON storage of collected articles
+* Daily markdown report generation
+* AI-generated intelligence briefings using Google Gemini
+* Streamlit UI for viewing briefings
 
+## Project Structure
 
-## How It Works
+* `main.py` - CLI runner for collection, report generation, and briefing creation
+* `collector/rss_collector.py` - RSS collection and JSON output
+* `reporter/report_generator.py` - Markdown report generation
+* `summarizer/briefing_generator.py` - AI briefing generation using Gemini
+* `ui/app.py` - Streamlit app for viewing briefings
+* `config/feeds.example.yaml` - Sample feed configuration
+* `.env.example` - Required environment variables template
+* `output/articles/` - Collected article JSON files
+* `output/reports/` - Generated daily markdown reports
+* `output/briefings/` - Generated intelligence briefings
 
-```text
-RSS Feeds
-    ↓
-Article Collection
-    ↓
-JSON Storage
-    ↓
-Markdown Report Generation
-```
+## Requirements
 
-Example output:
-
-```text
-output/reports/2026-06-14.md
-```
-
-## Configuration
-
-### Environment Variables
-
-Copy `.env.example` to `.env` and add your API keys:
+Install dependencies from `requirements.txt`:
 
 ```bash
-cp .env.example .env
+pip install -r requirements.txt
 ```
 
-### Feed Sources
+## Setup
 
-Feed sources are configured through a YAML file.
+1. Copy and configure environment variables:
 
-The repository contains:
-
-```text
-config/feeds.example.yaml
+```bash
+copy .env.example .env
 ```
 
-Create your own:
+2. Set `GOOGLE_API_KEY` in `.env`.
 
-```text
-config/feeds.yaml
+3. Copy `config/feeds.example.yaml` to `config/feeds.yaml` and customize feed sources.
+
+## Usage
+
+Run the full process from the command line:
+
+```bash
+python main.py
 ```
 
-and customize the sources as desired.
+Run the Streamlit UI:
+
+```bash
+streamlit run ui/app.py
+```
+
+## Feed Configuration
+
+Feeds are defined in `config/feeds.yaml` with category groups and source entries. Example format:
+
+```yaml
+technology:
+  - name: Hacker News
+    url: https://hnrss.org/frontpage
+business:
+  - name: Financial Times
+    url: https://www.ft.com/?format=rss
+```
+
+## Environment Variables
+
+Required variables:
+
+* `GOOGLE_API_KEY` - Google API key used by the Gemini client
+
+## Notes
+
+* The app saves raw collected articles in `output/articles/daily_articles.json`.
+* Daily markdown reports are generated in `output/reports/`.
+* AI-generated briefings are saved in `output/briefings/` with filenames like `IB_YYYY-MM-DD.md`.
+* `.env` is excluded from git via `.gitignore` and should never be committed.
 
 ## Current Development Stage
 
 ### Implemented
 
 * RSS feed ingestion
-* External feed configuration
-* Article categorization
-* JSON article storage
+* YAML feed configuration
+* Per-category article limits
+* Per-source article limits
+* Article storage in JSON
 * Markdown report generation
-* Daily report archiving
-* AI-powered article summarization (via Google APIs)
-* Intelligence briefing generation
+* AI intelligence briefing generation
+* Streamlit briefing viewer
 
-## Roadmap
+### Next Improvements
 
-### Intelligence Generation
-
-* AI-powered article summarization
-* Executive briefing generation
-* Multi-source synthesis
-* Key development identification
-* Long-term impact analysis
-
-### Information Quality
-
-* Duplicate story detection
-* Source reliability assessment
-* Importance and relevance scoring
-* Noise reduction and filtering
-
-### Knowledge Management
-
-* Historical archive
-* Search capabilities
-* Topic tracking
-* Trend identification
-* Cross-reference discovery
-
-### Personalization
-
-* Interest-based ranking
-* Personalized briefings
-* Adaptive content selection
-* User preference learning
-
-### Delivery & Accessibility
-
-* Automated report generation
-* Mobile-friendly consumption
-* Notification and delivery channels
-* Cloud deployment options
-
-### Advanced Capabilities
-
-* Semantic search
-* Research assistant features
-* Event clustering
-* Knowledge graph exploration
-* Long-term trend analysis
+* Better feed error handling and retries
+* More robust summary extraction
+* Search and filtering in the Streamlit UI
+* Settings for feed limits and report formatting
+* Support for additional AI prompt templates
 
 ## Motivation
 
-Most news platforms optimize for engagement, not understanding.
-
-Keeping up with developments in technology, economics, geopolitics, and science often requires reading dozens of articles from multiple sources every day.
-
-This project aims to build a personal intelligence briefing system that collects information from trusted sources, filters irrelevant content, and ultimately delivers concise, high-signal reports focused on developments that are likely to matter in the short and long term.
-
-The objective is simple: spend less time consuming news and more time understanding the world.
+Most news platforms optimize for engagement instead of signal. This project aims to collect information from trusted sources, summarize what matters, and present concise briefings for faster awareness and decision-making.

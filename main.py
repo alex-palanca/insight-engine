@@ -3,6 +3,7 @@ import reporter.report_generator as report_generator
 from summarizer import briefing_generator
 
 def main():
+    
 
     print("Starting article collection...")
     articles = rss_collector.collect_articles()
