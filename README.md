@@ -14,7 +14,7 @@ The long-term goal is to create an AI-powered assistant that filters information
 * Daily markdown report generation
 * AI-generated intelligence briefings using Google Gemini
 * Streamlit UI for viewing briefings with historical access
-* Local based upload of articles and briefings to S3
+* Cloud-based upload of articles and briefings to AWS S3
 
 ## Project Structure
 
@@ -52,7 +52,8 @@ copy .env.example .env
    - `GOOGLE_API_KEY` - Google API key for Gemini
    - `AWS_ACCESS_KEY_ID` - AWS credentials for S3
    - `AWS_SECRET_ACCESS_KEY` - AWS credentials for S3
-   - `AWS_S3_BUCKET` - S3 bucket name
+   - `AWS_REGION` - AWS region for S3
+   - `AWS_BUCKET_NAME` - S3 bucket name
 
 3. Copy `config/feeds.example.yaml` to `config/feeds.yaml` and customize feed sources.
 
@@ -82,6 +83,24 @@ The UI allows you to:
 - Browse historical briefings
 - Filter briefings by date
 
+## GitHub Actions Workflow
+
+This repository includes a GitHub Actions workflow at `.github/workflows/daily_briefing.yml`.
+
+The workflow is configured to:
+- run on a daily schedule at 07:00 UTC
+- allow manual execution via workflow dispatch
+- install dependencies from `requirements.txt`
+- execute `python main.py`
+- inject AWS and Google API secrets from GitHub Secrets
+
+Set the following secrets in your GitHub repository:
+- `GOOGLE_API_KEY`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_REGION`
+- `AWS_BUCKET_NAME`
+
 ## Feed Configuration
 
 Feeds are defined in `config/feeds.yaml` with category groups and source entries. Example format:
@@ -102,13 +121,15 @@ Required variables in `.env`:
 * `GOOGLE_API_KEY` - Google API key for Gemini
 * `AWS_ACCESS_KEY_ID` - AWS access key
 * `AWS_SECRET_ACCESS_KEY` - AWS secret key
-* `AWS_S3_BUCKET` - S3 bucket name for storage
+* `AWS_REGION` - AWS region for S3
+* `AWS_BUCKET_NAME` - S3 bucket name for storage
 
 ## Architecture Notes
 
 * Articles are collected with per-category limits (default: 30) and per-source limits (default: 5)
-* Articles are saved locally to `output/articles/{date}.json` and uploaded to S3
+* Articles are saved locally to `output/articles/{date}.json` and uploaded to AWS S3
 * The Streamlit UI retrieves briefings from S3 for viewing
+* GitHub Actions workflow automates daily briefing generation and cloud upload
 * All imports use project-root path resolution for flexible execution from any working directory
 * `.env` is excluded from git via `.gitignore` and should never be committed
 

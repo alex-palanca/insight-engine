@@ -1,22 +1,41 @@
 from dotenv import load_dotenv
 import boto3
 import os
+from typing import Optional
 
 # Load environment variables from .env file
 load_dotenv()
+
+
+def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:
+    """Return a secret from Streamlit or environment variables."""
+    try:
+        import streamlit as st
+        from streamlit.errors import StreamlitSecretNotFoundError
+
+        if hasattr(st, "secrets"):
+            try:
+                return st.secrets.get(name, os.getenv(name, default))
+            except StreamlitSecretNotFoundError:
+                return os.getenv(name, default)
+    except ModuleNotFoundError:
+        pass
+
+    return os.getenv(name, default)
+
 
 # S3Storage class for interacting with AWS S3
 class S3Storage:
 
     def __init__(self):
-        # Initialize the S3Storage class with AWS credentials and bucket name from environment variables
-        self.bucket_name = os.getenv("AWS_BUCKET_NAME")
+        # Initialize the S3Storage class with AWS credentials and bucket name from environment variables or Streamlit secrets
+        self.bucket_name = get_secret("AWS_BUCKET_NAME")
 
         self.client = boto3.client(
             "s3",
-            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-            region_name=os.getenv("AWS_REGION")
+            aws_access_key_id=get_secret("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=get_secret("AWS_SECRET_ACCESS_KEY"),
+            region_name=get_secret("AWS_REGION")
         )
 
     def upload_file(self, local_path: str, s3_key: str):

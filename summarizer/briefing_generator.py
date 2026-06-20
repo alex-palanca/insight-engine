@@ -1,18 +1,35 @@
 import os
 from dotenv import load_dotenv 
+import os
 from google import genai
 from datetime import datetime
 from storage.storage_service import upload_daily_briefing
+from typing import Optional
 
 # Load environment variables from .env file
 load_dotenv()
-key = os.getenv("GOOGLE_API_KEY")
+
+
+def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:
+    """Return a secret from Streamlit or environment variables."""
+    try:
+        import streamlit as st
+
+        if hasattr(st, "secrets"):
+            return st.secrets.get(name, os.getenv(name, default))
+    except ModuleNotFoundError:
+        pass
+
+    return os.getenv(name, default)
+
+
+key = get_secret("GOOGLE_API_KEY")
 
 # Check if the key is loaded correctly
 if not key:
     raise ValueError(
-        "GOOGLE_API_KEY is not set in the environment variables."
-        )
+        "GOOGLE_API_KEY is not set in the environment variables or Streamlit secrets."
+    )
 
 client = genai.Client(api_key=key)
 
