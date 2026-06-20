@@ -10,15 +10,13 @@ def main():
 
     print("Saving articles to markdown report...")
     rss_collector.save_articles(articles)
-    #"""""
+    
     print("Generating preliminary report...")
     report_generator.generate_report(articles)
-
     print("Generating IB report...")
     briefing_generator.create_intelligence_briefing()
 
     print("Finished successfully.")
-    #"""
 
 if __name__ == "__main__":
     main()

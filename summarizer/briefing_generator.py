@@ -50,7 +50,7 @@ def create_intelligence_briefing():
 
     briefing_path = (
         f"output/briefings/"
-        f"IB_{today}.md"
+        f"IB_{today}_v2.md"
     )
 
     prompt = load_prompt(
@@ -153,12 +153,72 @@ def generate_briefing(
     Returns:
         str: The generated briefing.
     """
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt,
-    )
+    import time
+    import logging
+    import httpx
+    from pathlib import Path
 
-    return response.text if response.text else "No briefing generated."
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(level=logging.INFO)
+
+    max_attempts = 3
+    backoff_base = 2
+
+    # Save the prompt to a temporary file for debugging if all attempts fail
+    dump_path = Path("output/debug_prompt.txt")
+    try:
+        dump_path.write_text(prompt, encoding="utf-8")
+    except Exception:
+        pass
+
+    last_exc = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            logger.info(f"Generating briefing (attempt {attempt}/{max_attempts})...")
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+            )
+
+            # Extract and display token usage
+            usage = getattr(response, "usage_metadata", None)
+            if usage:
+                prompt_tokens = getattr(usage, "prompt_token_count", None)
+                output_tokens = getattr(usage, "candidates_token_count", None)
+                try:
+                    total_tokens = (prompt_tokens or 0) + (output_tokens or 0)
+                except Exception:
+                    total_tokens = None
+
+                logger.info("--- Token Usage ---")
+                logger.info(f"Prompt tokens: {prompt_tokens}")
+                logger.info(f"Output tokens: {output_tokens}")
+                logger.info(f"Total tokens used: {total_tokens}")
+                logger.info("-------------------")
+
+            return response.text if getattr(response, "text", None) else "No briefing generated."
+
+        except Exception as e:
+            last_exc = e
+            # Log detailed info for httpx/httpcore errors
+            if isinstance(e, httpx.HTTPError):
+                logger.warning(f"HTTP error during generate_content: {e!r}")
+            else:
+                logger.warning(f"Error during generate_content: {e!r}")
+
+            # If final attempt, raise, otherwise back off and retry
+            if attempt == max_attempts:
+                logger.error("All attempts to generate briefing failed. Prompt saved to debug_prompt.txt")
+                raise
+
+            sleep_seconds = backoff_base ** attempt
+            logger.info(f"Retrying after {sleep_seconds}s...")
+            time.sleep(sleep_seconds)
+
+    # If loop exits unexpectedly, re-raise last exception
+    if last_exc:
+        raise last_exc
+    return "No briefing generated."
 
 
 def save_briefing(
