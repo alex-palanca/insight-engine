@@ -14,9 +14,13 @@ def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:
     """Return a secret from Streamlit or environment variables."""
     try:
         import streamlit as st
+        from streamlit.errors import StreamlitSecretNotFoundError
 
         if hasattr(st, "secrets"):
-            return st.secrets.get(name, os.getenv(name, default))
+            try:
+                return st.secrets.get(name, os.getenv(name, default))
+            except StreamlitSecretNotFoundError:
+                return os.getenv(name, default)
     except ModuleNotFoundError:
         pass
 

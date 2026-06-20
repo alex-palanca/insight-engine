@@ -24,7 +24,7 @@ def load_feeds(config_path: str | None = None) -> dict:
         config_path = (
             Path(__file__)
             .parent
-            .joinpath("feeds.example.yaml")
+            .joinpath("feeds.yaml")
         )
 
     with open(config_path, "r", encoding="utf-8") as file:

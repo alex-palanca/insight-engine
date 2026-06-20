@@ -2,13 +2,51 @@ import feedparser
 import config.feed_loader
 from storage.storage_service import upload_daily_articles
 import json
+import re
 from datetime import date
 
 # Maximum number of articles to collect per category
-MAX_ARTICLES_PER_CATEGORY = 30
+MAX_ARTICLES_PER_CATEGORY = 200
 # Maximum number of articles to collect per source/feed
-MAX_ARTICLES_PER_SOURCE = 5
+MAX_ARTICLES_PER_SOURCE = 50
+# Minimum length required for a valid article summary
+MIN_SUMMARY_LENGTH = 80
 
+# Invalid summary markers to filter out low-quality content
+INVALID_SUMMARY_MARKERS = [
+    "no summary available",
+    "summary unavailable",
+    "unable to retrieve summary",
+    "read more",
+    "continue reading",
+    "click here",
+    "Article URL:",
+    "Source:"
+]
+
+
+
+def clean_summary(summary: str) -> str:
+    # Remove HTML tags and image references
+    cleaned = re.sub(r'<img[^>]*>', '', summary, flags=re.IGNORECASE)
+    cleaned = re.sub(r'<[^>]+>', '', cleaned)
+    cleaned = cleaned.replace('&nbsp;', ' ').strip()
+    return cleaned
+
+
+def is_valid_summary(summary: str) -> bool:
+    # Check if the summary is valid based on length
+    if not summary:
+        return False
+
+    normalized = summary.strip().lower()
+    if len(normalized) < MIN_SUMMARY_LENGTH:
+        return False
+    
+    if any(marker in normalized for marker in INVALID_SUMMARY_MARKERS):
+        return False
+
+    return True
 
 def collect_articles():
     # News sources to collect RSS feeds from
@@ -48,13 +86,18 @@ def collect_articles():
                     if source_count >= MAX_ARTICLES_PER_SOURCE:
                         break
 
+                    raw_summary = entry.get("summary", "")
+                    cleaned_summary = clean_summary(raw_summary)
+                    if not is_valid_summary(cleaned_summary):
+                        continue
+
                     article = {
                         "title": entry.title,
                         "link": entry.link,
                         "published": entry.get("published", "Unknown"),
                         "source": feed_info["name"],
                         "category": category,
-                        "summary": entry.get("summary", "No summary available")
+                        "summary": cleaned_summary
                     }
 
                     articles.append(article)
