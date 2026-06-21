@@ -12,9 +12,9 @@ def main():
     rss_collector.save_articles(articles)
     
     print("Generating preliminary report...")
-    report_generator.generate_report(articles)
+    markdown = report_generator.generate_report(articles)
     print("Generating IB report...")
-    briefing_generator.create_intelligence_briefing()
+    briefing_generator.create_intelligence_briefing(markdown)
 
     print("Finished successfully.")
 

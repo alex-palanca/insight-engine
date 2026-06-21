@@ -17,3 +17,18 @@ def upload_daily_briefing(date: str):
         f"output/briefings/IB_{date}.md",
         cloud.briefing_key(date)
     )
+
+def download_daily_articles(date: str):
+
+    cloud.download_file(
+        f"output/articles/{date}.json",
+        cloud.article_key(date)
+    )
+
+
+def download_daily_briefing(date: str):
+
+    cloud.download_file(
+        f"output/briefings/IB_{date}.md",
+        cloud.briefing_key(date)
+    )

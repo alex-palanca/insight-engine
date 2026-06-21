@@ -5,12 +5,15 @@ import json
 import re
 from datetime import date
 
+# Define Local or Remote 
+local = 0
+
 # Maximum number of articles to collect per category
 MAX_ARTICLES_PER_CATEGORY = 200
 # Maximum number of articles to collect per source/feed
-MAX_ARTICLES_PER_SOURCE = 50
+MAX_ARTICLES_PER_SOURCE = 30
 # Minimum length required for a valid article summary
-MIN_SUMMARY_LENGTH = 80
+MIN_SUMMARY_LENGTH = 100
 
 # Invalid summary markers to filter out low-quality content
 INVALID_SUMMARY_MARKERS = [
@@ -20,8 +23,61 @@ INVALID_SUMMARY_MARKERS = [
     "read more",
     "continue reading",
     "click here",
-    "Article URL:",
-    "Source:"
+    # common metadata blocks from aggregators (Article/Comments/Points blocks)
+    "article url:",
+    "comments url:",
+    "points:",
+    "# comments",
+    "source:",
+    "url:",
+    "Link:",
+    # URLs and tracking
+    "http://",
+    "https://",
+    "www.",
+    "utm_",
+    # social / external hosts
+    "youtube.com",
+    "vimeo.com",
+    "instagram.com",
+    "twitter.com",
+    "x.com",
+    "t.co",
+    "facebook.com",
+    "github.com",
+    "news.ycombinator.com",
+    # HTML / embed / image markers
+    "<img",
+    "<iframe",
+    "<video",
+    "src=",
+    "href=",
+    "data:image/",
+    "&",
+    # promotional / commercial noise
+    "promo",
+    "promo code",
+    "coupon",
+    "coupon code",
+    "discount",
+    "% off",
+    "deal",
+    "sale",
+    "sponsored",
+    "ad:",
+    "buy now",
+    "shop",
+    "subscribe",
+    "sign up",
+    "newsletter",
+    # media labels / podcast/video boilerplate
+    "video",
+    "audio",
+    "podcast",
+    "livestream",
+    "gallery",
+    "photo",
+    
 ]
 
 
@@ -118,10 +174,11 @@ def collect_articles():
 
 def save_articles(articles):
 
-    filename = f"output/articles/{date.today().isoformat()}.json"
+    if local:
+        filename = f"output/articles/{date.today().isoformat()}.json"
 
-    with open(filename, "w", encoding="utf-8") as f:
-        json.dump(articles, f, indent=2, ensure_ascii=False)
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(articles, f, indent=2, ensure_ascii=False)
 
     print("Uploading articles to S3...")
     upload_daily_articles(date.today().isoformat())

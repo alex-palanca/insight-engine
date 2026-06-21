@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv 
-import os
 from google import genai
 from datetime import datetime
 from storage.storage_service import upload_daily_briefing
@@ -8,6 +7,9 @@ from typing import Optional
 
 # Load environment variables from .env file
 load_dotenv()
+
+# Define Local or Remote 
+local = 0
 
 
 def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:
@@ -38,27 +40,30 @@ if not key:
 client = genai.Client(api_key=key)
 
 
-def create_intelligence_briefing():
+def create_intelligence_briefing(markdown):
 
     today = datetime.now().strftime(
         "%Y-%m-%d"
     )
 
-    report_path = (
-        f"output/reports/{today}.md"
-    )
+    if local:
+        report_path = (
+            f"output/reports/{today}.md"
+        )
 
-    briefing_path = (
-        f"output/briefings/"
-        f"IB_{today}_v2.md"
-    )
+        briefing_path = (
+            f"output/briefings/"
+            f"IB_{today}.md"
+        )
+
+        daily_articles = load_markdown_report(
+            report_path
+        )
+    else:
+        daily_articles = markdown
 
     prompt = load_prompt(
-        "prompts/daily_briefing.txt"
-    )
-
-    daily_articles = load_markdown_report(
-        report_path
+    "prompts/daily_briefing.txt"
     )
 
     final_prompt = build_prompt(
@@ -70,11 +75,11 @@ def create_intelligence_briefing():
         client,
         final_prompt
     )
-
-    save_briefing(
-        briefing,
-        briefing_path
-    )
+    if local:
+        save_briefing(
+            briefing,
+            briefing_path
+        )
 
     upload_daily_briefing(today)
 
@@ -176,7 +181,7 @@ def generate_briefing(
         try:
             logger.info(f"Generating briefing (attempt {attempt}/{max_attempts})...")
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-2.5-flash-lite",
                 contents=prompt,
             )
 

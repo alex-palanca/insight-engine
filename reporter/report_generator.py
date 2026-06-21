@@ -136,3 +136,5 @@ def generate_report(articles):
     print(
         f"Processed {len(articles)} articles."
     )
+
+    return markdown
