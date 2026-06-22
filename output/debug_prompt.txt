@@ -62,25 +62,31 @@ Flag any disagreements between sources:
 ------------------------------------
 Curated Daily Articles:
 
-# Daily Briefer Report (2026-06-21)
+# Daily Briefer Report (2026-06-22)
 
-Collected Articles: 127
+Collected Articles: 203
 
 | Category | Count |
 |----------|-------|
-| Technology | 42 |
-| Economics | 24 |
-| World | 61 |
+| Technology | 52 |
+| Economics | 39 |
+| World | 112 |
 
 ---
 
-## Technology (42 articles)
+## Technology (52 articles)
 
 ### Review: Widow's Bay is a boldly original take on comedic horror
 - Source: Ars Technica
 - summary: An eminently binge-able series that honors classic horror tropes while reinventing them in surprising ways
 - Published: Sun, 21 Jun 2026 10:00:11 +0000
 - Link: [https://arstechnica.com/culture/2026/06/review-widows-bay-is-a-boldly-original-take-on-comedic-horror/](https://arstechnica.com/culture/2026/06/review-widows-bay-is-a-boldly-original-take-on-comedic-horror/)
+
+### Anthropic Reports Claude Now Handles 95% of Internal Analytics Queries
+- Source: InfoQ
+- summary: Anthropic recently reported that Claude now handles around 95% of its internal analytics requests, letting employees query business data independently instead of relying on data teams. The company attributes this result less to advances in models and more to data governance, semantic definitions, and operational discipline. By Renato Losio
+- Published: Sun, 21 Jun 2026 16:47:00 GMT
+- Link: [https://www.infoq.com/news/2026/06/anthropic-claude-analytics/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/anthropic-claude-analytics/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
 
 ### Inside Atlassian’s Forge Billing Architecture for Distributed Usage Tracking at Scale
 - Source: InfoQ
@@ -94,19 +100,13 @@ Collected Articles: 127
 - Published: Sat, 20 Jun 2026 11:00:00 GMT
 - Link: [https://www.infoq.com/news/2026/06/apple-core-ai-wwdc/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/apple-core-ai-wwdc/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
 
-### Claude Fable 5 on Bedrock Requires Sharing Inference Data with Anthropic
-- Source: InfoQ
-- summary: Using Claude Fable 5 or Mythos 5 on Amazon Bedrock requires opting into provider_data_share, sending prompts and outputs to Anthropic for 30-day retention with human review. Previous Bedrock models kept inference data inside the AWS boundary. Three days after launch, Anthropic asked AWS to revoke access to both models citing US export control compliance. By Steef-Jan Wiggers
-- Published: Sat, 20 Jun 2026 09:03:00 GMT
-- Link: [https://www.infoq.com/news/2026/06/bedrock-fable-5-data-sharing/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/bedrock-fable-5-data-sharing/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
 ### AWS Adds Multi-Region Replication to Amazon Cognito Identity Service
 - Source: InfoQ
 - summary: AWS recently introduced Amazon Cognito multi-region replication, which automatically replicates user identities and user pool configurations from a primary region to a secondary one. This enables applications to continue authenticating users from a replica region during outages, without requiring custom replication and failover mechanisms. By Renato Losio
 - Published: Sat, 20 Jun 2026 07:40:00 GMT
 - Link: [https://www.infoq.com/news/2026/06/cognito-replication-aws/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/cognito-replication-aws/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
 
-### Behind the Scenes:  Block 450 JVM Repositories Into Monorepo to Reduce Dependency Drift
+### Behind the Scenes:  Block 450 JVM Repositories into Monorepo to Reduce Dependency Drift
 - Source: InfoQ
 - summary: Block, Inc. describes migrating ~450 JVM repositories into a monorepo across Cash App and Square engineering to reduce dependency drift and coordination overhead. The system supports ~8,800 weekly builds with ~10 min p90 CI time. The approach improves cross-service changes, build visibility, and developer experience through dependency graph–based builds, selective CI, and custom IDE tooling. By Leela Kumili
 - Published: Fri, 19 Jun 2026 14:47:00 GMT
@@ -118,13 +118,13 @@ Collected Articles: 127
 - Published: Fri, 19 Jun 2026 12:02:00 GMT
 - Link: [https://www.infoq.com/presentations/data-aware-ai-agents/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/presentations/data-aware-ai-agents/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
 
-### CircleCI Introduces Chunk Sidecars to Bring CI Validation Directly Into AI Coding Workflows
+### CircleCI Introduces Chunk Sidecars to Bring CI Validation Directly into AI Coding Workflows
 - Source: InfoQ
-- summary: CircleCI has launched Chunk Sidecars, a new capability designed to bring CI-style validation directly into an AI coding agent's inner development loop By Craig Risi
+- summary: CircleCI has launched Chunk Sidecars, a new capability designed to bring CI-style validation directly into an AI coding agent's inner development loop. By Craig Risi
 - Published: Fri, 19 Jun 2026 12:00:00 GMT
 - Link: [https://www.infoq.com/news/2026/06/circleci-chunk-sidecars/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/circleci-chunk-sidecars/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
 
-### TSRX: A Framework-Agnostic Alternative to JSX
+### TSRX: a Framework-Agnostic Alternative to JSX
 - Source: InfoQ
 - summary: TSRX is a TypeScript language extension developed by Dominic Gannaway, designed to build declarative user interfaces in a framework-agnostic manner. It compiles single .tsrx files to various runtime targets and supports scoped styles and declarative error handling. TSRX is currently in alpha and is open source under the MIT license. By Daniel Curtis
 - Published: Fri, 19 Jun 2026 11:49:00 GMT
@@ -166,7 +166,7 @@ Collected Articles: 127
 - Published: Thu, 18 Jun 2026 14:36:00 GMT
 - Link: [https://www.infoq.com/news/2026/06/netflix-camera-file-processing/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/netflix-camera-file-processing/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
 
-### Presentation: Write-Ahead Intent Log: A Foundation for Efficient CDC at Scale
+### Presentation: Write-Ahead Intent Log: a Foundation for Efficient CDC at Scale
 - Source: InfoQ
 - summary: Vinay Chella and Akshat Goel discuss the challenges of running traditional CDC across heterogeneous databases during peak order traffic. They explain how Debezium hit limits under high load and share how they built Write-Ahead Intent Log (WAIL) - a custom architecture that utilizes a dumb producer proxy and a smart consumer pattern to cleanly separate the intent from the state payload. By Vinay Chella, Akshat Goel
 - Published: Thu, 18 Jun 2026 13:13:00 GMT
@@ -226,18 +226,6 @@ Collected Articles: 127
 - Published: Fri, 19 Jun 2026 07:59:12 +0000
 - Link: [https://techcrunch.com/2026/06/19/the-us-says-asmls-top-chip-tool-may-be-in-china-asml-says-it-isnt/](https://techcrunch.com/2026/06/19/the-us-says-asmls-top-chip-tool-may-be-in-china-asml-says-it-isnt/)
 
-### Source: Elastic agrees to buy CRV-backed Deductive AI for up to $85M
-- Source: TechCrunch
-- summary: Deductive AI, a startup that uses AI to catch and resolve bugs in software, was founded just three years ago.
-- Published: Fri, 19 Jun 2026 00:51:11 +0000
-- Link: [https://techcrunch.com/2026/06/18/source-elastic-agrees-to-buy-crv-backed-deductiveai-for-up-to-85m/](https://techcrunch.com/2026/06/18/source-elastic-agrees-to-buy-crv-backed-deductiveai-for-up-to-85m/)
-
-### AI inference startup Baseten reportedly raising $1.5B months after its last mega-round
-- Source: TechCrunch
-- summary: Startup Baseten is reportedly close to finalizing a $1.5 billion round at a $13 billion as the “inference gold rush" marches on.
-- Published: Thu, 18 Jun 2026 21:20:13 +0000
-- Link: [https://techcrunch.com/2026/06/18/ai-inference-startup-baseten-reportedly-raising-1-5b-months-after-its-last-mega-round/](https://techcrunch.com/2026/06/18/ai-inference-startup-baseten-reportedly-raising-1-5b-months-after-its-last-mega-round/)
-
 ### The Best NAS Devices for Your Home After Months of Testing
 - Source: Wired
 - summary: Network-attached storage (NAS) provides accessible shared space on your home network. After testing, these are my favorite NAS devices.
@@ -258,13 +246,13 @@ Collected Articles: 127
 
 ### Buying a Used iPhone Makes More Sense Than Ever
 - Source: Wired
-- summary: With Apple raising prices soon, you can save a lot of money by buying a used handset or upgrading an older device—safe in the knowledge that it'll last longer than ever.
+- summary: With Apple raising prices soon, you can save a lot of money by buying a used handset or upgrading an older device—safe in the knowledge that it’ll last longer than ever.
 - Published: Sun, 21 Jun 2026 10:00:00 +0000
 - Link: [https://www.wired.com/story/buying-a-used-iphone-makes-more-sense-than-ever/](https://www.wired.com/story/buying-a-used-iphone-makes-more-sense-than-ever/)
 
 ### A Critical Deadline Is Approaching for Windows and Linux Security
 - Source: Wired
-- summary: The cryptographic keys that secure your computer's boot sequence will start to expire on June 24. Here's what that means for you.
+- summary: The cryptographic keys that secure your computer’s boot sequence will start to expire on June 24. Here’s what that means for you.
 - Published: Sun, 21 Jun 2026 09:00:00 +0000
 - Link: [https://www.wired.com/story/a-critical-deadline-is-approaching-for-windows-and-linux-security/](https://www.wired.com/story/a-critical-deadline-is-approaching-for-windows-and-linux-security/)
 
@@ -328,9 +316,81 @@ Collected Articles: 127
 - Published: Fri, 19 Jun 2026 10:30:00 +0000
 - Link: [https://www.wired.com/story/pumpfuns-bounties-platform-is-a-black-hole-of-circular-grifting/](https://www.wired.com/story/pumpfuns-bounties-platform-is-a-black-hole-of-circular-grifting/)
 
+### This World Cup, Bigger Might Not Really Be Better
+- Source: Wired
+- summary: The biggest World Cup ever is pushing fans, players, and host cities to their limits—and experts say this is only the beginning.
+- Published: Fri, 19 Jun 2026 10:00:00 +0000
+- Link: [https://www.wired.com/story/biggest-world-cup-travel-flights-hotels-costs/](https://www.wired.com/story/biggest-world-cup-travel-flights-hotels-costs/)
+
+### An Open Strait of Hormuz Won’t Fix Gas Prices Overnight
+- Source: Wired
+- summary: Even if peace holds up between the US and Iran, oil prices aren’t going back down to where they were any time soon.
+- Published: Fri, 19 Jun 2026 09:30:00 +0000
+- Link: [https://www.wired.com/story/an-open-strait-of-hormuz-wont-fix-gas-prices-overnight/](https://www.wired.com/story/an-open-strait-of-hormuz-wont-fix-gas-prices-overnight/)
+
+### Prediction Market Philosophers Got What They Wanted. They’re Not Happy About It
+- Source: Wired
+- summary: Getting the future right is now big business. But at a festival in Berkeley, forecasters worry that sports markets could take the whole industry down.
+- Published: Fri, 19 Jun 2026 09:30:00 +0000
+- Link: [https://www.wired.com/story/prediction-market-philosophers-got-what-they-wanted/](https://www.wired.com/story/prediction-market-philosophers-got-what-they-wanted/)
+
+### Canada Missed Chances to Inspect Titan Before Fatal Implosion
+- Source: Wired
+- summary: A new report shows that government agencies failed to communicate and includes recommendations for stronger oversight in a bid to avert future disasters.
+- Published: Fri, 19 Jun 2026 09:00:00 +0000
+- Link: [https://www.wired.com/story/canada-missed-chances-titan-fatal-implosion/](https://www.wired.com/story/canada-missed-chances-titan-fatal-implosion/)
+
+### Pseudoscientific Cancer ‘Treatment’ Involves Gassing Naked People in Plastic Bags With Bleach
+- Source: Wired
+- summary: A London clinic owner has claimed he is treating people with stage 4 cancer by sealing them into a plastic bag while they're naked from the waist down and gassing them with chlorine dioxide.
+- Published: Fri, 19 Jun 2026 07:00:00 +0000
+- Link: [https://www.wired.com/story/pseudoscientific-cancer-treatment-involves-gassing-naked-people-in-plastic-bags-with-bleach/](https://www.wired.com/story/pseudoscientific-cancer-treatment-involves-gassing-naked-people-in-plastic-bags-with-bleach/)
+
+### eBay Coupons: 20% Off in June 2026
+- Source: Wired
+- summary: Save up to 60% on a selection of items at eBay, including electronics, home products, card games, car parts and more.
+- Published: Fri, 19 Jun 2026 05:00:00 +0000
+- Link: [https://www.wired.com/story/ebay-coupon-code/](https://www.wired.com/story/ebay-coupon-code/)
+
+### How the Peter Thiel-Linked Dialog Club Secretly Ranks Its Members
+- Source: Wired
+- summary: Leaked files show the invite-only network grades members by their money and fame, shaping who’s in, who’s out, and who pays.
+- Published: Thu, 18 Jun 2026 22:12:45 +0000
+- Link: [https://www.wired.com/story/how-peter-thiels-private-dialog-club-secretly-ranks-its-members/](https://www.wired.com/story/how-peter-thiels-private-dialog-club-secretly-ranks-its-members/)
+
+### The White House Is Making Up Its Rules for AI in Real Time
+- Source: Wired
+- summary: Anthropic still can’t distribute Claude Mythos or Fable 5 after running afoul of the Trump administration. But no one can say exactly what the company did wrong.
+- Published: Thu, 18 Jun 2026 21:03:43 +0000
+- Link: [https://www.wired.com/story/anthropic-mythos-export-controls-ai-regulations/](https://www.wired.com/story/anthropic-mythos-export-controls-ai-regulations/)
+
+### Meta’s AI Workers Are Revolting, Peter Thiel’s Secret Society, and SBF’s Plea to Trump
+- Source: Wired
+- summary: On today’s Uncanny Valley, we dive into the dysfunction in Meta’s newly formed AI unit and why it’s been driving already-low employee morale even further into the ground.
+- Published: Thu, 18 Jun 2026 19:29:51 +0000
+- Link: [https://www.wired.com/story/uncanny-valley-podcast-meta-ai-workers-revolting-peter-thiel-secret-society-sbf-plea-to-trump/](https://www.wired.com/story/uncanny-valley-podcast-meta-ai-workers-revolting-peter-thiel-secret-society-sbf-plea-to-trump/)
+
+### Trump Mocked Mark Zuckerberg and Jeff Bezos by Showing Off Fawning Texts
+- Source: Wired
+- summary: “You would not believe the texts I got from these tech guys,” NYT reporters Maggie Haberman and Jonathan Swan quote Donald Trump as telling associates in an upcoming book.
+- Published: Thu, 18 Jun 2026 17:58:30 +0000
+- Link: [https://www.wired.com/story/trump-mocked-mark-zuckerberg-and-jeff-bezos-by-showing-off-fawning-texts/](https://www.wired.com/story/trump-mocked-mark-zuckerberg-and-jeff-bezos-by-showing-off-fawning-texts/)
+
+### 3 Amazon Workers Say They’re Under Investigation for Speaking Out About Data Centers
+- Source: Wired
+- summary: The software engineers filed a complaint with Seattle’s civil rights office accusing Amazon of illegally retaliating against them for expressing their personal political beliefs.
+- Published: Thu, 18 Jun 2026 16:03:27 +0000
+- Link: [https://www.wired.com/story/amazon-workers-under-internal-investigation-after-speaking-out-about-data-centers/](https://www.wired.com/story/amazon-workers-under-internal-investigation-after-speaking-out-about-data-centers/)
+
+### Waymo Recalls Robotaxis Over Risk They'll Drive at Speed Into Freeway Construction Zones
+- Source: Wired
+- summary: The company's latest recall of 3,871 vehicles follows incidents of its autonomous cars prioritizing other hazards or failing to recognize closed construction zones altogether.
+- Published: Thu, 18 Jun 2026 12:50:21 +0000
+- Link: [https://www.wired.com/story/waymo-recalls-robotaxis-over-risk-theyll-drive-at-speed-into-freeway-construction-zones/](https://www.wired.com/story/waymo-recalls-robotaxis-over-risk-theyll-drive-at-speed-into-freeway-construction-zones/)
+
 ---
 
-## Economics (24 articles)
+## Economics (39 articles)
 
 ### How to share AI riches
 - Source: The Economist
@@ -362,53 +422,167 @@ Collected Articles: 127
 - Published: Wed, 22 Oct 2025 15:55:01 +0000
 - Link: [https://www.economist.com/finance-and-economics/2025/10/22/how-to-make-immigration-palatable-in-a-populist-age](https://www.economist.com/finance-and-economics/2025/10/22/how-to-make-immigration-palatable-in-a-populist-age)
 
-### US and Iran hold crunch talks in Switzerland
+### Germany’s spy agency comes in from the cold
 - Source: Financial Times
-- summary: Negotiations aimed at reaching permanent end to war will initially focus on Israeli-Hizbollah conflict in Lebanon
-- Published: Sun, 21 Jun 2026 14:30:33 GMT
-- Link: [https://www.ft.com/content/c1014643-940c-4874-998a-0a52eb517c49](https://www.ft.com/content/c1014643-940c-4874-998a-0a52eb517c49)
+- summary: Berlin wants to loosen the shackles on the BND as part of a Europe-wide drive to reduce dependence on US intelligence
+- Published: Mon, 22 Jun 2026 04:00:15 GMT
+- Link: [https://www.ft.com/content/50069749-fe38-4a6e-80d4-fe84d53f94a1](https://www.ft.com/content/50069749-fe38-4a6e-80d4-fe84d53f94a1)
 
-### Rahm Emanuel says Trump ‘got schooled’ by Iran in bad ceasefire deal
+### Why sinodollars outweigh the petroyuan
 - Source: Financial Times
-- summary: Possible Democratic presidential candidate describes war as historic ‘American national security mess’
-- Published: Sat, 20 Jun 2026 17:07:11 GMT
-- Link: [https://www.ft.com/content/3be5a96f-f22e-4b8e-898f-fe10c2f84058](https://www.ft.com/content/3be5a96f-f22e-4b8e-898f-fe10c2f84058)
+- summary: China’s currency is becoming a more important part of the global financial system but the dollar is still in control
+- Published: Mon, 22 Jun 2026 02:51:39 GMT
+- Link: [https://www.ft.com/content/0948fa97-1585-4484-90a5-6df769367dfe](https://www.ft.com/content/0948fa97-1585-4484-90a5-6df769367dfe)
 
-### Back-stabbing myths are driving the US and Europe further apart
+### Starmer mulls podium moment after Chequers retreat
 - Source: Financial Times
-- summary: Competing narratives of abandonment — from Iran to Greenland — could lead to Nato’s permanent unravelling
-- Published: Sun, 21 Jun 2026 15:00:08 GMT
-- Link: [https://www.ft.com/content/4a9be9b8-4cac-49d5-8e08-cb750007b2db](https://www.ft.com/content/4a9be9b8-4cac-49d5-8e08-cb750007b2db)
+- summary: Prime minister goes ‘dark’ on colleagues as he spends weekend discussing his political future with wife, Victoria
+- Published: Sun, 21 Jun 2026 16:35:45 GMT
+- Link: [https://www.ft.com/content/7852c1e4-9629-4a67-bf36-7177bc711e34](https://www.ft.com/content/7852c1e4-9629-4a67-bf36-7177bc711e34)
 
-### Ukraine warns Belarus of ‘consequences’ over drone equipment
+### Rightwing populist ‘El Tigre’ wins Colombia election
 - Source: Financial Times
-- summary: Volodymyr Zelenskyy threatens to remove relay stations in the country used by Russia unless Minsk acts within a week
-- Published: Sun, 21 Jun 2026 11:13:18 GMT
-- Link: [https://www.ft.com/content/dd2868ef-b9a2-4b6e-ab52-e4d87a9a75d2](https://www.ft.com/content/dd2868ef-b9a2-4b6e-ab52-e4d87a9a75d2)
+- summary: Trump-loving political outsider Abelardo de la Espriella narrowly beats leftist continuity candidate
+- Published: Mon, 22 Jun 2026 05:31:41 GMT
+- Link: [https://www.ft.com/content/49294716-56be-40a4-ba31-b4e376ccb47f](https://www.ft.com/content/49294716-56be-40a4-ba31-b4e376ccb47f)
 
-### Qué oportunidades trae la paz en Irán a la Bolsa
+### Galán revoluciona Iberdrola con un nuevo organigrama
 - Source: Expansion
-- summary: La firma del acuerdo de paz reduce la incertidumbre en el mercado y anima las cotizaciones de bancos, aerolíneas y compañías de consumo e intensivas en energía, que se benefician de la reducción de costes. Leer
-- Published: Sat, 20 Jun 2026 00:29:22 +0200
-- Link: [https://www.expansion.com/mercados/2026/06/20/6a3592a6e5fdea127f8b45a3.html](https://www.expansion.com/mercados/2026/06/20/6a3592a6e5fdea127f8b45a3.html)
+- summary: El presidente de la mayor energética española crea un nuevo sistema entre directivos 'top' con un esquema dual en áreas clave, para que se apoyen o, llegado el caso, sirvan de suplentes. Leer
+- Published: Mon, 22 Jun 2026 00:13:34 +0200
+- Link: [https://www.expansion.com/empresas/energia/2026/06/22/6a382481468aeb4a778b457d.html](https://www.expansion.com/empresas/energia/2026/06/22/6a382481468aeb4a778b457d.html)
 
-### JD Vance ve "grandes avances" tras las primeras horas de negociaciones con Irán en Suiza
+### Escrivá: "Limitar las hipotecas es intrusivo y hay que hacerlo con mucho cuidado"
 - Source: Expansion
-- summary: Las delegaciones de Estados Unidos e Irán lideradas por el vicepresidente estadounidense, JD Vance, y el jefe negociador iraní, Mohamed Baqer Qalibaf, llegaron al complejo de montaña de Bürgenstock (Suiza) para abordar la aplicación del memorando de 14 puntos firmado el miércoles con el que poner fin a la guerra, según informó el Ministerio de Exteriores helvético. Leer
-- Published: Sun, 21 Jun 2026 12:52:39 +0200
-- Link: [https://www.expansion.com/economia/2026/06/21/6a37c0dde5fdea511b8b459a.html](https://www.expansion.com/economia/2026/06/21/6a37c0dde5fdea511b8b459a.html)
+- summary: El supervisor publicará un Libro Blanco en el que incluirá todos los análisis y consecuencias que podrían provocar los topes al crédito hipotecario. Leer
+- Published: Mon, 22 Jun 2026 00:17:38 +0200
+- Link: [https://www.expansion.com/empresas/banca/2026/06/22/6a3849db468aebb23e8b45aa.html](https://www.expansion.com/empresas/banca/2026/06/22/6a3849db468aebb23e8b45aa.html)
 
-### Tres fondos globales baten a las grandes bolsas
+### La Primera de Expansión sobre Escrivá, Iberdrola, Santander, Colombia, Starmer y Nike
 - Source: Expansion
-- summary: Los mejores productos de renta variable global superan con creces la rentabilidad de los grandes índices bursátiles, que se mueven en máximos históricos. Leer
-- Published: Sat, 20 Jun 2026 21:28:15 +0200
-- Link: [https://www.expansion.com/mercados/fondos/2026/06/20/6a36d16be5fdeaf9408b4576.html](https://www.expansion.com/mercados/fondos/2026/06/20/6a36d16be5fdeaf9408b4576.html)
+- summary: EXPANSIÓN entrevista al Gobernador del Banco de España, José Luis Escrivá. El supervisor publicará un Libro Blanco en el que incluirá todos los análisis y consecuencias que podrían provocar los topes al crédito hipotecario. Leer
+- Published: Mon, 22 Jun 2026 07:27:48 +0200
+- Link: [https://www.expansion.com/podcasts/la-primera-de-expansion/2026/06/22/6a38c3d9e5fdeacf3d8b4595.html](https://www.expansion.com/podcasts/la-primera-de-expansion/2026/06/22/6a38c3d9e5fdeacf3d8b4595.html)
 
-### Los inesperados ganadores corporativos de la IA
+### Histórica ayuda de 6.000 millones a cien empresas por producir luz
 - Source: Expansion
-- summary: Empresas como Caterpillar o Siemens viven un renacimiento gracias a la IA. Los centros de datos disparan la demanda de acero, energía o refrigeración, transformando sectores industriales antes poco destacados. Leer
-- Published: Sat, 20 Jun 2026 20:29:05 +0200
-- Link: [https://www.expansion.com/economia/financial-times/2026/06/20/6a36d83d468aebb8568b4594.html](https://www.expansion.com/economia/financial-times/2026/06/20/6a36d83d468aebb8568b4594.html)
+- summary: El Consejo de Ministros prevé aprobar una medida que desbloquea, después de años, uno de los grandes problemas industriales en España. Leer
+- Published: Mon, 22 Jun 2026 00:17:37 +0200
+- Link: [https://www.expansion.com/empresas/energia/2026/06/22/6a38147c468aebe9218b459c.html](https://www.expansion.com/empresas/energia/2026/06/22/6a38147c468aebe9218b459c.html)
+
+### Los tres escenarios de riesgo latentes para la Bolsa
+- Source: Expansion
+- summary: Las Bolsas han escalado a nuevos máximos históricos. De cara a la segunda mitad del año, las perspectivas de UBS siguen siendo positivas, en especial para EEUU y Asia.  Pero la propia firma admite que "invertir en el entorno actual también requiere prestar mucha atención a diversos escenarios de riesgo para construir carteras sólidas". Leer
+- Published: Mon, 22 Jun 2026 00:35:07 +0200
+- Link: [https://www.expansion.com/mercados/2026/06/22/6a353ab7468aebb23e8b456e.html](https://www.expansion.com/mercados/2026/06/22/6a353ab7468aebb23e8b456e.html)
+
+### El Ibex duda al filo de sus récords
+- Source: Expansion
+- summary: La semana comienza con una tregua en la agenda financiera. Esta calma se traslada al conjunto de los mercados, gracias también a que las negociaciones finales entre EEUU e Irán parecen encauzarse, y a que el petróleo cotiza a la baja. El Ibex espera mayores referencias, incluidas las de Wall Street, para activar un nuevo asalto a sus récords. Leer
+- Published: Mon, 22 Jun 2026 08:11:34 +0200
+- Link: [https://www.expansion.com/mercados/cronica-bolsa/2026/06/22/6a38c93ee5fdead3658b4594.html](https://www.expansion.com/mercados/cronica-bolsa/2026/06/22/6a38c93ee5fdead3658b4594.html)
+
+### Mark Mobius, el inversor más aventurero
+- Source: Expansion
+- summary: Fue pionero en apostar por mercados emergentes que generaban desconfianza por su inestabilidad o por regímenes dictatoriales. Pasaba 250 días al año fuera de casa para descubrir empresas con gran potencial. Leer
+- Published: Mon, 22 Jun 2026 07:30:03 +0200
+- Link: [https://www.expansion.com/podcasts/genios-finanzas/2026/06/22/6a353a1ee5fdea1b748b4589.html](https://www.expansion.com/podcasts/genios-finanzas/2026/06/22/6a353a1ee5fdea1b748b4589.html)
+
+### Barclays nombra a Luis Zumárraga CEO en España
+- Source: Expansion
+- summary: El ejecutivo toma las riendas tras la salida de Portanet y las suma a sus cargos en la estructura europea. Leer
+- Published: Mon, 22 Jun 2026 00:35:10 +0200
+- Link: [https://www.expansion.com/empresas/banca/2026/06/22/6a357216e5fdea511b8b456d.html](https://www.expansion.com/empresas/banca/2026/06/22/6a357216e5fdea511b8b456d.html)
+
+### Colombia: De la Espriella gana las presidenciales por menos de un punto sobre Cepeda
+- Source: Expansion
+- summary: El candidato de extrema derecha Abelardo de la Espriella ha llamado a la unidad nacional y ha prometido gobernar para todos los colombianos después de imponerse por un estrecho margen de menos de un punto porcentual al izquierdista Iván Cepeda en las elecciones presidenciales más reñidas de la historia reciente. Leer
+- Published: Mon, 22 Jun 2026 07:31:56 +0200
+- Link: [https://www.expansion.com/latinoamerica/2026/06/22/6a38c86ee5fdea43458b4586.html](https://www.expansion.com/latinoamerica/2026/06/22/6a38c86ee5fdea43458b4586.html)
+
+### Quién es Abelardo de la Espriella, el eventual presidente electo de Colombia
+- Source: Expansion
+- summary: El abogado de ultraderecha Abelardo de la Espriella, llamado el Tigre por sus seguidores, se ha proclamado presidente electo de Colombia tras imponerse ayer por menos de un punto de diferencia al izquierdista Iván Cepeda en la segunda vuelta de las elecciones presidenciales. Leer
+- Published: Mon, 22 Jun 2026 07:55:29 +0200
+- Link: [https://www.expansion.com/latinoamerica/2026/06/22/6a38ce44468aeb59598b459a.html](https://www.expansion.com/latinoamerica/2026/06/22/6a38ce44468aeb59598b459a.html)
+
+### Los sesenta sectores que crean empleo
+- Source: Expansion
+- summary: La construcción de edificios lidera la creación de empleo el último año, seguida de la industria alimentaria, la educación, los servicios a edificios y las actividades recreativas. Leer
+- Published: Mon, 22 Jun 2026 00:36:29 +0200
+- Link: [https://www.expansion.com/economia/2026/06/22/6a383bade5fdea44308b4589.html](https://www.expansion.com/economia/2026/06/22/6a383bade5fdea44308b4589.html)
+
+### Charles Manski: "Las previsiones económicas no son fiables ante la incertidumbre actual"
+- Source: Expansion
+- summary: En una entrevista a EXPANSIÓN, el Premio Fundación BBVA Fronteras del Conocimiento de Economía de 2026, Charles Manski, afirma que la inteligencia artificial "es sólo un paso más en la revolución tecnológica y no afectará al empleo, pero es muy peligrosa para tomar decisiones". Leer
+- Published: Mon, 22 Jun 2026 00:36:30 +0200
+- Link: [https://www.expansion.com/economia/2026/06/22/6a35795b468aebf6548b4582.html](https://www.expansion.com/economia/2026/06/22/6a35795b468aebf6548b4582.html)
+
+### Starmer, al borde de la dimisión por la fuerte presión interna de su partido
+- Source: Expansion
+- summary: Entre la espada y la pared. Es la delicada situación política en que se encuentra el primer ministro británico, Keir Starmer, ante la creciente y asfixiante presión de su propia formación, el Partido Laborista, para que renuncie a su cargo como premier, hasta el punto de que algunos medios británicos descontaban ayer que su dimisión podría producirse hoy mismo. Leer
+- Published: Mon, 22 Jun 2026 00:36:57 +0200
+- Link: [https://www.expansion.com/economia/2026/06/22/6a38474ee5fdea54098b4586.html](https://www.expansion.com/economia/2026/06/22/6a38474ee5fdea54098b4586.html)
+
+### Paz en Irán: Dónde invertir para sacar el máximo partido a la Bolsa
+- Source: Expansion
+- summary: Los mercados han reaccionado al alza al acuerdo de paz entre Estados Unidos e Irán y hay que rehacer las carteras para sacar todo el partido a las Bolsas. Leer
+- Published: Wed, 17 Jun 2026 15:48:09 +0200
+- Link: [https://www.expansion.com/podcasts/en-accion/2026/06/17/6a32a1e3468aebe6028b457f.html](https://www.expansion.com/podcasts/en-accion/2026/06/17/6a32a1e3468aebe6028b457f.html)
+
+### Zhou Qunfei, la autodidacta detrás de la pantalla táctil del iPhone
+- Source: Expansion
+- summary: Ha pasado de trabajar por un dólar al día a sentarse en la misma mesa que Elon Musk y Tim Cook. Su empresa, Lens Technology, suministra superficies de vidrio a Apple y Tesla. Leer
+- Published: Mon, 15 Jun 2026 12:21:42 +0200
+- Link: [https://www.expansion.com/podcasts/genios-finanzas/2026/06/15/6a2fcb01468aebca328b457c.html](https://www.expansion.com/podcasts/genios-finanzas/2026/06/15/6a2fcb01468aebca328b457c.html)
+
+### Por qué el sueldo seguirá siendo un secreto, con Beatriz Ardid
+- Source: Expansion
+- summary: La entrada en vigor de la ley de transparencia salarial el próximo mes de junio, no dejará al descubierto su sueldo, pero a partir de entonces desaparece la cláusula de confidencialidad de los contratos y el sueldo medio por categorías será público. Leer
+- Published: Tue, 21 Apr 2026 03:22:06 +0200
+- Link: [https://www.expansion.com/podcasts/trabajo-y-mas/2026/04/21/69e61a70468aebad418b4596.html](https://www.expansion.com/podcasts/trabajo-y-mas/2026/04/21/69e61a70468aebad418b4596.html)
+
+### La Primera de Expansión sobre Santander, Goldman Sachs, Mundial, Renault, China y SpaceX
+- Source: Expansion
+- summary: Santander reordena la banca comercial y nombra dos responsables globales. Matías Sánchez asume el área de Particulares, y Borja Oyarzábal, la rama de Empresas. Daniel Barriuso, actual jefe de la unidad, sigue en el grupo como asesor de la presidenta y el CEO. Leer
+- Published: Fri, 19 Jun 2026 07:21:39 +0200
+- Link: [https://www.expansion.com/podcasts/la-primera-de-expansion/2026/06/19/6a34ccdc468aeb41018b4598.html](https://www.expansion.com/podcasts/la-primera-de-expansion/2026/06/19/6a34ccdc468aeb41018b4598.html)
+
+### EXPANSIÓN: 40 años de innovación y liderazgo
+- Source: Expansion
+- summary: De pionero del papel salmón a líder digital con una visión global, EXPANSIÓN celebra 40 años analizando la vida empresarial española y transformando la información económica en un servicio imprescindible para todos. Leer
+- Published: Tue, 26 May 2026 10:44:46 +0200
+- Link: [https://www.expansion.com/especiales/40-aniversario-expansion/2026/05/26/6a145649e5fdea2d2a8b459e.html](https://www.expansion.com/especiales/40-aniversario-expansion/2026/05/26/6a145649e5fdea2d2a8b459e.html)
+
+### Irán paraliza la negociación con EEUU tras las nuevas amenazas de Trump
+- Source: Expansion
+- summary: Irán ha interrumpido este domingo las conversaciones con Estados Unidos en Suiza tras las nuevas amenazas lanzadas por el presidente estadounidense Donald Trump contra la República Islámica, informó la agencia IRNA. Leer
+- Published: Sun, 21 Jun 2026 20:40:45 +0200
+- Link: [https://www.expansion.com/economia/2026/06/21/6a382fd2468aeb295d8b4599.html](https://www.expansion.com/economia/2026/06/21/6a382fd2468aeb295d8b4599.html)
+
+### Silver Lake prepara la venta de su 93% en el Grupo BC
+- Source: Expansion
+- summary: La gestora de capital riesgo estadounidense está analizando todas las alternativas estratégicas disponibles junto a sus asesores. Leer
+- Published: Mon, 22 Jun 2026 00:36:58 +0200
+- Link: [https://www.expansion.com/empresas/2026/06/22/6a382dbc468aebb8668b45a9.html](https://www.expansion.com/empresas/2026/06/22/6a382dbc468aebb8668b45a9.html)
+
+### StepStone, APG y Azora redoblan la puja por las residencias de mayores
+- Source: Expansion
+- summary: StepStone y Greykite con Vitalia; APG y Renta con Wellder o Azora pisan el acelerador en un negocio con una inversión potencial en España de 19.000 millones hasta 2035. Leer
+- Published: Mon, 22 Jun 2026 00:36:59 +0200
+- Link: [https://www.expansion.com/inmobiliario/mercado/2026/06/22/6a357c6c468aeb47738b45a9.html](https://www.expansion.com/inmobiliario/mercado/2026/06/22/6a357c6c468aeb47738b45a9.html)
+
+### Descubra la fórmula que identifica la mejor empresa para trabajar
+- Source: Expansion
+- summary: Aunque las clasificaciones ayudan, la opinión de quienes trabajan en una empresa, la de aquellos que la dejaron y la de quienes la siguen recomendando es el mejor termómetro para dar con la mejor opción. Leer
+- Published: Fri, 19 Jun 2026 12:23:44 +0200
+- Link: [https://www.expansion.com/expansion-empleo/desarrollo-de-carrera/2026/06/19/6a350db9468aeb003e8b45a2.html](https://www.expansion.com/expansion-empleo/desarrollo-de-carrera/2026/06/19/6a350db9468aeb003e8b45a2.html)
+
+### Merz: Alemania pierde cada mes entre 10.000 y 14.000 puestos de trabajo en la industria
+- Source: Expansion
+- summary: El canciller alemán, Friedrich Merz, afirmó este domingo que en Alemania se pierden cada mes entre 10.000 y 15.000 puestos de trabajo en la industria y abogó por reformas estructurales para ayudar a las empresas a que sigan siendo competitivas para mantener el bienestar en el futuro. Leer
+- Published: Sun, 21 Jun 2026 23:52:39 +0200
+- Link: [https://www.expansion.com/economia/2026/06/21/6a385c8ce5fdea40278b4588.html](https://www.expansion.com/economia/2026/06/21/6a385c8ce5fdea40278b4588.html)
 
 ### El juez Peinado envía a juicio a Begoña Gómez y le retira el pasaporte
 - Source: Expansion
@@ -416,93 +590,75 @@ Collected Articles: 127
 - Published: Sat, 20 Jun 2026 13:46:45 +0200
 - Link: [https://www.expansion.com/economia/2026/06/20/6a367cd4e5fdea1b048b4574.html](https://www.expansion.com/economia/2026/06/20/6a367cd4e5fdea1b048b4574.html)
 
-### Historia gráfica de la Bolsa española
+### El capital privado mantiene su impulso en Latinoamérica
 - Source: Expansion
-- summary: El 20 de octubre de 1831 se celebra la primera sesión de contratación de la Bolsa de Madrid. En 1992, se estrena el índice Ibex que aglutina las 35 empresas de mayor capitalización y liquidez del mercado. El selectivo ha marcado récord histórico en 2026. Leer
-- Published: Sat, 20 Jun 2026 00:07:41 +0200
-- Link: [https://www.expansion.com/especiales/40-aniversario-expansion/2026/06/12/69faf9a7e5fdead36a8b4572.html](https://www.expansion.com/especiales/40-aniversario-expansion/2026/06/12/69faf9a7e5fdead36a8b4572.html)
+- summary: La región captó 8.570 millones de dólares en nuevos fondos e invirtió un total de 25.600 millones durante el año pasado. Leer
+- Published: Mon, 22 Jun 2026 00:37:15 +0200
+- Link: [https://www.expansion.com/latinoamerica/iberoamericana-empresarial/2026/06/22/6a3843cf468aeb816f8b4573.html](https://www.expansion.com/latinoamerica/iberoamericana-empresarial/2026/06/22/6a3843cf468aeb816f8b4573.html)
 
-### Actualizando las previsiones de 2026
+### Cuba denuncia que EEUU ejerce un "bloqueo total, similar a uno de tipo militar" en el país
 - Source: Expansion
-- summary: Llegando a la mitad de 2026 bueno es analizar lo que analistas financieros y otra suerte de quirománticos previeron con sus videncias. Leer
-- Published: Sat, 20 Jun 2026 19:41:46 +0200
-- Link: [https://www.expansion.com/mercados/2026/06/20/6a36cf75e5fdea24788b4575.html](https://www.expansion.com/mercados/2026/06/20/6a36cf75e5fdea24788b4575.html)
+- summary: El ministro cubano de Exteriores, Bruno Rodríguez, denunció este sábado que EEUU ejerce un "bloqueo total" al país caribeño, "similar a uno de tipo militar" al referirse al asedio petrolero iniciado por Washington desde enero y a las sanciones reforzadas contra empresas que mantengan negocios con el Estado isleño. Leer
+- Published: Sat, 20 Jun 2026 19:20:50 +0200
+- Link: [https://www.expansion.com/latinoamerica/2026/06/20/6a36c60b468aeb3a518b45bb.html](https://www.expansion.com/latinoamerica/2026/06/20/6a36c60b468aeb3a518b45bb.html)
 
-### SpaceX estrena la era de la IA tras una semana histórica en Bolsa
+### La España de la que habla Sánchez no existe
 - Source: Expansion
-- summary: La compañía de Elon Musk mantiene el rally bursátil gracias al éxito de su fundador entre los inversores minoristas y al tirón en la demanda de los fondos indexados. Leer
-- Published: Sat, 20 Jun 2026 00:34:46 +0200
-- Link: [https://www.expansion.com/mercados/2026/06/20/6a35b1ef468aeb3a518b459c.html](https://www.expansion.com/mercados/2026/06/20/6a35b1ef468aeb3a518b459c.html)
+- summary: La combinación de altos precios de la vivienda y salarios bajos es el drama de numerosos españoles. Leer
+- Published: Fri, 19 Jun 2026 23:51:34 +0200
+- Link: [https://www.expansion.com/economia/2026/06/19/6a35a08c468aeb3c658b4581.html](https://www.expansion.com/economia/2026/06/19/6a35a08c468aeb3c658b4581.html)
 
-### Expansión regala el póster de la Bolsa
+### Beko: "Los electrodomésticos serán cada vez más proactivos"
 - Source: Expansion
-- summary: Expansión regala a sus lectores el mayor gráfico bursátil hecho jamás, con motivo de su 40 Aniversario. Leer
-- Published: Thu, 18 Jun 2026 20:55:37 +0200
-- Link: [https://www.expansion.com/mercados/2026/06/13/6a2c6c4b468aeb03048b458b.html](https://www.expansion.com/mercados/2026/06/13/6a2c6c4b468aeb03048b458b.html)
+- summary: El CEO de Beko Europa explica cómo están integrando tecnología tanto en su cadena de producción como en los propios dispositivos, con la inteligencia artificial como protagonista. Leer
+- Published: Mon, 22 Jun 2026 00:37:35 +0200
+- Link: [https://www.expansion.com/economia-digital/protagonistas/2026/06/22/6a350e1be5fdeac8298b4570.html](https://www.expansion.com/economia-digital/protagonistas/2026/06/22/6a350e1be5fdeac8298b4570.html)
 
-### Los 'bros de Trump' para un 4 de julio de la energía nuclear
+### ¿Dudas con la declaración de la Renta?
 - Source: Expansion
-- summary: Donald Trump fija el 4 de julio como meta para nuevos reactores de prueba, y algunos emprendedores respaldados por Silicon Valley aceleran una carrera nuclear que promete energía para la IA. Leer
-- Published: Fri, 19 Jun 2026 19:25:35 +0200
-- Link: [https://www.expansion.com/economia/financial-times/2026/06/19/6a357b8be5fdea67068b45a2.html](https://www.expansion.com/economia/financial-times/2026/06/19/6a357b8be5fdea67068b45a2.html)
+- summary: ¿Cuáles son las principales novedades de la campaña de la Renta 2025? ¿Qué debo tener en cuenta sobre indemnizaciones, despidos y rescates de planes de pensiones? ¿Cómo puedo modificar mis datos fiscales? Los socios del área fiscal de Andersen Borja de Gabriel (director del área fiscal) y Pablo Gómez-Acebo (de izquierda a derecha en la foto), contestarán a sus dudas a partir del 6 de abril de 2026 y durante toda la campaña de la Renta 2025. Leer
+- Published: Fri, 27 Mar 2026 10:29:59 +0100
+- Link: [https://www.expansion.com/encuentros/andersen/2026/04/06/index.html](https://www.expansion.com/encuentros/andersen/2026/04/06/index.html)
 
-### La 'ruta del Rolex' que delata la migración global de las grandes fortunas
+### Model 3, C-HR+, Dolphin Surf, EV3, R5, Elroq: los coches eléctricos que triunfan en España
 - Source: Expansion
-- summary: Los datos de exportación de la relojería suiza revelan una reconfiguración de los grandes patrimonios: pasan de Estados Unidos y Emiratos, a las plazas asiáticas. Leer
-- Published: Wed, 17 Jun 2026 00:48:41 +0200
-- Link: [https://www.expansion.com/fiscal/2026/06/17/6a31ab70e5fdea51638b456d.html](https://www.expansion.com/fiscal/2026/06/17/6a31ab70e5fdea51638b456d.html)
-
-### BYD lanza el primer híbrido enchufable del segmento B con más de 1.000 km de autonomía
-- Source: Expansion
-- summary: El fabricante chino, líder del mercado PHEV en España, amplía su popular gama DM-i con un modelo único en su categoría que se convierte el híbrido enchufable más pequeño y asequible del mercado. Leer
-- Published: Wed, 17 Jun 2026 10:38:40 +0200
-- Link: [https://www.expansion.com/empresas/motor/2026/06/17/6a325900468aeb64298b45b1.html](https://www.expansion.com/empresas/motor/2026/06/17/6a325900468aeb64298b45b1.html)
-
-### Los robots inteligentes cambian de forma para animar el mercado
-- Source: Expansion
-- summary: De colores, más pequeños, más delgados o más llamativos. Todo vale para atraer a los consumidores en un mercado cada vez con más actores. Leer
-- Published: Sat, 20 Jun 2026 20:12:14 +0200
-- Link: [https://www.expansion.com/economia-digital/innovacion/2026/06/20/6a350cb4e5fdea332a8b4578.html](https://www.expansion.com/economia-digital/innovacion/2026/06/20/6a350cb4e5fdea332a8b4578.html)
-
-### Tecno-optimistas: la nueva clase profesional que domina la IA
-- Source: Expansion
-- summary: Lejos de ser una fe ciega en el progreso, el tecno-optimismo material es una forma de organizar la carrera profesional. Quienes lo siguen utilizan la IA no sólo para innovar, sino para maximizar su renta y su patrimonio. A través de salarios elevados, acciones y una productividad multiplicada, esta nueva clase trabajadora convierte el progreso tecnológico en una herramienta de independencia. Leer
-- Published: Fri, 19 Jun 2026 12:23:22 +0200
-- Link: [https://www.expansion.com/expansion-empleo/profesiones/2026/06/19/6a351645468aeb92328b4594.html](https://www.expansion.com/expansion-empleo/profesiones/2026/06/19/6a351645468aeb92328b4594.html)
-
-### Colombia elige presidente en medio de la confrontación social y política
-- Source: Expansion
-- summary: Este domingo los colombianos están llamados a las urnas para elegir entre dos modelos radicalmente opuestos en lo económico y en lo social. Leer
-- Published: Sat, 20 Jun 2026 20:01:32 +0200
-- Link: [https://www.expansion.com/economia/politica/2026/06/20/6a35921b468aeb76798b459e.html](https://www.expansion.com/economia/politica/2026/06/20/6a35921b468aeb76798b459e.html)
+- summary: Los modelos totalmente eléctricos representan ya el 15% de todas las ventas de turismos nuevos en el canal de particulares en España. Leer
+- Published: Sat, 20 Jun 2026 00:05:40 +0200
+- Link: [https://www.expansion.com/empresas/motor/2026/06/20/6a352314468aeb03518b45a3.html](https://www.expansion.com/empresas/motor/2026/06/20/6a352314468aeb03518b45a3.html)
 
 ---
 
-## World (61 articles)
+## World (112 articles)
 
-### US and Iran begin talks on initial peace deal in Switzerland
+### Trump-backed political outsider wins Colombia election, initial count shows
 - Source: BBC World
-- summary: The face-to-face meeting follows ongoing fighting in Lebanon and Iran's claim to have shut the Strait of Hormuz.
-- Published: Sun, 21 Jun 2026 14:41:02 GMT
-- Link: [https://www.bbc.com/news/articles/cwy0q41v1lzo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cwy0q41v1lzo?at_medium=RSS&at_campaign=rss)
+- summary: Abelardo de la Espriella appears to have narrowly defeated his rival Iván Cepeda, who says the preliminary count is "not yet official or binding".
+- Published: Mon, 22 Jun 2026 03:31:40 GMT
+- Link: [https://www.bbc.com/news/articles/clye4ky2yzpo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/clye4ky2yzpo?at_medium=RSS&at_campaign=rss)
 
-### Fuel sales halted in occupied Crimea as Ukraine targets oil facilities
+### Russian troop build-up threatens city seen as key to seizing Ukraine's Donbas
 - Source: BBC World
-- summary: Fuel had already been rationed due to shortages caused by Kyiv's attacks against supply routes in Russian-occupied territories.
-- Published: Sun, 21 Jun 2026 10:55:05 GMT
-- Link: [https://www.bbc.com/news/articles/clyx2lk9d15o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/clyx2lk9d15o?at_medium=RSS&at_campaign=rss)
+- summary: If Kostyantynivka falls, Russian forces would be able push towards Ukraine's last remaining strongholds in the east.
+- Published: Sun, 21 Jun 2026 23:57:59 GMT
+- Link: [https://www.bbc.com/news/articles/c9w2g0ewk95o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c9w2g0ewk95o?at_medium=RSS&at_campaign=rss)
 
-### Nobel Peace Prize winner triumphs at Ethiopian polls but fears grow of new conflict
+### Cape Verde fan goes wild live on BBC News as his country scores
 - Source: BBC World
-- summary: Abiy Ahmed's party retains its huge majority despite unrest in several parts of Ethiopia and tensions with its neighbours.
-- Published: Sun, 21 Jun 2026 15:01:28 GMT
-- Link: [https://www.bbc.com/news/articles/cz750q5e3w3o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cz750q5e3w3o?at_medium=RSS&at_campaign=rss)
+- summary: During a live BBC News broadcast, reporter Paul Njie interviews a Cape Verde fan when the country suddenly scores its first ever World Cup goal against Uruguay in the 2026 World Cup.
+- Published: Sun, 21 Jun 2026 23:53:13 GMT
+- Link: [https://www.bbc.com/sport/football/videos/cyv0n4g6p77o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/sport/football/videos/cyv0n4g6p77o?at_medium=RSS&at_campaign=rss)
 
-### Former Olympian denies vandalising Washington Reflecting Pool after arrest
+### Trump says repairs to algae-plagued Reflecting Pool will begin immediately
 - Source: BBC World
-- summary: Davey Hearn says he was simply touching the new paint at the site out of curiosity and did not remove or alter it.
-- Published: Sun, 21 Jun 2026 07:16:54 GMT
-- Link: [https://www.bbc.com/news/articles/c8d26051vv2o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c8d26051vv2o?at_medium=RSS&at_campaign=rss)
+- summary: Despite a multi-million dollar renovation, the Washington DC landmark has peeling paint and algae. Trump claims vandals are partly to blame.
+- Published: Mon, 22 Jun 2026 00:54:43 GMT
+- Link: [https://www.bbc.com/news/articles/c872e8d9el1o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c872e8d9el1o?at_medium=RSS&at_campaign=rss)
+
+### Largest ever cocaine bust in Australia after police raid underground bunker
+- Source: BBC World
+- summary: Police seized 2.7 tonnes of cocaine worth an estimated A$816m after searching a property in western Sydney.
+- Published: Mon, 22 Jun 2026 01:40:00 GMT
+- Link: [https://www.bbc.com/news/articles/c14ygjzr8j7o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c14ygjzr8j7o?at_medium=RSS&at_campaign=rss)
 
 ### Tight security as Indian students resit medical exam after alleged paper leak
 - Source: BBC World
@@ -516,11 +672,11 @@ Collected Articles: 127
 - Published: Sat, 20 Jun 2026 21:57:36 GMT
 - Link: [https://www.bbc.com/news/articles/c4gy26p6pwzo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c4gy26p6pwzo?at_medium=RSS&at_campaign=rss)
 
-### Low-key funeral held for giant of the art world David Hockney
+### Ethiopia PM's party wins landslide as fears grow of new conflict
 - Source: BBC World
-- summary: The artist, who passed away at his home in London earlier this month, requested just his partner and great-nephew attend.
-- Published: Sun, 21 Jun 2026 13:08:49 GMT
-- Link: [https://www.bbc.com/news/articles/cn8q6wxy706o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cn8q6wxy706o?at_medium=RSS&at_campaign=rss)
+- summary: Abiy Ahmed's party retains its huge majority despite unrest in several parts of Ethiopia and tensions with its neighbours.
+- Published: Sun, 21 Jun 2026 15:01:28 GMT
+- Link: [https://www.bbc.com/news/articles/cz750q5e3w3o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cz750q5e3w3o?at_medium=RSS&at_campaign=rss)
 
 ### Dutch royals enjoy two big results in one World Cup day
 - Source: BBC World
@@ -528,11 +684,23 @@ Collected Articles: 127
 - Published: Sun, 21 Jun 2026 09:45:57 GMT
 - Link: [https://www.bbc.com/sport/football/articles/c4gydq973nqo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/sport/football/articles/c4gydq973nqo?at_medium=RSS&at_campaign=rss)
 
+### Former Olympian denies vandalising Washington Reflecting Pool after arrest
+- Source: BBC World
+- summary: Davey Hearn says he was simply touching the new paint at the site out of curiosity and did not remove or alter it.
+- Published: Sun, 21 Jun 2026 07:16:54 GMT
+- Link: [https://www.bbc.com/news/articles/c8d26051vv2o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c8d26051vv2o?at_medium=RSS&at_campaign=rss)
+
 ### African and Caribbean nations call for formal apology for transatlantic slavery
 - Source: BBC World
 - summary: The leaders have asked for apologies from the countries that benefited from the slave trade, as well as debt relief and financial compensation.
 - Published: Sat, 20 Jun 2026 02:33:30 GMT
 - Link: [https://www.bbc.com/news/articles/cm2rl8z5x7no?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cm2rl8z5x7no?at_medium=RSS&at_campaign=rss)
+
+### Fuel sales halted in occupied Crimea as Ukraine targets oil facilities
+- Source: BBC World
+- summary: Fuel had already been rationed due to shortages caused by Kyiv's attacks against supply routes in Russian-occupied territories.
+- Published: Sun, 21 Jun 2026 10:55:05 GMT
+- Link: [https://www.bbc.com/news/articles/clyx2lk9d15o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/clyx2lk9d15o?at_medium=RSS&at_campaign=rss)
 
 ### Indian cricketer, 15, hits record-breaking 50 in just 11 balls
 - Source: BBC World
@@ -569,6 +737,78 @@ Collected Articles: 127
 - summary: Nearly 1,700 people were evacuated from the huge blaze at Viva Wyndham Dominicus Beach in Bayahibe, a popular resort town on the Caribbean coast.
 - Published: Sat, 20 Jun 2026 17:33:25 GMT
 - Link: [https://www.bbc.com/news/articles/c932k8010j1o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c932k8010j1o?at_medium=RSS&at_campaign=rss)
+
+### James Burrows, legendary director of Cheers and Friends, dies aged 85
+- Source: BBC World
+- summary: Best-known as co-creator of sitcom Cheers, Burrows directed more than 1,000 episodes of other classics including the Big Bang Theory and Will and Grace.
+- Published: Sat, 20 Jun 2026 00:23:46 GMT
+- Link: [https://www.bbc.com/news/articles/ce8k07x523eo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/ce8k07x523eo?at_medium=RSS&at_campaign=rss)
+
+### Boy, 12, wins hearts after trying to check sick chicken into Ethiopian hospital
+- Source: BBC World
+- summary: Markos's beloved hen was not responding to any treatments - so he did the only thing he could think of.
+- Published: Fri, 19 Jun 2026 10:25:30 GMT
+- Link: [https://www.bbc.com/news/articles/cy49e7w3rmxo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cy49e7w3rmxo?at_medium=RSS&at_campaign=rss)
+
+### Morocco captain Achraf Hakimi to stand trial for rape
+- Source: BBC World
+- summary: French prosecutors confirm Morocco captain Achraf Hakimi will stand trial for rape, in accusations dating back to 2023.
+- Published: Fri, 19 Jun 2026 10:28:22 GMT
+- Link: [https://www.bbc.com/sport/football/articles/c20y18z7le1o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/sport/football/articles/c20y18z7le1o?at_medium=RSS&at_campaign=rss)
+
+### Zimbabwe MPs pass bill to extend president's time in power
+- Source: BBC World
+- summary: The proposal would extend Emmerson Mnangagwa's term by two years and scrap direct presidential elections.
+- Published: Fri, 19 Jun 2026 08:03:32 GMT
+- Link: [https://www.bbc.com/news/articles/c20y15m0337o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c20y15m0337o?at_medium=RSS&at_campaign=rss)
+
+### Six-year-old Ebola patient taken from DR Congo hospital found and 'doing well'
+- Source: BBC World
+- summary: Health facilities have come under attack during the current outbreak as a result of misinformation and fear.
+- Published: Fri, 19 Jun 2026 14:45:57 GMT
+- Link: [https://www.bbc.com/news/articles/c0qyg29wpk2o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c0qyg29wpk2o?at_medium=RSS&at_campaign=rss)
+
+### Currency crash and visa crackdowns force Indian students to rethink studying abroad
+- Source: BBC World
+- summary: A weaker rupee and tougher immigration rules are pushing Indian students away from popular destinations like the US and UK.
+- Published: Sun, 21 Jun 2026 21:55:43 GMT
+- Link: [https://www.bbc.com/news/articles/c8x2gd9lkxzo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c8x2gd9lkxzo?at_medium=RSS&at_campaign=rss)
+
+### Steve Rosenberg: Moscow oil refinery attack brings Russia's war with Ukraine closer to home
+- Source: BBC World
+- summary: There are moments when life in Moscow feels completely normal - Thursday morning wasn't one of them, writes Steve Rosenberg.
+- Published: Sat, 20 Jun 2026 10:19:34 GMT
+- Link: [https://www.bbc.com/news/articles/cp3xqkxp3x5o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cp3xqkxp3x5o?at_medium=RSS&at_campaign=rss)
+
+### Why an AI company cleaned my New York City apartment for free
+- Source: BBC World
+- summary: An AI company is sending free cleaners door-to-door in a bid to train the robots it hopes one day will replace them.
+- Published: Sat, 20 Jun 2026 23:18:55 GMT
+- Link: [https://www.bbc.com/news/articles/cpwerjy20kyo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cpwerjy20kyo?at_medium=RSS&at_campaign=rss)
+
+### Thousands killed in US-Israeli war on Iran - but experts say true total may never be known
+- Source: BBC World
+- summary: Experts say internet, media and government restrictions have all hampered casualty reporting across the region.
+- Published: Fri, 19 Jun 2026 05:33:59 GMT
+- Link: [https://www.bbc.com/news/articles/cy735xlv50ko?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cy735xlv50ko?at_medium=RSS&at_campaign=rss)
+
+### Parisians cool off in canal amid 'red alert' heatwave
+- Source: BBC World
+- summary: France has issued red heatwave alerts for around half the country as temperatures soar to record levels.
+- Published: Sun, 21 Jun 2026 17:15:56 GMT
+- Link: [https://www.bbc.com/news/videos/c802denngxeo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/videos/c802denngxeo?at_medium=RSS&at_campaign=rss)
+
+### BBC sees destroyed villages in Israeli-occupied southern Lebanon
+- Source: BBC World
+- summary: Travelling with a humanitarian convoy, BBC's Hugo Bachega has been given rare access to a part of Lebanon under Israeli occupation.
+- Published: Sat, 20 Jun 2026 16:37:03 GMT
+- Link: [https://www.bbc.com/news/videos/c8r2pyv3e2po?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/videos/c8r2pyv3e2po?at_medium=RSS&at_campaign=rss)
+
+### Would you choose to take a 22-hour non-stop flight?
+- Source: BBC World
+- summary: The BBC asked Sydney locals if they would take the newly announced, longest ever commercial flight from Sydney to London.
+- Published: Fri, 19 Jun 2026 18:47:31 GMT
+- Link: [https://www.bbc.com/news/videos/cn4dqg0dz5go?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/videos/cn4dqg0dz5go?at_medium=RSS&at_campaign=rss)
 
 ### Cover Story newsletter: How we chose the cover image
 - Source: The Economist
@@ -666,6 +906,138 @@ Collected Articles: 127
 - Published: 2017-12-11T10:14:32.000+0000
 - Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2e5a8aa31095b331af46bc.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2e5a8aa31095b331af46bc.html)
 
+### Welsh national side helping with Chinese soccer goals
+- Source: China Daily
+- summary: Fans of the Welsh national soccer team have experienced some dizzying highs and disappointing lows in the last 18 months.
+- Published: 2017-12-11T10:02:08.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2e57a1a31095b331af444e.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2e57a1a31095b331af444e.html)
+
+### South San Francisco elects first Chinese-American mayor
+- Source: China Daily
+- summary: Liza Lau Normandy has been elected mayor of South San Francisco, the first Chinese-American to be elected in the city's 110 years history, according to World Journal.
+- Published: 2017-12-11T06:31:31.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2e2643a310eefe3e9a28fd.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2e2643a310eefe3e9a28fd.html)
+
+### South San Francisco elects first Chinese-American mayor
+- Source: China Daily
+- summary: Liza Lau Normandy has been elected mayor of South San Francisco, the first Chinese-American to be elected in the city's 110 years history, according to World Journal.
+- Published: 2017-12-11T06:31:31.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2e2643a310eefe3e9a28fd.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2e2643a310eefe3e9a28fd.html)
+
+### Algerian boy, 12, wins Shenzhen talent contest
+- Source: China Daily
+- summary: A 12-year-old Algerian boy was crowned winner of the eighth Shenzhen Expats Chinese Talent Competition on Sunday.
+- Published: 2017-12-11T05:51:21.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2e1cd9a310eefe3e9a28ac.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2e1cd9a310eefe3e9a28ac.html)
+
+### China launches communication satellite for Algeria
+- Source: China Daily
+- summary: China launched Algeria's first communication satellite, Alcomsat-1, into a preset orbit from the Xichang Satellite Launch Center in the southwestern province of Sichuan early Monday.
+- Published: 2017-12-11T02:33:57.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html)
+
+### China launches communication satellite for Algeria
+- Source: China Daily
+- summary: China launched Algeria's first communication satellite, Alcomsat-1, into a preset orbit from the Xichang Satellite Launch Center in the southwestern province of Sichuan early Monday.
+- Published: 2017-12-11T02:33:57.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html)
+
+### China launches communication satellite for Algeria
+- Source: China Daily
+- summary: China launched Algeria's first communication satellite, Alcomsat-1, into a preset orbit from the Xichang Satellite Launch Center in the southwestern province of Sichuan early Monday.
+- Published: 2017-12-11T02:33:57.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html)
+
+### China launches communication satellite for Algeria
+- Source: China Daily
+- summary: China launched Algeria's first communication satellite, Alcomsat-1, into a preset orbit from the Xichang Satellite Launch Center in the southwestern province of Sichuan early Monday.
+- Published: 2017-12-11T02:33:57.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html)
+
+### Nanjing massacre remembered
+- Source: China Daily
+- summary: A memorial service to mark the 80th anniversary of the Nanjing Massacre committed by the Japanese military during World War II brought together hundreds of activists and members of the Chinese and other Asian communities on Sunday in San Francisco.
+- Published: 2017-12-11T02:24:46.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html)
+
+### Nanjing massacre remembered
+- Source: China Daily
+- summary: A memorial service to mark the 80th anniversary of the Nanjing Massacre committed by the Japanese military during World War II brought together hundreds of activists and members of the Chinese and other Asian communities on Sunday in San Francisco.
+- Published: 2017-12-11T02:24:46.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html)
+
+### Nanjing massacre remembered
+- Source: China Daily
+- summary: A memorial service to mark the 80th anniversary of the Nanjing Massacre committed by the Japanese military during World War II brought together hundreds of activists and members of the Chinese and other Asian communities on Sunday in San Francisco.
+- Published: 2017-12-11T02:24:46.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html)
+
+### Nanjing massacre remembered
+- Source: China Daily
+- summary: A memorial service to mark the 80th anniversary of the Nanjing Massacre committed by the Japanese military during World War II brought together hundreds of activists and members of the Chinese and other Asian communities on Sunday in San Francisco.
+- Published: 2017-12-11T02:24:46.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html)
+
+### Nanjing massacre remembered
+- Source: China Daily
+- summary: A memorial service to mark the 80th anniversary of the Nanjing Massacre committed by the Japanese military during World War II brought together hundreds of activists and members of the Chinese and other Asian communities on Sunday in San Francisco.
+- Published: 2017-12-11T02:24:46.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html)
+
+### Autopsy: Jiang suffered several injuries before the fatal stab
+- Source: China Daily
+- summary: The trial of the alleged murderer of Chinese student Jiang Ge began at 10 am on Monday in Tokyo. It will last seven days and the verdict is expected on Dec 20.
+- Published: 2017-12-11T02:12:40.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2de998a310eefe3e9a160b.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2de998a310eefe3e9a160b.html)
+
+### Anti-nuclear weapon campaigner ICAN receives 2017 Nobel Peace Prize
+- Source: China Daily
+- summary: The International Campaign to Abolish Nuclear Weapons (ICAN) received the 2017 Nobel Peace Prize at an awarding ceremony here Sunday, for its efforts to give new momentum to the process of abolishing nuclear weapons.
+- Published: 2017-12-11T02:12:09.000+0000
+- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2de979a310eefe3e9a1604.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2de979a310eefe3e9a1604.html)
+
+### US-Iran talks end in Switzerland, mediators say
+- Source: deutsche welle
+- summary: According to mediators from Qatar and Pakistan, the talks between United States and Iranian officials in Switzerland have ended with both sides agreeing on a roadmap. Technical talks will continue.
+- Published: Unknown
+- Link: [https://www.dw.com/en/us-iran-talks-end-in-switzerland-mediators-say/live-77641405?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/us-iran-talks-end-in-switzerland-mediators-say/live-77641405?maca=en-rss-en-all-1573-rdf)
+
+### Colombia election: Hard-right candidate claims victory
+- Source: deutsche welle
+- summary: Right-wing presidential candidate, Abelardo de la Espriella, won 49.66% of the Colombians' votes, according to preliminary results.
+- Published: Unknown
+- Link: [https://www.dw.com/en/colombia-election-hard-right-candidate-claims-victory/a-77650646?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/colombia-election-hard-right-candidate-claims-victory/a-77650646?maca=en-rss-en-all-1573-rdf)
+
+### Deniz Undav: Germany's 2026 World Cup supersub
+- Source: deutsche welle
+- summary: With three goals in two games, striker Deniz Undav is the man in focus for Germany at the World Cup. But things could have turned out very differently for the Stuttgart striker.
+- Published: Unknown
+- Link: [https://www.dw.com/en/deniz-undav-germany-s-2026-world-cup-supersub/a-77650649?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/deniz-undav-germany-s-2026-world-cup-supersub/a-77650649?maca=en-rss-en-all-1573-rdf)
+
+### Czechia: Thousands march in support of public media funding
+- Source: deutsche welle
+- summary: Prime Minister Andrej Babis' government has been accused of seeking to take control over Czech public media. The plan would leave broadcasters with a 15% funding cut and no guarantees of continued future funding.
+- Published: Unknown
+- Link: [https://www.dw.com/en/czechia-thousands-march-in-support-of-public-media-funding/a-77650608?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/czechia-thousands-march-in-support-of-public-media-funding/a-77650608?maca=en-rss-en-all-1573-rdf)
+
+### Severe heat wave sweeps Europe, triggering alerts and disruptions
+- Source: deutsche welle
+- summary: Authorities accross Europe have warned of temperatures exceeding 39 and 40 degrees Celsius as a 'heat dome' sets in. Germany also faces the threat of extreme thunderstorms.
+- Published: Unknown
+- Link: [https://www.dw.com/en/severe-heat-wave-sweeps-europe-triggering-alerts-and-disruptions/a-77648446?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/severe-heat-wave-sweeps-europe-triggering-alerts-and-disruptions/a-77648446?maca=en-rss-en-all-1573-rdf)
+
+### Romania's Dan taps new PM, breaks democratic norms
+- Source: deutsche welle
+- summary: President Nicusor Dan has nominated a new prime minister, without consulting Romania’s governing parties. Critics accuse Dan of breaking democratic rules.
+- Published: Unknown
+- Link: [https://www.dw.com/en/romania-s-dan-taps-new-pm-breaks-democratic-norms/a-77618469?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/romania-s-dan-taps-new-pm-breaks-democratic-norms/a-77618469?maca=en-rss-en-all-1573-rdf)
+
+### Scottish police arrest man over Edinburgh attacks
+- Source: deutsche welle
+- summary: Five people were injured in the attacks on Friday that were described by Prime Minister Keir Starmer as being motivated by "anti-Muslim hatred."
+- Published: Unknown
+- Link: [https://www.dw.com/en/scottish-police-arrest-man-over-edinburgh-attacks/a-77647568?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/scottish-police-arrest-man-over-edinburgh-attacks/a-77647568?maca=en-rss-en-all-1573-rdf)
+
 ### Ethiopia's ruling party wins overwhelming majority in parliament
 - Source: deutsche welle
 - summary: Prime Minister Abiy Ahmed’s Prosperity Party comfortably secured another parliamentary majority, defeating a fragmented opposition.
@@ -738,113 +1110,197 @@ Collected Articles: 127
 - Published: Unknown
 - Link: [https://www.dw.com/en/zelenskyy-returns-poland-s-highest-honor-as-row-deepens/a-77637366?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/zelenskyy-returns-poland-s-highest-honor-as-row-deepens/a-77637366?maca=en-rss-en-all-1573-rdf)
 
-### India news: Millions of students retake NEET amid protests
+### Inequality is elementary to Germany's school system
 - Source: deutsche welle
-- summary: Some 2.2 million premedical aspirants are retaking the high-pressure entrance test across India under strict security measures. Meanwhile, Prime Minister Modi is in Kolkata for International Yoga Day.
+- summary: Children's paths through Germany's school system are often determined before their first day of kindergarten, according to the national report on education. An elementary school in Bonn is offering a new model for kids.
 - Published: Unknown
-- Link: [https://www.dw.com/en/india-news-millions-of-students-retake-neet-amid-protests/live-77634329?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/india-news-millions-of-students-retake-neet-amid-protests/live-77634329?maca=en-rss-en-all-1573-rdf)
+- Link: [https://www.dw.com/en/inequality-is-elementary-to-germany-s-school-system/a-77613220?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/inequality-is-elementary-to-germany-s-school-system/a-77613220?maca=en-rss-en-all-1573-rdf)
 
-### Germany news: Pension overhaul may push retirement age to 70
+### EU ban on BPA chemical in food packaging takes effect
 - Source: deutsche welle
-- summary: Germany is weighing sweeping pension changes, including raising the retirement age to 70. Meanwhile, football fans are celebrating after the men's national side qualified for the World Cup knockout stage. DW has more.
+- summary: From July 2026 onwards, BPA will no longer be permitted in EU food packaging. The industrial chemical is known to interfere with the human hormonal system.
 - Published: Unknown
-- Link: [https://www.dw.com/en/germany-news-pension-overhaul-may-push-retirement-age-to-70/live-77635252?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/germany-news-pension-overhaul-may-push-retirement-age-to-70/live-77635252?maca=en-rss-en-all-1573-rdf)
+- Link: [https://www.dw.com/en/eu-ban-on-bpa-chemical-in-food-packaging-takes-effect/a-77630680?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/eu-ban-on-bpa-chemical-in-food-packaging-takes-effect/a-77630680?maca=en-rss-en-all-1573-rdf)
 
-### Pakistan: Roadside bombs kill 7 in northwest
+### German journalist detained in Syria back home, lawyer says
 - Source: deutsche welle
-- summary: A police officer said twin blasts in Pakistan's northwestern Khyber Pakhtunkhwa province were triggered remotely. No group immediately claimed responsibility.
+- summary: Eva Maria Michelmann vanished in Syria in January as government forces advanced on Kurdish fighters in the northeast. The German government last week said it was working to get her home.
 - Published: Unknown
-- Link: [https://www.dw.com/en/pakistan-roadside-bombs-kill-7-in-northwest/a-77636194?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/pakistan-roadside-bombs-kill-7-in-northwest/a-77636194?maca=en-rss-en-all-1573-rdf)
+- Link: [https://www.dw.com/en/german-journalist-detained-in-syria-back-home-lawyer-says/a-77631412?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/german-journalist-detained-in-syria-back-home-lawyer-says/a-77631412?maca=en-rss-en-all-1573-rdf)
 
-### La "empatía" por ser "víctimas del acoso judicial contra sus familias" que une a Sánchez con Zapatero y suscita dudas en el PSOE
-- Source: El Mundo
-- summary: Moncloa cree que el acoso por la corrupción puede llevar a la gente a ver al actual presidente del Gobierno como una víctima Leer
-- Published: Sun, 21 Jun 2026 00:11:33 +0200
-- Link: [https://www.elmundo.es/espana/2026/06/21/6a36d121e9cf4ad24d8b457f.html](https://www.elmundo.es/espana/2026/06/21/6a36d121e9cf4ad24d8b457f.html)
+### What to expect from the strongest El Nino in over a century
+- Source: deutsche welle
+- summary: Warnings of a mighty El Nino weather pattern this year could bring drought, flooding and extreme heat. Can we prepare for the worst of it?
+- Published: Unknown
+- Link: [https://www.dw.com/en/what-to-expect-from-the-strongest-el-nino-in-over-a-century/a-77469489?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/what-to-expect-from-the-strongest-el-nino-in-over-a-century/a-77469489?maca=en-rss-en-all-1573-rdf)
 
-### El CGPJ valorará mañana si Peinado incurrió en "falta grave de consideración" a la Policía por sugerir que podría ayudar a huir a Begoña Gómez
-- Source: El Mundo
-- summary: La Comisión Permanente del órgano de los jueces ha celebrado este domingo una reunión telemática y la decisión final se tomará este lunes a las 9.00 horas Leer
-- Published: Sun, 21 Jun 2026 13:54:08 +0200
-- Link: [https://www.elmundo.es/espana/2026/06/21/6a37adaffdddff4c458b45a4.html](https://www.elmundo.es/espana/2026/06/21/6a37adaffdddff4c458b45a4.html)
+### As heat waves grow more frequent and fierce, cities worldwide are racing to cool streets and reshape urban life. But can they adapt quickly enough?
+- Source: deutsche welle
+- summary: As heat waves grow more frequent and fierce, cities worldwide are racing to cool streets and reshape urban life.
+- Published: Unknown
+- Link: [https://www.dw.com/en/as-heat-waves-grow-more-frequent-and-fierce-cities-worldwide-are-racing-to-cool-streets-and-reshape-urban-life-but-can-they-adapt-quickly-enough/a-77504229?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/as-heat-waves-grow-more-frequent-and-fierce-cities-worldwide-are-racing-to-cool-streets-and-reshape-urban-life-but-can-they-adapt-quickly-enough/a-77504229?maca=en-rss-en-all-1573-rdf)
 
-### La cronología de indicios que señalan a Begoña Gómez: del "cambio radical en su trayectoria tras la investidura" a usar la "proximidad a Sánchez para impulsar" su carrera
-- Source: El Mundo
-- summary: El juez Peinado sienta en el banquillo a la esposa del presidente del Gobierno, su asesora en Presidencia y el empresario Barrabés. Le retira el pasaporte, le impide salir del país y le obliga a presentarse cada 15 días Leer
-- Published: Sat, 20 Jun 2026 22:47:13 +0200
-- Link: [https://www.elmundo.es/espana/2026/06/20/6a36ece3e85ecef37e8b4580.html](https://www.elmundo.es/espana/2026/06/20/6a36ece3e85ecef37e8b4580.html)
+### Can Europe build its own AI heavyweights to rival the US?
+- Source: deutsche welle
+- summary: With AI dominated by US firms, Europe is pushing for more independence. New partnerships, investments and startups aim to boost the continent's digital sovereignty, but challenges around funding and regulation remain.
+- Published: Unknown
+- Link: [https://www.dw.com/en/can-europe-build-its-own-ai-heavyweights-to-rival-the-us/a-77629735?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/can-europe-build-its-own-ai-heavyweights-to-rival-the-us/a-77629735?maca=en-rss-en-all-1573-rdf)
 
-### El pagador de Zapatero presentó en Dubái un certificado de Bankia para diseñar la offshore a las 24 horas de almorzar con él
-- Source: El Mundo
-- summary: El documento fue emitido el 27 de enero de 2021 y remitido ese mismo día a las autoridades de la Zona Franca Leer
-- Published: Sat, 20 Jun 2026 22:46:50 +0200
-- Link: [https://www.elmundo.es/espana/2026/06/20/6a36d7efe85ece96668b4585.html](https://www.elmundo.es/espana/2026/06/20/6a36d7efe85ece96668b4585.html)
+### Women tackling coal dust and other eco wins this week
+- Source: deutsche welle
+- summary: Indian women fight back against toxic coal dust, the US hits a solar milestone, and there's good news for soil in Kenya and cars worldwide.
+- Published: Unknown
+- Link: [https://www.dw.com/en/women-tackling-coal-dust-and-other-eco-wins-this-week/a-77627984?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/women-tackling-coal-dust-and-other-eco-wins-this-week/a-77627984?maca=en-rss-en-all-1573-rdf)
 
-### Yohir Akerman, el 'espía' de los poderosos de América al que recurrió la cloaca del PSOE para hundir a la Fiscalía Anticorrupción: "No puedo revelar cuánto me han pagado"
-- Source: El Mundo
-- summary: Es el investigador que llevó hasta la sede del PSOE una prueba viva para usarla contra la Fiscalía Anticorrupción. Dice que "esa operación nunca nos fue presentada como parte de una operación política". Él lo niega pero fuentes judiciales lo vinculan a Nervis Villalobos. Su historial incluye la defensa de los intereses de bananeras y petroleras con métodos controvertidos Leer
-- Published: Sat, 20 Jun 2026 22:46:27 +0200
-- Link: [https://www.elmundo.es/cronica/2026/06/20/6a3581f2fc6c83e8558b45ad.html](https://www.elmundo.es/cronica/2026/06/20/6a3581f2fc6c83e8558b45ad.html)
+### New exhibitions for Anish Kapoor: Art on the edge
+- Source: deutsche welle
+- summary: His art challenges our perception: Forms vanish and perspectives shift. Anish Kapoor leads the viewer to the edge of the abyss — and sometimes, even beyond. Two new exhibitions revisit his work.
+- Published: Unknown
+- Link: [https://www.dw.com/en/new-exhibitions-for-anish-kapoor-art-on-the-edge/a-77580647?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/new-exhibitions-for-anish-kapoor-art-on-the-edge/a-77580647?maca=en-rss-en-all-1573-rdf)
 
-### Arancha González Laya: "Rodríguez Zapatero nunca medió en mi nombre en Venezuela"
-- Source: El Mundo
-- summary: Ex ministra de Asuntos Exteriores de Sánchez y ahora decana de la Paris School of International Affairs de Sciences Po, analiza en el libro 'Solos en el mundo' (Arpa) la crisis de influencia que atraviesa la Unión Europea Leer
-- Published: Sun, 21 Jun 2026 03:09:22 +0200
-- Link: [https://www.elmundo.es/espana/2026/06/21/6a36c0d2fdddff4c458b458d.html](https://www.elmundo.es/espana/2026/06/21/6a36c0d2fdddff4c458b458d.html)
+### Germany's Left Party is dreaming big
+- Source: deutsche welle
+- summary: The socialist Left Party has seen its membership soar and is especially popular with young female voters. Could it soon come to power in the city state of Berlin?
+- Published: Unknown
+- Link: [https://www.dw.com/en/germany-s-left-party-is-dreaming-big/a-77627530?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/germany-s-left-party-is-dreaming-big/a-77627530?maca=en-rss-en-all-1573-rdf)
 
-### Muere el tercer menor accidentado en una playa de Tarragona y Salvador Illa muestra su conmoción
-- Source: El Mundo
-- summary: Con este fallecimiento ascienden a tres las víctimas mortales de la tragedia, que se cobró la vida en el acto de un menor de 12 años el viernes y la de otros dos de 13 años que habían sido evacuados en estado crítico. Leer
-- Published: Sun, 21 Jun 2026 07:12:24 +0200
-- Link: [https://www.elmundo.es/cataluna/2026/06/21/6a377295e9cf4a256f8b4592.html](https://www.elmundo.es/cataluna/2026/06/21/6a377295e9cf4a256f8b4592.html)
+### Czech government causes alarm with plan to scrap license fee
+- Source: deutsche welle
+- summary: The Czech government has approved a bill to put the funding of public service media under direct political control. Critics warn that if passed, the bill would put a pillar of Czech democracy at risk.
+- Published: Unknown
+- Link: [https://www.dw.com/en/czech-government-causes-alarm-with-plan-to-scrap-license-fee/a-77625913?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/czech-government-causes-alarm-with-plan-to-scrap-license-fee/a-77625913?maca=en-rss-en-all-1573-rdf)
 
-### Abelardo de la Espriella: "Voy a gobernar con mano de hierro contra el crimen transnacional y el comunismo"
-- Source: El Mundo
-- summary: Instalado en Barranquilla, donde mantiene su cuartel general, asegura que será el próximo presidente del país. De momento, las encuestas le dan la razón Leer
-- Published: Sun, 21 Jun 2026 03:09:23 +0200
-- Link: [https://www.elmundo.es/internacional/2026/06/21/6a36bbffe85ecef2668b45d6.html](https://www.elmundo.es/internacional/2026/06/21/6a36bbffe85ecef2668b45d6.html)
+### US curbs Anthropic AI access, raising global concerns
+- Source: deutsche welle
+- summary: The Trump administration has restricted foreign access to Anthropic's latest AI models over security fears, forcing a global shutdown. Could the row hurt the Claude-maker's IPO plans and set a far-reaching precedent?
+- Published: Unknown
+- Link: [https://www.dw.com/en/us-curbs-anthropic-ai-access-raising-global-concerns/a-77577694?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/us-curbs-anthropic-ai-access-raising-global-concerns/a-77577694?maca=en-rss-en-all-1573-rdf)
 
-### Marc Márquez lo da todo para ganar en Brno y acecha a Bezzecchi
+### El CGPJ examina a Peinado hoy mismo bajo presión del Gobierno
 - Source: El Mundo
-- summary: El de Cervera se vació para una victoria que le deja a 40 puntos del italiano, sancionado sin correr por agredir a los comisarios. Martín, a ocho del liderato Leer
-- Published: Sun, 21 Jun 2026 16:00:12 +0200
-- Link: [https://www.elmundo.es/deportes/motociclismo/2026/06/21/6a37e13f21efa007798b457c.html](https://www.elmundo.es/deportes/motociclismo/2026/06/21/6a37e13f21efa007798b457c.html)
+- summary: Decide este lunes si es «falta grave» sugerir que la Policía podría ayudar a huir a Begoña Gómez Leer
+- Published: Sun, 21 Jun 2026 23:40:42 +0200
+- Link: [https://www.elmundo.es/espana/2026/06/21/6a38001be9cf4a726c8b457e.html](https://www.elmundo.es/espana/2026/06/21/6a38001be9cf4a726c8b457e.html)
 
-### Al-Dawsari, el Neymar de Arabia que hizo un Erasmus en la Liga: "Tácticamente era un desastre"
+### Begoña, una de los nuestros
 - Source: El Mundo
-- summary: El capitán saudí fue uno de los jugadores que pasó seis meses en España en 2018. Jugó con el Villarreal 33 minutos ante el Real Madrid. "Lleva años jugando al lado de Benzema, Malcom o Theo Hernández...tiene muchos de lo que aprender", recuerda Luismi Loro, segundo entrenador Leer
-- Published: Sat, 20 Jun 2026 23:23:17 +0200
-- Link: [https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/20/6a35bedfe9cf4a8f3d8b459e.html](https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/20/6a35bedfe9cf4a8f3d8b459e.html)
+- summary: En ningún caso como en este ha conseguido Sánchez implicar con tanto éxito al Gobierno, su partido y la mayoría de su electorado: se persigue a mi esposa porque se nos persigue a los socialistas Leer
+- Published: Mon, 22 Jun 2026 02:22:10 +0200
+- Link: [https://www.elmundo.es/espana/2026/06/22/6a38127ce9cf4a5f168b45a2.html](https://www.elmundo.es/espana/2026/06/22/6a38127ce9cf4a5f168b45a2.html)
 
-### Banquillos con acento porteño: Argentina, 95 años sin entrenador extranjero, llena de seleccionadores el Mundial
+### El PSOE acelera su calendario de primarias para elegir a los candidatos de 2027 en medio de la tormenta judicial
 - Source: El Mundo
-- summary: Seis equipos están dirigidos por argentinos, a pesar de que en Europa solo tienen presencia en LaLiga. Seis tienen también nacionalidad francesa, pero la doblan con sus países de origen. El podio lo completa España. Leer
-- Published: Fri, 19 Jun 2026 23:15:14 +0200
-- Link: [https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/19/6a340aa3fdddffda348b45da.html](https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/19/6a340aa3fdddffda348b45da.html)
+- summary: Los territorios podrán optar por los meses de julio, septiembre o noviembre para convocar sus procesos internos Leer
+- Published: Mon, 22 Jun 2026 02:22:11 +0200
+- Link: [https://www.elmundo.es/espana/2026/06/22/6a35068bfc6c83561f8b4587.html](https://www.elmundo.es/espana/2026/06/22/6a35068bfc6c83561f8b4587.html)
 
-### Diario del Madrid latino en las madrugadas mundialistas: muchas mujeres con Paraguay, ron a morro con Colombia y lágrimas argentinas por Messi
+### No tener más hijos por no poder pagar la guardería: "Es inviable y como hagas jornada partida, estás vendida"
 - Source: El Mundo
-- summary: Una semana trasnochando en bares para ver selecciones latinoamericanas. Himnos y goles a todo pulmón, cumbias y reguetones, ir a trabajar de empalme y llantos de alegría y nostalgia entre colombianos, argentinos, paraguayos, uruguayos y mexicanos. Magia Mundial Leer
-- Published: Sun, 21 Jun 2026 14:10:27 +0200
-- Link: [https://www.elmundo.es/cronica/2026/06/21/6a357bf7e4d4d8a0388b456d.html](https://www.elmundo.es/cronica/2026/06/21/6a357bf7e4d4d8a0388b456d.html)
+- summary: Los precios de los centros privados superan los 700 euros en las grandes ciudades, rebasando ya el 30% de los ingresos por hogar en plena crisis demográfica Leer
+- Published: Sun, 21 Jun 2026 22:49:59 +0200
+- Link: [https://www.elmundo.es/economia/2026/06/21/6a0c959421efa058188b45df.html](https://www.elmundo.es/economia/2026/06/21/6a0c959421efa058188b45df.html)
 
-### El cielo durante la estación más larga del año: el verano del gran eclipse español
+### La cloaca de Leire se 'sincronizó' con la comisión de investigación de la 'operación Cataluña'
 - Source: El Mundo
-- summary: Con el comienzo del verano llega el periodo del año con mayores fenómenos astronómicos: el eclipse total de Sol del 12 de agosto, noches de Perseidas y observación de planetas Leer
-- Published: Sun, 21 Jun 2026 11:56:37 +0200
-- Link: [https://www.elmundo.es/ciencia-y-salud/ciencia/2026/06/21/6a2fd3c7e9cf4a87738b4578.html](https://www.elmundo.es/ciencia-y-salud/ciencia/2026/06/21/6a2fd3c7e9cf4a87738b4578.html)
+- summary: La trama presumía de usar el peso del PSOE en investigaciones parlamentarias para impulsar sus ataques a los fiscales y la UCO Leer
+- Published: Sun, 21 Jun 2026 22:50:22 +0200
+- Link: [https://www.elmundo.es/espana/2026/06/21/6a3812f5fc6c837c358b4589.html](https://www.elmundo.es/espana/2026/06/21/6a3812f5fc6c837c358b4589.html)
 
-### Empiezan las negociaciones entre EEUU e Irán en Suiza mientras Trump amenaza con recrudecer de nuevo la guerra
+### Zapatero se arriesga con su declaración de máximos a que surja "un Aldama"
 - Source: El Mundo
-- summary: «Irán debe detener inmediatamente a sus muy bien pagados representantes en Líbano. Si no lo hacen, golpearemos a Irán con mucha dureza otra vez, igual que la semana pasada, pero aún más fuerte», declara el americano Leer
-- Published: Sun, 21 Jun 2026 14:12:51 +0200
-- Link: [https://www.elmundo.es/internacional/2026/06/21/6a37a407e4d4d8a0388b459f.html](https://www.elmundo.es/internacional/2026/06/21/6a37a407e4d4d8a0388b459f.html)
+- summary: El ex presidente se expone a que la confesión de cualquier otro acusado cobre más valor para el juez y la Fiscalía Anticorrupción Leer
+- Published: Sun, 21 Jun 2026 22:50:13 +0200
+- Link: [https://www.elmundo.es/espana/2026/06/21/6a3805d9e9cf4a33078b4590.html](https://www.elmundo.es/espana/2026/06/21/6a3805d9e9cf4a33078b4590.html)
 
-### Alan Weisman, divulgador científico: "El planeta no lo vamos a salvar los humanos, en todo caso se salvará por sí mismo"
+### Así se apartó Lamine de la presión tras el partido ante Cabo Verde: la Play, un viaje de cinco horas y el primer gol
 - Source: El Mundo
-- summary: En 'Lo último que se pierde', el periodista y escritor reflexiona sobre cómo adaptarnos a un mundo más caliente e impredecible, por las condiciones que nosotros mismos hemos creado Leer
-- Published: Sat, 20 Jun 2026 11:18:44 +0200
-- Link: [https://www.elmundo.es/ciencia-y-salud/ciencia/2026/06/20/6a351e2ae4d4d847708b45bd.html](https://www.elmundo.es/ciencia-y-salud/ciencia/2026/06/20/6a351e2ae4d4d847708b45bd.html)
+- summary: "Rodrigo es Balón de Oro, Pedri es el mejor centrocampista del mundo, están Nico, Dani Olmo, Mikel... todos son muy buenos. Son de talla mundial y por eso somos favoritos", dice el barcelonista. Leer
+- Published: Mon, 22 Jun 2026 02:54:04 +0200
+- Link: [https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/22/6a384d85fdddffca788b457d.html](https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/22/6a384d85fdddffca788b457d.html)
+
+### El derechista Abelardo de la Espriella será el próximo presidente de Colombia
+- Source: El Mundo
+- summary: Se impone por un margen de un punto en un país totalmente partido en dos / El presidente Gustavo Petro había sugerido a los suyos tomar las calles si su delfín, Iván Cepeda, no era el elegido Leer
+- Published: Mon, 22 Jun 2026 07:15:33 +0200
+- Link: [https://www.elmundo.es/internacional/2026/06/22/6a38603ee85ece7b1b8b457e.html](https://www.elmundo.es/internacional/2026/06/22/6a38603ee85ece7b1b8b457e.html)
+
+### Abelardo de la Espriella, un Tigre para darle la vuelta a Colombia
+- Source: El Mundo
+- summary: El ganador de las elecciones colombianas promete adelgazar el Estado, agilizar trámites para crear empresas, reducir impuestos, perseguir la evasión y la corrupción que devora billones cada año, construir diez mega cárceles a lo Bukele, romper la paz total de Petro y ser implacable con las bandas Leer
+- Published: Mon, 22 Jun 2026 00:09:53 +0200
+- Link: [https://www.elmundo.es/internacional/2026/06/01/6a1d138afc6c8371028b456e.html](https://www.elmundo.es/internacional/2026/06/01/6a1d138afc6c8371028b456e.html)
+
+### Uruguay tampoco puede con Cabo Verde y pone en bandeja a España el primer puesto del grupo
+- Source: El Mundo
+- summary: La Celeste remontó el gol inicial de los africanos, pero un clamoroso error desembocó en el 2-2. A los de De la Fuente les debería valer un empate el viernes para ser líderes. Leer
+- Published: Mon, 22 Jun 2026 02:18:29 +0200
+- Link: [https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/22/6a387499e85ece96668b45c2.html](https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/22/6a387499e85ece96668b45c2.html)
+
+### Jesús Casas, seleccionador de Irak durante tres años: "Teníamos a varios jugadores analfabetos, en Bagdad lo importante era sobrevivir, no la escuela"
+- Source: El Mundo
+- summary: El español, asistente de Luis Enrique hasta 2022, llegó a la selección iraquí ese año y se marchó en 2025, camino del Mundial. "Mi familia pensaba que me iba con los cascos azules, pero es un pueblo que quiere olvidar la guerra", cuenta a EL MUNDO Leer
+- Published: Sun, 21 Jun 2026 22:49:05 +0200
+- Link: [https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/21/6a381af4fc6c8362788b4594.html](https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/21/6a381af4fc6c8362788b4594.html)
+
+### Bélgica vuelve a decepcionar ante la desterrada Irán y se complican sus opciones en el grupo G
+- Source: El Mundo
+- summary: Los de Rudi García fueron incapaces de marcar un gol y la expulsión de Ngoy les cortó su ritmo en el segundo tiempo Leer
+- Published: Sun, 21 Jun 2026 23:17:17 +0200
+- Link: [https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/21/6a3837c1e4d4d8585d8b456e.html](https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/21/6a3837c1e4d4d8585d8b456e.html)
+
+### Sumy, el frente olvidado de la guerra: "Éramos una isla en medio de rusos"
+- Source: El Mundo
+- summary: La región, símbolo de la resistencia ucraniana, es una pista de entrenamiento para los drones de Putin: "Quiere aterrorizarnos" Leer
+- Published: Sun, 21 Jun 2026 22:49:41 +0200
+- Link: [https://www.elmundo.es/internacional/2026/06/21/6a3812b9e4d4d83e1a8b4582.html](https://www.elmundo.es/internacional/2026/06/21/6a3812b9e4d4d83e1a8b4582.html)
+
+### La crisis sin fin de la vivienda: "Es el mayor problema social y económico de España"
+- Source: El Mundo
+- summary: Hay una cifra que ayuda a entender el problema: cada año se crean más del doble de hogares que viviendas nuevas Leer
+- Published: Mon, 22 Jun 2026 00:00:00 +0200
+- Link: [https://www.elmundo.es/podcasts/el-mundo-al-dia/2026/06/22/6a358fc6e4d4d837328b4581.html](https://www.elmundo.es/podcasts/el-mundo-al-dia/2026/06/22/6a358fc6e4d4d837328b4581.html)
+
+### Junts no cree en los Presupuestos de Sánchez: "Lo usa como arma para justificar elecciones sin ligarlas a la corrupción"
+- Source: El Mundo
+- summary: Seguirá sin apoyar la moción de censura del PP: "A Feijóo le da igual la moción de censura. En el fondo, ya sabe que antes o después ganará" Leer
+- Published: Mon, 22 Jun 2026 02:28:23 +0200
+- Link: [https://www.elmundo.es/cataluna/2026/06/22/6a3808cdfdddff3a488b45ba.html](https://www.elmundo.es/cataluna/2026/06/22/6a3808cdfdddff3a488b45ba.html)
+
+### Jero García, escritor: "El peor 'bullying' es el que provoca la invisibilidad; un niño prefiere que le peguen a sentirse solo"
+- Source: El Mundo
+- summary: Ex boxeador y educador, sabe de los problemas de la juventud a pie de calle y no ceja de luchar contra el acoso escolar dando conferencias en los colegios. Publica 'Camino de vuelta', donde todo, por duro que parezca, es verdad. Leer
+- Published: Mon, 22 Jun 2026 00:19:49 +0200
+- Link: [https://www.elmundo.es/papel/lideres/2026/06/22/6a33cf19e4d4d82b618b4583.html](https://www.elmundo.es/papel/lideres/2026/06/22/6a33cf19e4d4d82b618b4583.html)
+
+### Xavier Torrens, experto en seguridad: «En España la violencia del narco alcanzará pronto a la población»
+- Source: El Mundo
+- summary: Alerta de que España, principal productor europeo de cannabis, está importando el crimen organizado, y que esté ya entró en la fase de corromper a políticos, jueces, fiscales y policías Leer
+- Published: Mon, 22 Jun 2026 01:30:39 +0200
+- Link: [https://www.elmundo.es/cataluna/2026/06/22/6a380ae6fc6c831c048b4577.html](https://www.elmundo.es/cataluna/2026/06/22/6a380ae6fc6c831c048b4577.html)
+
+### Más escaleras mecánicas de la calle al Metro para mejorar el acceso: hoy, se estrenan en Prosperidad y, de aquí a septiembre, en San Blas y Estrella
+- Source: El Mundo
+- summary: La Comunidad de Madrid invertirá 3,5 millones de euros para hacer más cómodo el uso del transporte público al viajero Leer
+- Published: Mon, 22 Jun 2026 00:20:53 +0200
+- Link: [https://www.elmundo.es/madrid/2026/06/22/6a37cf04fc6c8353588b4590.html](https://www.elmundo.es/madrid/2026/06/22/6a37cf04fc6c8353588b4590.html)
+
+### Chronovisor, la fascinante primera película de la historia para ser exclusivamente leída
+- Source: El Mundo
+- summary: Cinemajove enmudece entusiasmado con la película de los estadounidenses Kevin Walker y Jack Auen, un vertiginoso juguete borgiano que inventa el noir de biblioteca Leer
+- Published: Sun, 21 Jun 2026 21:35:03 +0200
+- Link: [https://www.elmundo.es/cultura/cine/2026/06/21/6a37d26fe4d4d87c398b458c.html](https://www.elmundo.es/cultura/cine/2026/06/21/6a37d26fe4d4d87c398b458c.html)
+
+### Adiós a los polvos de sol: el producto de maquillaje sencillísimo de aplicar que cambiará tu cara este verano
+- Source: El Mundo
+- summary: El colorete es el fenómeno del año. Según el tono y la aplicación, y con manicuras que lo complementan, se adapta a cualquier ocasión, como acreditan estos cuatro looks realizados con Bourjois y Sally Hansen.  Leer
+- Published: Mon, 22 Jun 2026 00:16:23 +0200
+- Link: [https://www.elmundo.es/yodona/belleza/2026/06/22/6a2fc10ce4d4d8dc038b458c.html](https://www.elmundo.es/yodona/belleza/2026/06/22/6a2fc10ce4d4d8dc038b458c.html)
+
+### Álex Rayón, experto en Inteligencia Artificial: "La IA no viene a sustituir al enólogo, sino a quitarle horas de Excel"
+- Source: El Mundo
+- summary: Mientras drones y algoritmos radiografían la viña y ordenan el caos de cifras, este especialista en transformación digital reivindica un modelo en el que la tecnología hace el trabajo sucio y la intuición del bodeguero firma el vino Leer
+- Published: Mon, 22 Jun 2026 01:30:41 +0200
+- Link: [https://www.elmundo.es/metropoli/elmundovino/2026/06/22/6a35063521efa076218b45a0.html](https://www.elmundo.es/metropoli/elmundovino/2026/06/22/6a35063521efa076218b45a0.html)
 
 ---
 

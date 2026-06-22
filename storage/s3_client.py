@@ -38,13 +38,14 @@ class S3Storage:
             region_name=get_secret("AWS_REGION")
         )
 
-    def upload_file(self, local_path: str, s3_key: str):
-        # Upload a file to the S3 bucket
-        self.client.upload_file(
-            local_path,
-            self.bucket_name,
-            s3_key
-        )
+    def upload_content(self, content, s3_key: str):
+        """Upload a file to S3.
+        
+        Args:
+            content: Body of the file.
+            s3_key: The S3 key (destination path).
+        """
+        self.client.put_object(Bucket=self.bucket_name, Key=s3_key, Body=content)
 
     def download_file(self, s3_key: str, local_path: str):
         # Download a file from the S3 bucket

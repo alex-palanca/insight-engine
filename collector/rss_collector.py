@@ -1,12 +1,12 @@
 import feedparser
 import config.feed_loader
-from storage.storage_service import upload_daily_articles
+import storage.storage_service as cloud
 import json
 import re
 from datetime import date
 
 # Define Local or Remote 
-local = 0
+local = 1
 
 # Maximum number of articles to collect per category
 MAX_ARTICLES_PER_CATEGORY = 200
@@ -174,14 +174,17 @@ def collect_articles():
 
 def save_articles(articles):
 
-    if local:
+    json_articles = json.dumps(articles, indent=2, ensure_ascii=False)
+
+    if local != 0:
         filename = f"output/articles/{date.today().isoformat()}.json"
 
         with open(filename, "w", encoding="utf-8") as f:
-            json.dump(articles, f, indent=2, ensure_ascii=False)
+            json.dump(articles,f, indent=2, ensure_ascii=False)
+            
 
     print("Uploading articles to S3...")
-    upload_daily_articles(date.today().isoformat())
+    cloud.upload_articles(date.today().isoformat(),json_articles)
 
     print(f"Saved {len(articles)} articles to {filename}")
         

@@ -2,14 +2,14 @@ import os
 from dotenv import load_dotenv 
 from google import genai
 from datetime import datetime
-from storage.storage_service import upload_daily_briefing
+from storage.storage_service import upload_briefing
 from typing import Optional
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Define Local or Remote 
-local = 0
+local = 1
 
 
 def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:
@@ -81,7 +81,7 @@ def create_intelligence_briefing(markdown):
             briefing_path
         )
 
-    upload_daily_briefing(today)
+    upload_briefing(today,briefing)
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -181,7 +181,7 @@ def generate_briefing(
         try:
             logger.info(f"Generating briefing (attempt {attempt}/{max_attempts})...")
             response = client.models.generate_content(
-                model="gemini-2.5-flash-lite",
+                model="gemini-3.5-flash",
                 contents=prompt,
             )
 

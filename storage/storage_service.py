@@ -3,22 +3,22 @@ from storage.s3_client import S3Storage
 cloud = S3Storage()
 
 
-def upload_daily_articles(date: str):
+def upload_articles(date: str,content):
 
-    cloud.upload_file(
-        f"output/articles/{date}.json",
+    cloud.upload_content(
+        content,
         cloud.article_key(date)
     )
 
 
-def upload_daily_briefing(date: str):
+def upload_briefing(date: str,file_input):
 
-    cloud.upload_file(
-        f"output/briefings/IB_{date}.md",
+    cloud.upload_content(
+        file_input,
         cloud.briefing_key(date)
     )
 
-def download_daily_articles(date: str):
+def download_articles(date: str):
 
     cloud.download_file(
         f"output/articles/{date}.json",
@@ -26,7 +26,7 @@ def download_daily_articles(date: str):
     )
 
 
-def download_daily_briefing(date: str):
+def download_briefing(date: str):
 
     cloud.download_file(
         f"output/briefings/IB_{date}.md",
