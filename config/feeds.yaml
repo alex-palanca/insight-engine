@@ -24,6 +24,27 @@ technology:
   - name: The Verge
     url: https://www.theverge.com/rss/index.xml
 
+  - name: arXiv
+    url: https://rss.arxiv.org/rss/cs
+
+  - name: The New York Times - Technology
+    url: https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml
+
+  - name: The Wall Street Journal - Technology
+    url: https://feeds.a.dj.com/rss/RSSTechnology.xml
+
+  - name: Financial Times - Technology
+    url: https://www.ft.com/technology?format=rss
+
+  - name: The Washington Post - Technology
+    url: https://feeds.washingtonpost.com/rss/business/technology
+
+  - name: The Economist - Science and Technology
+    url: https://www.economist.com/science-and-technology/rss.xml
+
+  - name: BBC News - Technology
+    url: http://feeds.bbci.co.uk/news/technology/rss.xml
+
 economics:
   - name: OECD
     url: https://www.oecd.org/rss.xml
@@ -46,15 +67,20 @@ economics:
   - name: World Bank
     url: https://www.worldbank.org/en/news/press-releases/rss
 
+  - name: The New York Times - Economy
+    url: https://rss.nytimes.com/services/xml/rss/nyt/Economy.xml
+
+  - name: The Wall Street Journal - Business
+    url: https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml
+
+    url: http://feeds.bbci.co.uk/news/business/rss.xml
+
+  - name: The Washington Post - Business
+    url: https://feeds.washingtonpost.com/rss/business
+
 world:
   - name: Reuters World
     url: https://feeds.reuters.com/Reuters/worldNews
-
-  - name: BBC World
-    url: http://feeds.bbci.co.uk/news/world/rss.xml
-
-  - name: The Economist
-    url: https://www.economist.com/the-world-this-week/rss.xml
 
   - name: China Daily
     url: http://www.chinadaily.com.cn/rss/world_rss.xml
@@ -67,3 +93,24 @@ world:
 
   - name: El Mundo
     url: https://e00-elmundo.uecdn.es/elmundo/rss/portada.xml
+
+  - name: The New York Times - World
+    url: https://rss.nytimes.com/services/xml/rss/nyt/World.xml
+
+  - name: The New York Times - Politics
+    url: https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml
+    
+  - name: The Wall Street Journal - World News
+    url: https://feeds.a.dj.com/rss/RSSWorldNews.xml
+
+  - name: Financial Times - World News
+    url: https://www.ft.com/world?format=rss
+
+  - name: The Economist - International
+    url: https://www.economist.com/international/rss.xml
+
+  - name: The Washington Post - Politics
+    url: https://feeds.washingtonpost.com/rss/politics
+    
+  - name: BBC News - World
+    url: http://feeds.bbci.co.uk/news/world/rss.xml

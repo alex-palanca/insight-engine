@@ -43,7 +43,7 @@ Keep only articles with:
 **Potential implications:**
 1-2 sentences. Go beyond the obvious. Consider economic, policy, technological, and competitive spillovers.
 
-**Sources:** List title, link for each version/perspective (especially if conflicting accounts exist)
+**Sources:** List title, useful url/link for each version/perspective (especially if conflicting accounts exist)
 
 ### 2. [Development Title]
 
@@ -56,3 +56,43 @@ Flag any disagreements between sources:
 * What claim are sources conflicting on?
 * Which source seems more credible and why?
 * What additional data would resolve the disagreement?
+
+## Emerging Patterns & Systemic Signals
+
+Instead of isolated "Long-Term Signals," identify:
+
+* **Convergence**: Multiple industries/regions showing same pattern (e.g., supply chain regionalization across sectors)
+* **Bifurcation**: Divergence between actors, markets, or regions (e.g., trade fragmentation)
+* **Acceleration**: Known trends speeding up (velocity matters more than direction)
+* **Reversals**: Unexpected shifts in established trajectories
+* **Thresholds crossed**: When does a trend become a crisis? When does a niche become mainstream?
+
+## Cross-Domain Interconnections
+
+Highlight how developments in one domain amplify or contradict those in others:
+
+* Tech policy affecting energy markets
+* Geopolitical events shifting AI regulation
+* Supply chain shifts triggering financial market stress
+* Trade tensions affecting technology availability
+
+## Outliers & Worth Monitoring
+
+Developments that scored 40-60:
+
+* Not yet major events but showing momentum
+* Potential catalysts for future escalation
+* Interesting contradictions to mainstream narratives
+* Underreported stories with tail-risk potential
+
+---
+
+# Key Principles
+
+ **Consequence over coverage**: Explain why something matters, not just what happened.
+ **Density over length**: Every sentence should convey irreplaceable information. Cut ruthlessly.
+ **Precision over hedging**: Use "High/Medium/Low" confidence. Avoid "may," "could," "might" unless necessary.
+ **Interconnection over silos**: Show how developments relate to each other.
+ **Trajectory over snapshot**: Is this accelerating, reversing, or stable?
+
+Keep the entire briefing under 10 minutes of reading. Assume the reader will decide immediately what to investigate further based on the quality of your summary—make every word count.

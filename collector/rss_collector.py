@@ -8,12 +8,15 @@ from datetime import date
 # Define Local or Remote 
 local = 1
 
+# Define Today's date
+today = date.today()
+
 # Maximum number of articles to collect per category
 MAX_ARTICLES_PER_CATEGORY = 200
 # Maximum number of articles to collect per source/feed
-MAX_ARTICLES_PER_SOURCE = 30
+MAX_ARTICLES_PER_SOURCE = 50
 # Minimum length required for a valid article summary
-MIN_SUMMARY_LENGTH = 100
+MIN_SUMMARY_LENGTH = 180
 
 # Invalid summary markers to filter out low-quality content
 INVALID_SUMMARY_MARKERS = [
@@ -141,6 +144,19 @@ def collect_articles():
                         break
                     if source_count >= MAX_ARTICLES_PER_SOURCE:
                         break
+
+                    # Filter outdated using feedparser's built-in parsed date tuple
+                    # (Year, Month, Day, Hour, Minute, Second, Weekday, Julian Day, DST)
+                    if not hasattr(entry, 'published_parsed') or entry.published_parsed is None:
+                        continue
+                    
+                    entry_year = entry.published_parsed[0]
+                    entry_month = entry.published_parsed[1]
+                    entry_day = entry.published_parsed[2]
+
+                    # Only accept articles published exactly today
+                    if entry_year != today.year or entry_month != today.month or entry_day != today.day:
+                        continue
 
                     raw_summary = entry.get("summary", "")
                     cleaned_summary = clean_summary(raw_summary)
