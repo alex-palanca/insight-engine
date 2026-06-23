@@ -1,20 +1,34 @@
-import collector.rss_collector as rss_collector
-import reporter.report_generator as report_generator
-from summarizer import briefing_generator
+import ingestion.rss_collector as rss_collector
+from processing import cleaner, formatter
+from intelligence import briefing_generator
+from storage import storage_utils as storage
+import config
+from datetime import datetime
 
+today = datetime.now().strftime(
+        "%Y-%m-%d"
+    )
 
 def main():
-    
+    # News sources to collect RSS feeds from
+    feeds = config.feed_loader.load_feeds() 
     print("Starting article collection...")
-    articles = rss_collector.collect_articles()
+    articles = rss_collector.collect_articles(feeds,200,50)
 
-    print("Saving articles to markdown report...")
-    rss_collector.save_articles(articles)
+    print("Cleaning articles...")
+    cleaned_articles = cleaner.clean_batch(articles)
+
+    print("Saving cleaned articles...")
+    storage.save_articles(cleaned_articles)
     
-    print("Generating preliminary report...")
-    markdown = report_generator.generate_report(articles)
+    print("Formatting articles...")
+    markdown = formatter.format_context(cleaned_articles)
+    print(markdown)
+
     print("Generating IB report...")
-    briefing_generator.create_intelligence_briefing(markdown)
+    briefing = briefing_generator.create_intelligence_briefing(markdown)
+    print("Saving Intelligence Briefing...")
+    storage.upload_briefing(today,briefing)
 
     print("Finished successfully.")
 

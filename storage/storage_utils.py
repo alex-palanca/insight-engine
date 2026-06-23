@@ -1,4 +1,9 @@
 from storage.s3_client import S3Storage
+from datetime import date
+import json
+
+# Define Today's date
+today = date.today()
 
 cloud = S3Storage()
 
@@ -32,3 +37,11 @@ def download_briefing(date: str):
         f"output/briefings/IB_{date}.md",
         cloud.briefing_key(date)
     )
+
+def save_articles(articles):
+    
+
+    json_articles = json.dumps(articles, indent=2, ensure_ascii=False)          
+
+    print("Uploading articles to S3...")
+    upload_articles(date.today().isoformat(),json_articles)

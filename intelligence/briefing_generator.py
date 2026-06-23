@@ -1,15 +1,10 @@
 import os
 from dotenv import load_dotenv 
 from google import genai
-from datetime import datetime
-from storage.storage_service import upload_briefing
 from typing import Optional
 
 # Load environment variables from .env file
 load_dotenv()
-
-# Define Local or Remote 
-local = 1
 
 
 def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:
@@ -28,10 +23,8 @@ def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:
 
     return os.getenv(name, default)
 
-
+# Set up global client initialization for this module
 key = get_secret("GOOGLE_API_KEY")
-
-# Check if the key is loaded correctly
 if not key:
     raise ValueError(
         "GOOGLE_API_KEY is not set in the environment variables or Streamlit secrets."
@@ -42,25 +35,8 @@ client = genai.Client(api_key=key)
 
 def create_intelligence_briefing(markdown):
 
-    today = datetime.now().strftime(
-        "%Y-%m-%d"
-    )
 
-    if local:
-        report_path = (
-            f"output/reports/{today}.md"
-        )
-
-        briefing_path = (
-            f"output/briefings/"
-            f"IB_{today}.md"
-        )
-
-        daily_articles = load_markdown_report(
-            report_path
-        )
-    else:
-        daily_articles = markdown
+    daily_articles = markdown
 
     prompt = load_prompt(
     "prompts/daily_briefing.txt"
@@ -75,14 +51,8 @@ def create_intelligence_briefing(markdown):
         client,
         final_prompt
     )
-    if local:
-        save_briefing(
-            briefing,
-            briefing_path
-        )
-
-    upload_briefing(today,briefing)
-
+    
+    return briefing
 
 def load_prompt(prompt_path: str) -> str:
     """
@@ -100,25 +70,6 @@ def load_prompt(prompt_path: str) -> str:
         encoding='utf-8'
         ) as file:
         return file.read()
-
-
-def load_markdown_report(report_path: str) -> str:
-    """
-    Loads the markdown report from the specified file.
-
-    Args:
-        report_path (str): The path to the file containing the markdown report.
-
-    Returns:
-        str: The loaded markdown report.
-    """
-    with open(
-        report_path,
-        "r",
-        encoding="utf-8"
-    ) as f:
-
-        return f.read()
 
 
 def build_prompt(
