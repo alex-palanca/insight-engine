@@ -3,7 +3,7 @@ from datetime import date
 import re
 
 # We can move your global constants here
-MIN_SUMMARY_LENGTH = 180
+MIN_SUMMARY_LENGTH = 100
 INVALID_SUMMARY_MARKERS = [
     "Unknown"
     "no summary available",

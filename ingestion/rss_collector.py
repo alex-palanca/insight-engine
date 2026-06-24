@@ -1,10 +1,12 @@
 import feedparser
-from datetime import date
+from datetime import date,datetime, timedelta, time, timezone
 from pydantic import ValidationError
 from models.article import Article
 
-# Define Today's date
-today = date.today()
+
+now_utc = datetime.now(timezone.utc)
+yesterday_utc = now_utc - timedelta(days=1)    
+threshold_utc = datetime.combine(yesterday_utc.date(), time(17, 0, 0))
 
 
 def collect_articles(
@@ -48,19 +50,27 @@ def collect_articles(
                         if hasattr(entry, 'updated_parsed') and entry.updated_parsed is not None:
                                 entry.published_parsed = entry.updated_parsed
                         else:
-                            print(f"  [Dropped] No date found: {entry.get('title', 'Unknown')}")
                             continue
                     
-                    entry_year = entry.published_parsed[0]
-                    entry_month = entry.published_parsed[1]
-                    entry_day = entry.published_parsed[2]
-                    entry_hour = entry.published_parsed[3]
+                    entry_utc = datetime(*entry.published_parsed[:6])
 
-                    # Only accept articles published exactly today
-                    if entry_year != today.year or entry_month != today.month or entry_day != today.day:
-                        continue
+                    if entry_utc < threshold_utc:
+                        continue                 
 
-                    article_date = date(entry_year,entry_month,entry_day)
+                    article_date = entry_utc.date()
+
+
+                    yaml_tags = feed_info.get("source_tags",[])
+
+                    native_tags = []
+                    if hasattr(entry, 'tags'):
+                        for t in entry.tags:
+                            if hasattr(t, 'term'):
+                                # Standardize the publisher's tags: lowercase and replace spaces
+                                clean_tag = t.term.lower().replace(" ", "_")
+                                native_tags.append(clean_tag)
+    
+                    native_tags = list(set(native_tags))
 
                     try:
 
@@ -71,6 +81,8 @@ def collect_articles(
                                 published=article_date,
                                 source=feed_info["name"],
                                 category=category,
+                                source_tags=yaml_tags, 
+                                article_tags=native_tags,
                                 summary=entry.get("summary", "")
                         )
 

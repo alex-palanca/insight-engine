@@ -74,6 +74,10 @@ geopolitics:
     url: https://www.brookings.edu/feed/
     source_tags: ["think_tank", "public_policy"]
 
+  - name: The Wall Street Journal - Politics
+    url: https://feeds.content.dowjones.io/public/rss/RSSWSJD
+    source_tags: ["politics", "us_perspective"]
+
 technology:
   - name: arXiv (Computer Science)
     url: https://rss.arxiv.org/rss/cs
@@ -99,6 +103,10 @@ technology:
     url: https://www.wired.com/feed/rss
     source_tags: ["consumer_tech", "culture"]
 
+  - name: The Wall Street Journal - Tech
+    url: https://feeds.content.dowjones.io/public/rss/RSSWSJD
+    source_tags: ["corporate", "tech_news"]
+
 economics:
   - name: The Economist
     url: https://www.economist.com/finance-and-economics/rss.xml
@@ -120,7 +128,7 @@ economics:
     url: http://search.worldbank.org/all.rss?qterm=press+release
     source_tags: ["global_development", "institutional"]
 
-    Business:
+Business:
   - name: The Wall Street Journal - Business
     url: https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml
     source_tags: ["corporate", "us_markets"]
