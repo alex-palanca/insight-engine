@@ -1,5 +1,5 @@
 import feedparser
-from datetime import date,datetime, timedelta, time, timezone
+from datetime import datetime, timedelta, time, timezone
 from pydantic import ValidationError
 from models.article import Article
 

@@ -1,10 +1,6 @@
 import os
-from dotenv import load_dotenv 
 from google import genai
 from typing import Optional
-
-# Load environment variables from .env file
-load_dotenv()
 
 
 def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:

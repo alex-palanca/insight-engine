@@ -1,98 +1,60 @@
+# reporter/report_generator.py
 from datetime import datetime
 from config.feed_loader import load_feeds
 
-date = datetime.now().strftime("%Y-%m-%d")
-
-# Initial categorization order based on the feeds.yaml configuration
 feeds = load_feeds()
 category_order = list(feeds.keys())
 
-
-def format_context(enriched_articles: list) -> str:
+def format_context(articles):
     """
-    Generates a markdown report grouped by category.
-
-    Args:
-        enriched_articles (list): List of article dictionaries.
+    Acts as a pure data formatter. Takes enriched JSON and returns 
+    a highly-dense Markdown string for the Synthesizer LLM. 
+    Does NOT save to disk.
     """
-    if not enriched_articles:
-        return "No articles available"
+    date = datetime.now().strftime("%Y-%m-%d")
+    print("Formatting enriched data in-memory...")
 
-    print("Formatting articles to markdown...")
-
-    # 1. Group articles by category for better LLM context structure
     grouped_articles = {}
-    for article in enriched_articles:
-        # FIX: Changed from article.category.title() to dictionary lookup .get()
-        category_raw = article.get("category", "uncategorized")
-        category = category_raw.title()
-        
+    for article in articles:
+        category = article.get("category", "uncategorized")
         if category not in grouped_articles:
             grouped_articles[category] = []
         grouped_articles[category].append(article)
 
-    # Report header
-    markdown = f"# Daily Briefer Report ({date})\n\n"
-    markdown += f"Collected Articles: {len(enriched_articles)}\n\n"
+    markdown = f"# Enriched Intelligence Data ({date})\n\n"
+    markdown += f"Total High-Signal Articles: {len(articles)}\n\n"
 
-    markdown += "| Category | Count |\n"
-    markdown += "|----------|-------|\n"
+    all_categories = category_order.copy()
+    for category in grouped_articles.keys():
+        if category not in all_categories:
+            all_categories.append(category)
 
-    # Summary table
-    for category in category_order:
-        count = len(grouped_articles.get(category.title(), []))
-        markdown += f"| {category.title()} | {count} |\n"
-
-    # Include any unexpected categories
-    for category in grouped_articles:
-        if category.lower() not in category_order:
-            count = len(grouped_articles[category])
-            markdown += f"| {category} | {count} |\n"
-
-    markdown += "\n---\n\n"
-
-    # Main content (Loop through categories explicitly ordered)
-    for category_name in category_order:
-        category = category_name.title()
-
+    for category in all_categories:
         if category not in grouped_articles:
             continue
 
         category_articles = grouped_articles[category]
+        category_articles.sort(key=lambda x: x.get('score', 0), reverse=True)
 
-        markdown += (
-            f"## {category} "
-            f"({len(category_articles)} articles)\n\n"
-        )
+        markdown += f"## {category.title()} ({len(category_articles)} articles)\n\n"
 
         for article in category_articles:
-            markdown += f"### {article.get('title', 'No Title')}\n"
-            markdown += f"- Source: {article.get('source', 'Unknown')}\n"
-            markdown += f"- Summary: {article.get('summary', 'No summary available')}\n"
-            markdown += f"- Published: {article.get('published', 'Unknown')}\n"
-            markdown += f"- Link: [{article.get('link', '')}]({article.get('link', '')})\n\n"
-        markdown += "---\n\n"
-
-    # Handle categories not defined in CATEGORY_ORDER
-    for category, category_articles in grouped_articles.items():
-        if category.lower() in category_order:
-            continue
-
-        markdown += (
-            f"## {category} "
-            f"({len(category_articles)} articles)\n\n"
-        )
-
-        for article in category_articles:
-            markdown += f"### {article.get('title', 'No Title')}\n"
-            markdown += f"- Source: {article.get('source', 'Unknown')}\n"       
-            markdown += f"- Summary: {article.get('summary', 'No summary available')}\n"
-            markdown += f"- Published: {article.get('published', 'Unknown')}\n"
-            markdown += f"- Link: [{article.get('link', '')}]({article.get('link', '')})\n\n"
-
-        markdown += "---\n\n"
-
-
-    print(f"Formatted {len(enriched_articles)} articles.")
+            score = article.get('score', 0)
+            metrics = article.get('metrics', {})
+            
+            markdown += f"### {article.get('title', 'Untitled')} [SCORE: {score}/100]\n"
+            markdown += f"- **Source:** {article.get('source', 'Unknown')} | **Link:** {article.get('link', '')}\n"
+            markdown += f"- **AI Summary:**\n{article.get('ai_summary', 'N/A')}\n"
+            markdown += f"- **Justification:** {article.get('justification', 'N/A')}\n"
+            
+            if metrics:
+                markdown += (
+                    f"- **Metrics:** Immediacy({metrics.get('immediacy', 0)}), "
+                    f"Scale({metrics.get('scale', 0)}), "
+                    f"Permanence({metrics.get('permanence', 0)}), "
+                    f"Reverberance({metrics.get('reverberance', 0)}), "
+                    f"Novelty({metrics.get('novelty', 0)})\n"
+                )
+            markdown += "\n---\n\n"
 
     return markdown
