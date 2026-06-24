@@ -1,116 +1,171 @@
+artificial_intelligence:
+  - name: OpenAI Blog
+    url: https://openai.com/blog/rss.xml
+    source_tags: ["llm", "research", "corporate"]
+
+  - name: DeepMind Research
+    url: https://deepmind.google/blog/rss.xml
+    source_tags: ["research", "agi"]
+
+  - name: Anthropic News
+    url: https://www.anthropic.com/feed.xml
+    source_tags: ["llm", "safety", "research"]
+
+  - name: Hugging Face Blog
+    url: https://huggingface.co/blog/feed.xml
+    source_tags: ["open_source", "models"]
+
+cybersecurity:
+  - name: Krebs on Security
+    url: https://krebsonsecurity.com/feed/
+    source_tags: ["cybercrime", "investigative"]
+
+  - name: Schneier on Security
+    url: https://www.schneier.com/feed/atom/
+    source_tags: ["cryptography", "policy"]
+
+  - name: CISA Cybersecurity Advisories
+    url: https://www.cisa.gov/cybersecurity-advisories/all.xml
+    source_tags: ["government", "threat_intel", "vulnerabilities"]
+
+  - name: Bleeping Computer
+    url: https://www.bleepingcomputer.com/feed/
+    source_tags: ["ransomware", "breaches"]
+
+science:
+  - name: Nature
+    url: https://www.nature.com/nature.rss
+    source_tags: ["academic", "biology", "physics"]
+
+  - name: Quanta Magazine
+    url: https://api.quantamagazine.org/feed/
+    source_tags: ["mathematics", "theoretical_physics"]
+
+  - name: NASA Breaking News
+    url: https://www.nasa.gov/rss/dyn/breaking_news.rss
+    source_tags: ["space", "aerospace"]
+
+  - name: Science Magazine (AAAS)
+    url: https://www.science.org/rss/news_current.xml
+    source_tags: ["academic", "multidisciplinary"]
+
+  - name: ESA (European Space Agency)
+    url: https://www.esa.int/rssfeed/Our_Activities/Space_Science
+    source_tags: ["space", "european_agency"]
+
+  - name: CERN News
+    url: https://home.cern/news/feed
+    source_tags: ["physics", "european_agency", "research"]
+
+geopolitics:
+  - name: War on the Rocks
+    url: https://warontherocks.com/feed/
+    source_tags: ["military", "defense_strategy"]
+
+  - name: Foreign Affairs
+    url: https://www.foreignaffairs.com/rss.xml
+    source_tags: ["diplomacy", "international_relations"]
+
+  - name: CSIS (Center for Strategic and International Studies)
+    url: https://www.csis.org/rss
+    source_tags: ["think_tank", "global_security"]
+
+  - name: Brookings Institution
+    url: https://www.brookings.edu/feed/
+    source_tags: ["think_tank", "public_policy"]
+
 technology:
+  - name: arXiv (Computer Science)
+    url: https://rss.arxiv.org/rss/cs
+    source_tags: ["academic", "research", "computer_science"]
 
   - name: Ars Technica
     url: https://feeds.arstechnica.com/arstechnica/index
+    source_tags: ["tech_news", "policy"]
 
   - name: Hacker News
     url: https://hnrss.org/frontpage
-
-  - name: MIT Technology Review
-    url: https://www.technologyreview.com/feed/
+    source_tags: ["startup", "developer"]
 
   - name: InfoQ
     url: https://www.infoq.com/feed/
+    source_tags: ["software_engineering", "architecture"]
 
   - name: O'Reilly Radar
     url: https://www.oreilly.com/radar/feed/
-
-  - name: TechCrunch
-    url: https://techcrunch.com/feed/
+    source_tags: ["engineering_trends", "data"]
 
   - name: Wired
     url: https://www.wired.com/feed/rss
-
-  - name: The Verge
-    url: https://www.theverge.com/rss/index.xml
-
-  - name: arXiv
-    url: https://rss.arxiv.org/rss/cs
-
-  - name: The New York Times - Technology
-    url: https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml
-
-  - name: The Wall Street Journal - Technology
-    url: https://feeds.a.dj.com/rss/RSSTechnology.xml
-
-  - name: Financial Times - Technology
-    url: https://www.ft.com/technology?format=rss
-
-  - name: The Washington Post - Technology
-    url: https://feeds.washingtonpost.com/rss/business/technology
-
-  - name: The Economist - Science and Technology
-    url: https://www.economist.com/science-and-technology/rss.xml
-
-  - name: BBC News - Technology
-    url: http://feeds.bbci.co.uk/news/technology/rss.xml
+    source_tags: ["consumer_tech", "culture"]
 
 economics:
-  - name: OECD
-    url: https://www.oecd.org/rss.xml
-
   - name: The Economist
     url: https://www.economist.com/finance-and-economics/rss.xml
+    source_tags: ["macroeconomics", "global_markets"]
 
   - name: Financial Times
     url: https://www.ft.com/?format=rss
+    source_tags: ["markets", "corporate_finance"]
 
-  - name: Bloomberg
-    url: https://www.bloomberg.com/feed/podcast/etf-report.xml
-
-  - name: Expansion
-    url: https://www.expansion.com/rss/portada.xml
+  - name: OECD
+    url: https://www.oecd.org/rss.xml
+    source_tags: ["macroeconomics", "institutional"]
 
   - name: Imf
-    url: https://www.imf.org/en/News/Articles/2023/01/01/rss-feed
+    url: https://www.imf.org/en/News/RSS
+    source_tags: ["macroeconomics", "institutional", "global_policy"]
 
   - name: World Bank
-    url: https://www.worldbank.org/en/news/press-releases/rss
+    url: http://search.worldbank.org/all.rss?qterm=press+release
+    source_tags: ["global_development", "institutional"]
 
-  - name: The New York Times - Economy
-    url: https://rss.nytimes.com/services/xml/rss/nyt/Economy.xml
-
+    Business:
   - name: The Wall Street Journal - Business
     url: https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml
+    source_tags: ["corporate", "us_markets"]
 
-    url: http://feeds.bbci.co.uk/news/business/rss.xml
+  - name: CNBC Europe
+    url: https://www.cnbc.com/id/100004038/device/rss/rss.html
+    source_tags: ["corporate", "european_markets"]
 
-  - name: The Washington Post - Business
-    url: https://feeds.washingtonpost.com/rss/business
+  - name: Harvard Business Review
+    url: https://feeds.feedburner.com/harvardbusiness
+    source_tags: ["management", "corporate_strategy"]
+    
+  - name: Sifted (Backed by FT - European Startups)
+    url: https://sifted.eu/feed/
+    source_tags: ["european_startups", "venture_capital"]
 
 world:
-  - name: Reuters World
-    url: https://feeds.reuters.com/Reuters/worldNews
-
-  - name: China Daily
-    url: http://www.chinadaily.com.cn/rss/world_rss.xml
-
-  - name: Asociated Press
-    url: https://apnews.com/apf-topnews?format=rss
-
-  - name: deutsche welle
-    url: https://rss.dw.com/rdf/rss-en-all
+  - name: BBC News - World
+    url: http://feeds.bbci.co.uk/news/world/rss.xml
+    source_tags: ["general_news", "global_events"]
 
   - name: El Mundo
     url: https://e00-elmundo.uecdn.es/elmundo/rss/portada.xml
+    source_tags: ["general_news", "spanish_politics"]
 
   - name: The New York Times - World
     url: https://rss.nytimes.com/services/xml/rss/nyt/World.xml
+    source_tags: ["general_news", "us_perspective"]
 
-  - name: The New York Times - Politics
-    url: https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml
-    
-  - name: The Wall Street Journal - World News
-    url: https://feeds.a.dj.com/rss/RSSWorldNews.xml
+  - name: Yahoo News - World
+    url: https://yahoo.com/news/rss/world
+    source_tags: ["general_news", "syndicated"]
 
-  - name: Financial Times - World News
-    url: https://www.ft.com/world?format=rss
+  - name: deutsche welle
+    url: https://rss.dw.com/rdf/rss-en-all
+    source_tags: ["general_news", "european_perspective"]
 
-  - name: The Economist - International
-    url: https://www.economist.com/international/rss.xml
+  - name: Politico Europe
+    url: https://www.politico.eu/feed/
+    source_tags: ["eu_policy", "regulatory", "european_politics"]
 
-  - name: The Washington Post - Politics
-    url: https://feeds.washingtonpost.com/rss/politics
-    
-  - name: BBC News - World
-    url: http://feeds.bbci.co.uk/news/world/rss.xml
+  - name: France 24 - Europe
+    url: https://www.france24.com/en/europe/rss
+    source_tags: ["general_news", "european_perspective"]
+
+  - name: Euronews
+    url: https://www.euronews.com/rss
+    source_tags: ["general_news", "eu_affairs"]

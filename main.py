@@ -1,5 +1,5 @@
 import ingestion.rss_collector as rss_collector
-from processing import cleaner, formatter
+from processing import formatter
 from intelligence import briefing_generator
 from storage import storage_utils as storage
 import config
@@ -13,10 +13,7 @@ def main():
     # News sources to collect RSS feeds from
     feeds = config.feed_loader.load_feeds() 
     print("Starting article collection...")
-    articles = rss_collector.collect_articles(feeds,200,50)
-
-    print("Cleaning articles...")
-    cleaned_articles = cleaner.clean_batch(articles)
+    cleaned_articles = rss_collector.collect_articles(feeds,200,50)
 
     print("Saving cleaned articles...")
     storage.save_articles(cleaned_articles)
@@ -33,4 +30,10 @@ def main():
     print("Finished successfully.")
 
 if __name__ == "__main__":
-    main()
+    # News sources to collect RSS feeds from
+    feeds = config.feed_loader.load_feeds() 
+    print("Starting article collection...")
+    cleaned_articles = rss_collector.collect_articles(feeds,200,50)
+
+    print("Saving cleaned articles...")
+    storage.save_articles(cleaned_articles)

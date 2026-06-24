@@ -1,5 +1,7 @@
 import feedparser
 from datetime import date
+from pydantic import ValidationError
+from models.article import Article
 
 # Define Today's date
 today = date.today()
@@ -18,23 +20,18 @@ def collect_articles(
 
         category_counts[category] = 0
 
-        # Stop early if we've already reached the per-category limit
         if category_counts[category] >= max_per_category:
             continue
 
-        # Error handling for feed parsing by source
         for feed_info in category_feeds:
 
-            # If we've reached the limit for this category, stop processing more feeds
             if category_counts[category] >= max_per_category:
                 break
             
             try:
                 feed_url = feed_info["url"]
-
                 parsed_feed = feedparser.parse(feed_url)
 
-                # Track how many articles we've taken from this source
                 source_count = 0
 
                 for entry in parsed_feed.entries:
@@ -46,30 +43,46 @@ def collect_articles(
                         break
 
                     # Filter outdated using feedparser's built-in parsed date tuple
-                    # (Year, Month, Day, Hour, Minute, Second, Weekday, Julian Day, DST)
                     if not hasattr(entry, 'published_parsed') or entry.published_parsed is None:
-                        continue
+                        # Fallback
+                        if hasattr(entry, 'updated_parsed') and entry.updated_parsed is not None:
+                                entry.published_parsed = entry.updated_parsed
+                        else:
+                            print(f"  [Dropped] No date found: {entry.get('title', 'Unknown')}")
+                            continue
                     
                     entry_year = entry.published_parsed[0]
                     entry_month = entry.published_parsed[1]
                     entry_day = entry.published_parsed[2]
+                    entry_hour = entry.published_parsed[3]
 
                     # Only accept articles published exactly today
                     if entry_year != today.year or entry_month != today.month or entry_day != today.day:
                         continue
 
-                    article = {
-                        "title": entry.title,
-                        "link": entry.link,
-                        "published": entry.get("published", "Unknown"),
-                        "source": feed_info["name"],
-                        "category": category,
-                        "summary": entry.get("summary", "")
-                    }
+                    article_date = date(entry_year,entry_month,entry_day)
 
-                    raw_articles.append(article)
-                    category_counts[category] += 1
-                    source_count += 1
+                    try:
+
+                        # Article model built and validated
+                        article = Article(
+                                title=entry.get("title", "No Title"),
+                                link=entry.get("link", "http://invalid"),
+                                published=article_date,
+                                source=feed_info["name"],
+                                category=category,
+                                summary=entry.get("summary", "")
+                        )
+
+                        raw_articles.append(article.model_dump(mode='json'))
+
+                        category_counts[category] += 1
+                        source_count += 1
+                
+                    except ValidationError as e:
+                        # The data contract was violated
+                        continue
+            
                 print(f"{source_count} articles collected from {feed_info['name']}")
             except Exception as e:
                 print(f"Error collecting articles from {feed_url}: {e}")
