@@ -1,1306 +1,535 @@
 
-You are a senior intelligence analyst optimizing for signal extraction from high-volume feeds.
+You are a senior intelligence analyst optimizing for high-density signal extraction from daily news feeds. Your goal is to maximize the quality density of insights while maintaining a highly concise, professional format.
 
-You are given a report containing 200+ news articles collected from multiple sources.
+You are given a raw compilation of today's news articles. Because these are direct feed extractions, multiple sources may report on the identical underlying event. You must mentally cluster these duplicates into single comprehensive developments.
 
-Your goal is NOT to maximize coverage. Your goal is to maximize the quality density of insights.
+# Utilizing Article Metadata (Data Lineage)
+Each article in the dataset contains two explicit, separated metadata arrays that you must leverage to evaluate signal over noise:
+1. `source_tags`: High-trust, architect-assigned structural tags mapping the foundational nature of the source (e.g., `macroeconomics`, `llm`, `threat_intel`, `general_news`).
+2. `article_tags`: Variable-trust, publisher-generated keywords capturing granular topics, entities, or technologies.
 
-Use article summaries as the primary source of information, when containing meaningful detail, prioritize them over titles. Discard low-signal content aggressively.
+**Metadata Ingestion Protocol:**
+* **The General News Sieve:** Treat articles whose `source_tags` contain `general_news` with extreme skepticism. Filter them aggressively. Drop standard political commentary, local incidents, and repetitive updates. Only pass a `general_news` article if it indicates a massive structural, geopolitical, or macroeconomic shift.
+* **Specialized Domain Weighting:** Give high analytical weight to articles containing specialized `source_tags` like `research`, `vulnerabilities`, `eu_policy`, or `academic`. Use these to find primary source signals.
+* **Thematic Clustering:** Utilize the granular `article_tags` to bridge connections across different broad categories (e.g., seeing how a specific entity or keyword appears simultaneously in a `cybersecurity` feed and a `business` feed).
 
-# Filtering & De-Duplication
-
-Keep only articles with:
-
-* Novel factual information or data
-* Significant consequence or momentum
-* Cross-domain impact potential
-* Quantitative claims or measurable outcomes
-* Policy, technology, economic, or geopolitical relevance
+# Core Directives
+* Prioritize substantive details found in summaries over shallow headlines.
+* Discard low-signal content, corporate PR fluff, and trivial updates aggressively.
+* Do not use introductory or conversational filler ("Here is...", "In this section..."). Dive directly into facts.
 
 # Output Structure
 
 # Daily Intelligence Briefing
 
 ## Executive Summary
-
-3-10 bullets covering:
-
-* The single highest-impact development and why
-* Any major reversals or surprises vs. yesterday's trajectory
-* Emerging patterns or systemic shifts
-* Critical developments requiring immediate attention
-* Cross-domain linkages (how tech developments affect geopolitics, etc.)
+Generate exactly 3 to 5 high-density bullet points. Every bullet must incorporate direct cross-domain linkages (e.g., how macroeconomics is dictating tech policy, or how local conflict impacts global supply chains) or highlight an explicit directional trajectory (accelerating, reversing, stable). Bold key entities.
 
 ## Top Developments
+Identify and synthesize the top 3 to 5 (maximum) highest-impact events today. Group multi-source coverage of the same event under one title.
 
-### 1. [Development Title]
+### 1. [Clear, Factual Title]
+* **What Happened:** 1-2 sentences. Stick strictly to verifiable facts, incorporating relevant numbers, hard timelines, and specific actors.
+* **Why It Matters & Implications:** 1-2 sentences. Outline immediate consequences alongside systemic second/third-order economic, regulatory, or competitive spillovers.
+* **Domain Focus:** List the dominant `source_tags` and relevant `article_tags` that define this development's footprint.
+* **Sources:** [Source Name](URL) | [Conflicting Source Name](URL) (If applicable)
 
-**What happened:**
-1-2 sentences. Stick to verifiable facts. Include relevant numbers, timelines, actors.
+### 2. [Clear, Factual Title]
+(Continue for a maximum of 5 developments)
 
-**Why it matters:**
-1-2 sentences. Explain consequence, not just significance. Link to second and third-order effects.
+## Systemic Signals & Anomalies
+Provide a maximum of 3 highly compressed bullets covering critical macro shifts. Only generate this section if the dataset contains clear evidence of:
+* **Convergence/Bifurcation:** Distinct sectors or geographic regions showing identical or violently opposing patterns.
+* **Contradictions/Uncertainty:** High-impact scenarios where credible sources actively disagree on core facts.
+* **Outliers:** Underreported, highly factual stories carrying structural tail-risk potential.
 
-**Potential implications:**
-1-2 sentences. Go beyond the obvious. Consider economic, policy, technological, and competitive spillovers.
+---
 
-**Sources:** List title, link for each version/perspective (especially if conflicting accounts exist)
-
-### 2. [Development Title]
-
-(Continue until 3-7 developments)
-
-## Contradictions & Uncertainty
-
-Flag any disagreements between sources:
-
-* What claim are sources conflicting on?
-* Which source seems more credible and why?
-* What additional data would resolve the disagreement?
-
+# Key Constraints
+* **Density Over Length:** Every sentence must convey unique, irreplaceable data. Cut words ruthlessly.
+* **Precision Over Hedging:** Assign [High/Medium/Low] analytical confidence. Avoid speculative language like "may", "could", or "might" unless directly referencing an unverified claim.
+* Keep the entire final output dense, concise, and structured for quick executive review.
 
 ------------------------------------
 Curated Daily Articles:
 
-# Daily Briefer Report (2026-06-22)
+# Enriched Intelligence Data (2026-06-26)
 
-Collected Articles: 203
+Total High-Signal Articles: 50
 
-| Category | Count |
-|----------|-------|
-| Technology | 52 |
-| Economics | 39 |
-| World | 112 |
+## Cybersecurity (1 articles)
 
----
-
-## Technology (52 articles)
-
-### Review: Widow's Bay is a boldly original take on comedic horror
-- Source: Ars Technica
-- summary: An eminently binge-able series that honors classic horror tropes while reinventing them in surprising ways
-- Published: Sun, 21 Jun 2026 10:00:11 +0000
-- Link: [https://arstechnica.com/culture/2026/06/review-widows-bay-is-a-boldly-original-take-on-comedic-horror/](https://arstechnica.com/culture/2026/06/review-widows-bay-is-a-boldly-original-take-on-comedic-horror/)
-
-### Anthropic Reports Claude Now Handles 95% of Internal Analytics Queries
-- Source: InfoQ
-- summary: Anthropic recently reported that Claude now handles around 95% of its internal analytics requests, letting employees query business data independently instead of relying on data teams. The company attributes this result less to advances in models and more to data governance, semantic definitions, and operational discipline. By Renato Losio
-- Published: Sun, 21 Jun 2026 16:47:00 GMT
-- Link: [https://www.infoq.com/news/2026/06/anthropic-claude-analytics/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/anthropic-claude-analytics/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### Inside Atlassian’s Forge Billing Architecture for Distributed Usage Tracking at Scale
-- Source: InfoQ
-- summary: Atlassian details the Forge billing platform built for usage-based pricing across its cloud ecosystem. It processes large-scale usage events with correct attribution, deduplication, and aggregation using a streaming pipeline, idempotent processing, and layered storage to enable accurate billing, near real-time visibility, and reliable reconciliation across distributed services. By Leela Kumili
-- Published: Sat, 20 Jun 2026 14:21:00 GMT
-- Link: [https://www.infoq.com/news/2026/06/forge-billing-usage-platform/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/forge-billing-usage-platform/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### Apple Launches Core AI for Apple-Silicon Optimized On-Device Generative AI
-- Source: InfoQ
-- summary: At WWDC 26, Apple announced the Core AI framework, the official successor to Core ML. It is designed to allow developers to run large language models and generative AI entirely on-device, supporting both custom-converted PyTorch models and pre-optimized open-source models. By Sergio De Simone
-- Published: Sat, 20 Jun 2026 11:00:00 GMT
-- Link: [https://www.infoq.com/news/2026/06/apple-core-ai-wwdc/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/apple-core-ai-wwdc/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### AWS Adds Multi-Region Replication to Amazon Cognito Identity Service
-- Source: InfoQ
-- summary: AWS recently introduced Amazon Cognito multi-region replication, which automatically replicates user identities and user pool configurations from a primary region to a secondary one. This enables applications to continue authenticating users from a replica region during outages, without requiring custom replication and failover mechanisms. By Renato Losio
-- Published: Sat, 20 Jun 2026 07:40:00 GMT
-- Link: [https://www.infoq.com/news/2026/06/cognito-replication-aws/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/cognito-replication-aws/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### Behind the Scenes:  Block 450 JVM Repositories into Monorepo to Reduce Dependency Drift
-- Source: InfoQ
-- summary: Block, Inc. describes migrating ~450 JVM repositories into a monorepo across Cash App and Square engineering to reduce dependency drift and coordination overhead. The system supports ~8,800 weekly builds with ~10 min p90 CI time. The approach improves cross-service changes, build visibility, and developer experience through dependency graph–based builds, selective CI, and custom IDE tooling. By Leela Kumili
-- Published: Fri, 19 Jun 2026 14:47:00 GMT
-- Link: [https://www.infoq.com/news/2026/06/block-450-jvm-monorepo-migration/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/block-450-jvm-monorepo-migration/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### Presentation: AI Agents to Make Sense of Data at OpenAI
-- Source: InfoQ
-- summary: OpenAI’s Bonnie Xu discusses Kepler, an internal AI data analyst agent built to query 600+ petabytes of data. She explains how they overcome context window limits using MCP, automated code crawling, and RAG. Xu also shares how their team leverages scoped semantic memory for self-learning and utilizes AST-based LLM grading to build a robust, regression-free evaluation pipeline. By Bonnie Xu
-- Published: Fri, 19 Jun 2026 12:02:00 GMT
-- Link: [https://www.infoq.com/presentations/data-aware-ai-agents/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/presentations/data-aware-ai-agents/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### CircleCI Introduces Chunk Sidecars to Bring CI Validation Directly into AI Coding Workflows
-- Source: InfoQ
-- summary: CircleCI has launched Chunk Sidecars, a new capability designed to bring CI-style validation directly into an AI coding agent's inner development loop. By Craig Risi
-- Published: Fri, 19 Jun 2026 12:00:00 GMT
-- Link: [https://www.infoq.com/news/2026/06/circleci-chunk-sidecars/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/circleci-chunk-sidecars/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### TSRX: a Framework-Agnostic Alternative to JSX
-- Source: InfoQ
-- summary: TSRX is a TypeScript language extension developed by Dominic Gannaway, designed to build declarative user interfaces in a framework-agnostic manner. It compiles single .tsrx files to various runtime targets and supports scoped styles and declarative error handling. TSRX is currently in alpha and is open source under the MIT license. By Daniel Curtis
-- Published: Fri, 19 Jun 2026 11:49:00 GMT
-- Link: [https://www.infoq.com/news/2026/06/tsrx-alternative-jsx/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/tsrx-alternative-jsx/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### Article: Designing Continuous Authorization for Sensitive Cloud Systems
-- Source: InfoQ
-- summary: Most cloud systems make one authorization decision at login. Everything after runs on trust established at authentication time. For systems handling regulated data, that gap is where breaches happen. This article presents a continuous authorization architecture covering risk-tiered evaluation, behavioral baselines, privacy-preserving audit trails, and a phased and incremental rollout. By Venkata Nedunoori
-- Published: Fri, 19 Jun 2026 09:00:00 GMT
-- Link: [https://www.infoq.com/articles/continuous-authorization-cloud/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/articles/continuous-authorization-cloud/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### Azure Functions Ships Serverless Agents Runtime at Build 2026
-- Source: InfoQ
-- summary: Azure Functions shipped a serverless agents runtime in public preview at Build 2026. Agents are defined in .agent.md markdown files with YAML triggers, MCP server access, 1,400+ connectors, and sandboxed execution. The Functions team confirmed to InfoQ that the runtime adds no cold start overhead and no billing premium beyond standard Flex Consumption. By Steef-Jan Wiggers
-- Published: Fri, 19 Jun 2026 08:57:00 GMT
-- Link: [https://www.infoq.com/news/2026/06/azure-functions-serverless-agent/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/azure-functions-serverless-agent/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### Windows Platform Security and the Race to Secure AI Agents
-- Source: InfoQ
-- summary: In a new Windows Developer Blog post titled "Windows platform security for AI agents", Microsoft positions Windows as the trustworthy operating system for autonomous agents and introduces the Microsoft Execution Containers (MXC) SDK as the core of that strategy. The post argues that containment, identity and manageability must be built into the operating system. By Matt Saunders
-- Published: Fri, 19 Jun 2026 08:00:00 GMT
-- Link: [https://www.infoq.com/news/2026/06/windows-security-agents/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/windows-security-agents/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### GitLab 19.0 Embeds Agentic AI in Secrets, Merge Requests, and Supply Chain Security
-- Source: InfoQ
-- summary: GitLab 19.0 extends agentic AI beyond code generation into securing credentials, reviewing and merging changes, and scanning dependencies, adding a public beta Secrets Manager, a full merge request Developer Flow, usage-based GitLab Duo billing, and generally available SBOM dependency scanning. By Mark Silvester
-- Published: Fri, 19 Jun 2026 08:00:00 GMT
-- Link: [https://www.infoq.com/news/2026/06/gitlab-19-agentic-ai/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/gitlab-19-agentic-ai/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### .NET 11 Preview 5: Brings File-Based App Improvements, New C# Features, and a Blazor Validation Wave
-- Source: InfoQ
-- summary: Microsoft has released the fifth preview of .NET 11, with updates across the SDK, C#, ASP.NET Core, .NET MAUI, and EF Core. Highlights include file-based app improvements, new C# closed classes and unions, a Blazor validation wave, a large MAUI reliability rollup, and SQL Server 2022 as the default EF Core compatibility level. By Almir Vuk
-- Published: Fri, 19 Jun 2026 08:00:00 GMT
-- Link: [https://www.infoq.com/news/2026/06/dotnet-11-preview-5/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/dotnet-11-preview-5/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### From Camera to Cloud: Netflix’s Scalable Media Processing Pipeline
-- Source: InfoQ
-- summary: Netflix has detailed a cloud-based system for scaling camera file processing across global film and TV workflows. The pipeline handles ingest, validation, metadata extraction, and media transformation at scale using FilmLight API and distributed compute. It standardizes workflows across editorial, VFX, and color pipelines, improving consistency and reducing manual handling across productions. By Leela Kumili
-- Published: Thu, 18 Jun 2026 14:36:00 GMT
-- Link: [https://www.infoq.com/news/2026/06/netflix-camera-file-processing/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/news/2026/06/netflix-camera-file-processing/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### Presentation: Write-Ahead Intent Log: a Foundation for Efficient CDC at Scale
-- Source: InfoQ
-- summary: Vinay Chella and Akshat Goel discuss the challenges of running traditional CDC across heterogeneous databases during peak order traffic. They explain how Debezium hit limits under high load and share how they built Write-Ahead Intent Log (WAIL) - a custom architecture that utilizes a dumb producer proxy and a smart consumer pattern to cleanly separate the intent from the state payload. By Vinay Chella, Akshat Goel
-- Published: Thu, 18 Jun 2026 13:13:00 GMT
-- Link: [https://www.infoq.com/presentations/write-ahead-intent-log/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global](https://www.infoq.com/presentations/write-ahead-intent-log/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global)
-
-### TechCrunch Mobility: A new robotaxi scorecard shows China’s dominance
-- Source: TechCrunch
-- summary: Welcome back to TechCrunch Mobility — your central hub for news and insights on the future of transportation.
-- Published: Sun, 21 Jun 2026 16:05:00 +0000
-- Link: [https://techcrunch.com/2026/06/21/techcrunch-mobility-a-new-robotaxi-scorecard-shows-chinas-dominance/](https://techcrunch.com/2026/06/21/techcrunch-mobility-a-new-robotaxi-scorecard-shows-chinas-dominance/)
-
-### When the Trump administration cracks down on Anthropic, who benefits?
-- Source: TechCrunch
-- summary: On the new episode of Equity, we discussed what actually prompted the administration's latest moves against Anthropic, and what this might mean for the AI ecosystem.
-- Published: Sun, 21 Jun 2026 15:28:17 +0000
-- Link: [https://techcrunch.com/2026/06/21/when-the-trump-administration-cracks-down-on-anthropic-who-benefits/](https://techcrunch.com/2026/06/21/when-the-trump-administration-cracks-down-on-anthropic-who-benefits/)
-
-### Beyond Siri: Here are the practical AI features coming to your iPhone in iOS 27
-- Source: TechCrunch
-- summary: Siri’s AI overhaul may have grabbed the headlines at WWDC, but some of Apple’s most useful AI features are arriving elsewhere in iOS 27.
-- Published: Sun, 21 Jun 2026 14:40:28 +0000
-- Link: [https://techcrunch.com/2026/06/21/beyond-siri-here-are-the-practical-ai-features-coming-to-your-iphone-in-ios-27/](https://techcrunch.com/2026/06/21/beyond-siri-here-are-the-practical-ai-features-coming-to-your-iphone-in-ios-27/)
-
-### Every new iOS 27 feature that’s worth knowing about
-- Source: TechCrunch
-- summary: While it's not flashy like Apple’s new Siri AI and Apple Intelligence upgrades, there are still a number of additions to iOS 27 worth looking at.
-- Published: Sat, 20 Jun 2026 15:00:00 +0000
-- Link: [https://techcrunch.com/2026/06/20/every-new-ios-27-feature-thats-worth-knowing-about/](https://techcrunch.com/2026/06/20/every-new-ios-27-feature-thats-worth-knowing-about/)
-
-### He made your free video player run smoothly. Now he’s doing that for robots.
-- Source: TechCrunch
-- summary: French serial entrepreneur and open-source legend Jean-Baptiste Kempf has been building Kyber, an infrastructure layer to control remote devices in real time.
-- Published: Sat, 20 Jun 2026 00:47:44 +0000
-- Link: [https://techcrunch.com/2026/06/19/he-made-your-free-video-player-run-smoothly-now-hes-doing-that-for-robots/](https://techcrunch.com/2026/06/19/he-made-your-free-video-player-run-smoothly-now-hes-doing-that-for-robots/)
-
-### From PGP to Mythos: a brief history of export controls that didn’t stop anyone
-- Source: TechCrunch
-- summary: For the last 30 years, stopping the flow of cybersecurity-related software has proven to be ineffective. It's unclear why it would work now with Anthropic’s cybersecurity model Mythos.
-- Published: Fri, 19 Jun 2026 22:40:14 +0000
-- Link: [https://techcrunch.com/2026/06/19/encryption-spyware-and-now-mythos-history-shows-why-cyber-export-control-doesnt-work/](https://techcrunch.com/2026/06/19/encryption-spyware-and-now-mythos-history-shows-why-cyber-export-control-doesnt-work/)
-
-### Go eyes robotaxis and acquisitions after Japan’s biggest IPO of 2026 — here’s why it matters
-- Source: TechCrunch
-- summary: Go's IPO — Japan's biggest so far this year — has done more than provide a much-needed boost to the country's languishing listing season. It has also supplied the taxi-hailing app with the capital required to address an existential issue: Japan's shortage of drivers.
-- Published: Fri, 19 Jun 2026 21:45:00 +0000
-- Link: [https://techcrunch.com/2026/06/19/go-eyes-robotaxis-and-acquisitions-after-japans-biggest-ipo-of-2026-heres-why-it-matters/](https://techcrunch.com/2026/06/19/go-eyes-robotaxis-and-acquisitions-after-japans-biggest-ipo-of-2026-heres-why-it-matters/)
-
-### Every fusion startup that has raised over $100M
-- Source: TechCrunch
-- summary: Fusion startups have raised $7.1 billion to date, with the majority of it going to a handful of companies.
-- Published: Fri, 19 Jun 2026 16:50:58 +0000
-- Link: [https://techcrunch.com/2026/06/19/every-fusion-startup-that-has-raised-over-100m/](https://techcrunch.com/2026/06/19/every-fusion-startup-that-has-raised-over-100m/)
-
-### The US says ASML’s top chip tool may be in China, but how?
-- Source: TechCrunch
-- summary: There's a commercial logic that cuts against the idea that ASML would risk its export license to arm a Chinese customer.
-- Published: Fri, 19 Jun 2026 07:59:12 +0000
-- Link: [https://techcrunch.com/2026/06/19/the-us-says-asmls-top-chip-tool-may-be-in-china-asml-says-it-isnt/](https://techcrunch.com/2026/06/19/the-us-says-asmls-top-chip-tool-may-be-in-china-asml-says-it-isnt/)
-
-### The Best NAS Devices for Your Home After Months of Testing
-- Source: Wired
-- summary: Network-attached storage (NAS) provides accessible shared space on your home network. After testing, these are my favorite NAS devices.
-- Published: Sun, 21 Jun 2026 10:30:00 +0000
-- Link: [https://www.wired.com/story/best-nas-devices/](https://www.wired.com/story/best-nas-devices/)
-
-### 28 Tips to Take Your ChatGPT Prompts to the Next Level
-- Source: Wired
-- summary: Sure, anyone can use OpenAI’s chatbot. But with smart engineering, you can get way more interesting results.
-- Published: Sun, 21 Jun 2026 10:30:00 +0000
-- Link: [https://www.wired.com/story/28-tips-to-take-your-chatgpt-prompts-to-the-next-level/](https://www.wired.com/story/28-tips-to-take-your-chatgpt-prompts-to-the-next-level/)
-
-### If You’re Searching for a New Skillet, Consider Stainless Steel
-- Source: Wired
-- summary: Stainless-steel pans may lack nonstick coatings, but they’re unfussy, they sear well, and they’re built for a lifetime of hard work.
-- Published: Sun, 21 Jun 2026 10:30:00 +0000
-- Link: [https://www.wired.com/story/stainless-steel-skillets-are-great/](https://www.wired.com/story/stainless-steel-skillets-are-great/)
-
-### Buying a Used iPhone Makes More Sense Than Ever
-- Source: Wired
-- summary: With Apple raising prices soon, you can save a lot of money by buying a used handset or upgrading an older device—safe in the knowledge that it’ll last longer than ever.
-- Published: Sun, 21 Jun 2026 10:00:00 +0000
-- Link: [https://www.wired.com/story/buying-a-used-iphone-makes-more-sense-than-ever/](https://www.wired.com/story/buying-a-used-iphone-makes-more-sense-than-ever/)
-
-### A Critical Deadline Is Approaching for Windows and Linux Security
-- Source: Wired
-- summary: The cryptographic keys that secure your computer’s boot sequence will start to expire on June 24. Here’s what that means for you.
-- Published: Sun, 21 Jun 2026 09:00:00 +0000
-- Link: [https://www.wired.com/story/a-critical-deadline-is-approaching-for-windows-and-linux-security/](https://www.wired.com/story/a-critical-deadline-is-approaching-for-windows-and-linux-security/)
-
-### Home Batteries: How They're Installed and How Much They Cost
-- Source: Wired
-- summary: After adding one to my home, here's why you might want a home battery, how they work, and what to look for, plus some installation tips.
-- Published: Sat, 20 Jun 2026 11:00:00 +0000
-- Link: [https://www.wired.com/story/how-to-buy-a-home-battery/](https://www.wired.com/story/how-to-buy-a-home-battery/)
-
-### 16 Best Greens Powders (2026): Taste-Tested for Months
-- Source: Wired
-- summary: I did the research and taste-testing to find the best greens powders worth your money. Bloom Nutrition’s Superfood Greens Powder is my tried-and-true pick.
-- Published: Sat, 20 Jun 2026 10:31:00 +0000
-- Link: [https://www.wired.com/gallery/best-greens-powders/](https://www.wired.com/gallery/best-greens-powders/)
-
-### Hackers Claim to Leak Stolen Madison Square Garden Data
-- Source: Wired
-- summary: Plus: Gay bars in San Francisco using face scanners, France quits Palantir, Apple plans to change its private email, and more.
-- Published: Sat, 20 Jun 2026 09:30:00 +0000
-- Link: [https://www.wired.com/story/security-news-this-week-hackers-claim-to-leak-stolen-madison-square-garden-data/](https://www.wired.com/story/security-news-this-week-hackers-claim-to-leak-stolen-madison-square-garden-data/)
-
-### Scientists Invent a Way to Brew Espresso With Ultrasonic Waves—No Hot Water Required
-- Source: Wired
-- summary: Researchers have demonstrated they can make coffee comparable to conventional espresso using ultrasonic waves. Because the process doesn’t need hot water, it consumes 75 percent less energy.
-- Published: Sat, 20 Jun 2026 09:00:00 +0000
-- Link: [https://www.wired.com/story/scientists-brew-espresso-with-ultrasonic-waves/](https://www.wired.com/story/scientists-brew-espresso-with-ultrasonic-waves/)
-
-### The Most Promising Ebola Vaccine Has Been Sitting on the Shelf for 15 Years
-- Source: Wired
-- summary: Years after initial tests, researchers are now racing to see if a vaccine developed in 2011 can help fight the current Bundibugyo outbreak in Congo.
-- Published: Fri, 19 Jun 2026 14:23:43 +0000
-- Link: [https://www.wired.com/story/ebola-vaccine-sitting-on-shelf-for-15-years/](https://www.wired.com/story/ebola-vaccine-sitting-on-shelf-for-15-years/)
-
-### The Best iPad to Buy (and Some to Avoid) in 2026: Compare the Air, Pro, Mini
-- Source: Wired
-- summary: We break down the current iPad lineup to help you figure out which of Apple’s tablets is best for you.
-- Published: Fri, 19 Jun 2026 12:00:00 +0000
-- Link: [https://www.wired.com/gallery/the-best-ipad/](https://www.wired.com/gallery/the-best-ipad/)
-
-### Best Mesh Wi-Fi Systems (2026): Netgear, Asus, Amazon, and More
-- Source: Wired
-- summary: Forget about patchy internet connections and dead spots in the house. These WIRED-tested multiroom mesh systems will get you online in no time.
-- Published: Fri, 19 Jun 2026 11:31:00 +0000
-- Link: [https://www.wired.com/story/best-mesh-wifi-routers/](https://www.wired.com/story/best-mesh-wifi-routers/)
-
-### Gen Z Singles Are Trying to Make ‘Solomaxxing’ Aspirational
-- Source: Wired
-- summary: For young people, the trend removes the stigma of being unmarried and alone, and recasts it as something to aim for, not avoid.
-- Published: Fri, 19 Jun 2026 11:00:00 +0000
-- Link: [https://www.wired.com/story/solomaxxing/](https://www.wired.com/story/solomaxxing/)
-
-### Try One of macOS 27’s Best Features Right Now
-- Source: Wired
-- summary: Apple’s fall macOS release will let you build Shortcuts by typing what you want to happen. But Claude Code and Codex users don’t have to wait.
-- Published: Fri, 19 Jun 2026 10:30:00 +0000
-- Link: [https://www.wired.com/story/try-one-of-macos-27s-best-features-right-now-shortcuts-playground-agent/](https://www.wired.com/story/try-one-of-macos-27s-best-features-right-now-shortcuts-playground-agent/)
-
-### Pump.Fun’s Bounties Platform Is a Black Hole of Circular Grifting
-- Source: Wired
-- summary: The crypto platform claims you can “pay anyone to do anything,” from quitting a job on camera to getting a memecoin-themed tattoo. But it mostly seems like people trying to scam each other.
-- Published: Fri, 19 Jun 2026 10:30:00 +0000
-- Link: [https://www.wired.com/story/pumpfuns-bounties-platform-is-a-black-hole-of-circular-grifting/](https://www.wired.com/story/pumpfuns-bounties-platform-is-a-black-hole-of-circular-grifting/)
-
-### This World Cup, Bigger Might Not Really Be Better
-- Source: Wired
-- summary: The biggest World Cup ever is pushing fans, players, and host cities to their limits—and experts say this is only the beginning.
-- Published: Fri, 19 Jun 2026 10:00:00 +0000
-- Link: [https://www.wired.com/story/biggest-world-cup-travel-flights-hotels-costs/](https://www.wired.com/story/biggest-world-cup-travel-flights-hotels-costs/)
-
-### An Open Strait of Hormuz Won’t Fix Gas Prices Overnight
-- Source: Wired
-- summary: Even if peace holds up between the US and Iran, oil prices aren’t going back down to where they were any time soon.
-- Published: Fri, 19 Jun 2026 09:30:00 +0000
-- Link: [https://www.wired.com/story/an-open-strait-of-hormuz-wont-fix-gas-prices-overnight/](https://www.wired.com/story/an-open-strait-of-hormuz-wont-fix-gas-prices-overnight/)
-
-### Prediction Market Philosophers Got What They Wanted. They’re Not Happy About It
-- Source: Wired
-- summary: Getting the future right is now big business. But at a festival in Berkeley, forecasters worry that sports markets could take the whole industry down.
-- Published: Fri, 19 Jun 2026 09:30:00 +0000
-- Link: [https://www.wired.com/story/prediction-market-philosophers-got-what-they-wanted/](https://www.wired.com/story/prediction-market-philosophers-got-what-they-wanted/)
-
-### Canada Missed Chances to Inspect Titan Before Fatal Implosion
-- Source: Wired
-- summary: A new report shows that government agencies failed to communicate and includes recommendations for stronger oversight in a bid to avert future disasters.
-- Published: Fri, 19 Jun 2026 09:00:00 +0000
-- Link: [https://www.wired.com/story/canada-missed-chances-titan-fatal-implosion/](https://www.wired.com/story/canada-missed-chances-titan-fatal-implosion/)
-
-### Pseudoscientific Cancer ‘Treatment’ Involves Gassing Naked People in Plastic Bags With Bleach
-- Source: Wired
-- summary: A London clinic owner has claimed he is treating people with stage 4 cancer by sealing them into a plastic bag while they're naked from the waist down and gassing them with chlorine dioxide.
-- Published: Fri, 19 Jun 2026 07:00:00 +0000
-- Link: [https://www.wired.com/story/pseudoscientific-cancer-treatment-involves-gassing-naked-people-in-plastic-bags-with-bleach/](https://www.wired.com/story/pseudoscientific-cancer-treatment-involves-gassing-naked-people-in-plastic-bags-with-bleach/)
-
-### eBay Coupons: 20% Off in June 2026
-- Source: Wired
-- summary: Save up to 60% on a selection of items at eBay, including electronics, home products, card games, car parts and more.
-- Published: Fri, 19 Jun 2026 05:00:00 +0000
-- Link: [https://www.wired.com/story/ebay-coupon-code/](https://www.wired.com/story/ebay-coupon-code/)
-
-### How the Peter Thiel-Linked Dialog Club Secretly Ranks Its Members
-- Source: Wired
-- summary: Leaked files show the invite-only network grades members by their money and fame, shaping who’s in, who’s out, and who pays.
-- Published: Thu, 18 Jun 2026 22:12:45 +0000
-- Link: [https://www.wired.com/story/how-peter-thiels-private-dialog-club-secretly-ranks-its-members/](https://www.wired.com/story/how-peter-thiels-private-dialog-club-secretly-ranks-its-members/)
-
-### The White House Is Making Up Its Rules for AI in Real Time
-- Source: Wired
-- summary: Anthropic still can’t distribute Claude Mythos or Fable 5 after running afoul of the Trump administration. But no one can say exactly what the company did wrong.
-- Published: Thu, 18 Jun 2026 21:03:43 +0000
-- Link: [https://www.wired.com/story/anthropic-mythos-export-controls-ai-regulations/](https://www.wired.com/story/anthropic-mythos-export-controls-ai-regulations/)
-
-### Meta’s AI Workers Are Revolting, Peter Thiel’s Secret Society, and SBF’s Plea to Trump
-- Source: Wired
-- summary: On today’s Uncanny Valley, we dive into the dysfunction in Meta’s newly formed AI unit and why it’s been driving already-low employee morale even further into the ground.
-- Published: Thu, 18 Jun 2026 19:29:51 +0000
-- Link: [https://www.wired.com/story/uncanny-valley-podcast-meta-ai-workers-revolting-peter-thiel-secret-society-sbf-plea-to-trump/](https://www.wired.com/story/uncanny-valley-podcast-meta-ai-workers-revolting-peter-thiel-secret-society-sbf-plea-to-trump/)
-
-### Trump Mocked Mark Zuckerberg and Jeff Bezos by Showing Off Fawning Texts
-- Source: Wired
-- summary: “You would not believe the texts I got from these tech guys,” NYT reporters Maggie Haberman and Jonathan Swan quote Donald Trump as telling associates in an upcoming book.
-- Published: Thu, 18 Jun 2026 17:58:30 +0000
-- Link: [https://www.wired.com/story/trump-mocked-mark-zuckerberg-and-jeff-bezos-by-showing-off-fawning-texts/](https://www.wired.com/story/trump-mocked-mark-zuckerberg-and-jeff-bezos-by-showing-off-fawning-texts/)
-
-### 3 Amazon Workers Say They’re Under Investigation for Speaking Out About Data Centers
-- Source: Wired
-- summary: The software engineers filed a complaint with Seattle’s civil rights office accusing Amazon of illegally retaliating against them for expressing their personal political beliefs.
-- Published: Thu, 18 Jun 2026 16:03:27 +0000
-- Link: [https://www.wired.com/story/amazon-workers-under-internal-investigation-after-speaking-out-about-data-centers/](https://www.wired.com/story/amazon-workers-under-internal-investigation-after-speaking-out-about-data-centers/)
-
-### Waymo Recalls Robotaxis Over Risk They'll Drive at Speed Into Freeway Construction Zones
-- Source: Wired
-- summary: The company's latest recall of 3,871 vehicles follows incidents of its autonomous cars prioritizing other hazards or failing to recognize closed construction zones altogether.
-- Published: Thu, 18 Jun 2026 12:50:21 +0000
-- Link: [https://www.wired.com/story/waymo-recalls-robotaxis-over-risk-theyll-drive-at-speed-into-freeway-construction-zones/](https://www.wired.com/story/waymo-recalls-robotaxis-over-risk-theyll-drive-at-speed-into-freeway-construction-zones/)
+### New macOS malware embeds fake errors to confuse AI analysis tools [SCORE: 65/100]
+- **Source:** Bleeping Computer | **Link:** https://www.bleepingcomputer.com/news/security/new-macos-malware-embeds-fake-errors-to-confuse-ai-analysis-tools/
+- **AI Summary:**
+New 'Gaslight' macOS malware uses prompt injection and fake debugging data to deceive AI analysis tools. This marks a shift toward adversarial AI tactics in malware development. It threatens the reliability of automated threat detection systems.
+- **Justification:** The development of malware specifically designed to poison AI-based security analysis represents a significant escalation in the cyber-arms race.
+- **Metrics:** Immediacy(15), Scale(10), Permanence(10), Reverberance(15), Novelty(15)
 
 ---
 
-## Economics (39 articles)
+## Technology (16 articles)
 
-### How to share AI riches
-- Source: The Economist
-- summary: From Donald Trump to Sam Altman, the idea of redistributing them is catching on. Does it make sense?
-- Published: Thu, 11 Jun 2026 09:29:25 +0000
-- Link: [https://www.economist.com/finance-and-economics/2026/06/11/how-to-share-ai-riches](https://www.economist.com/finance-and-economics/2026/06/11/how-to-share-ai-riches)
-
-### How high could global inflation go?
-- Source: The Economist
-- summary: With luck, the Iran war won’t cause a recession. But the surge in energy prices will push up the cost of living
-- Published: Mon, 23 Mar 2026 20:37:50 +0000
-- Link: [https://www.economist.com/finance-and-economics/2026/03/23/how-high-could-global-inflation-go](https://www.economist.com/finance-and-economics/2026/03/23/how-high-could-global-inflation-go)
-
-### The ascent of India’s economy
-- Source: The Economist
-- summary: It has benefited from a slice of luck, a commitment to economic reform and a shove from Donald Trump
-- Published: Thu, 22 Jan 2026 10:34:06 +0000
-- Link: [https://www.economist.com/finance-and-economics/2026/01/22/the-ascent-of-indias-economy](https://www.economist.com/finance-and-economics/2026/01/22/the-ascent-of-indias-economy)
-
-### The end of the rip-off economy
-- Source: The Economist
-- summary: From finance and medicine to used cars, artificial intelligence is radically improving market efficiency
-- Published: Mon, 27 Oct 2025 16:58:08 +0000
-- Link: [https://www.economist.com/finance-and-economics/2025/10/27/the-end-of-the-rip-off-economy](https://www.economist.com/finance-and-economics/2025/10/27/the-end-of-the-rip-off-economy)
-
-### How to make immigration palatable in a populist age
-- Source: The Economist
-- summary: Guest-worker schemes are booming. They offer vast benefits to both host countries and the workers themselves
-- Published: Wed, 22 Oct 2025 15:55:01 +0000
-- Link: [https://www.economist.com/finance-and-economics/2025/10/22/how-to-make-immigration-palatable-in-a-populist-age](https://www.economist.com/finance-and-economics/2025/10/22/how-to-make-immigration-palatable-in-a-populist-age)
-
-### Germany’s spy agency comes in from the cold
-- Source: Financial Times
-- summary: Berlin wants to loosen the shackles on the BND as part of a Europe-wide drive to reduce dependence on US intelligence
-- Published: Mon, 22 Jun 2026 04:00:15 GMT
-- Link: [https://www.ft.com/content/50069749-fe38-4a6e-80d4-fe84d53f94a1](https://www.ft.com/content/50069749-fe38-4a6e-80d4-fe84d53f94a1)
-
-### Why sinodollars outweigh the petroyuan
-- Source: Financial Times
-- summary: China’s currency is becoming a more important part of the global financial system but the dollar is still in control
-- Published: Mon, 22 Jun 2026 02:51:39 GMT
-- Link: [https://www.ft.com/content/0948fa97-1585-4484-90a5-6df769367dfe](https://www.ft.com/content/0948fa97-1585-4484-90a5-6df769367dfe)
-
-### Starmer mulls podium moment after Chequers retreat
-- Source: Financial Times
-- summary: Prime minister goes ‘dark’ on colleagues as he spends weekend discussing his political future with wife, Victoria
-- Published: Sun, 21 Jun 2026 16:35:45 GMT
-- Link: [https://www.ft.com/content/7852c1e4-9629-4a67-bf36-7177bc711e34](https://www.ft.com/content/7852c1e4-9629-4a67-bf36-7177bc711e34)
-
-### Rightwing populist ‘El Tigre’ wins Colombia election
-- Source: Financial Times
-- summary: Trump-loving political outsider Abelardo de la Espriella narrowly beats leftist continuity candidate
-- Published: Mon, 22 Jun 2026 05:31:41 GMT
-- Link: [https://www.ft.com/content/49294716-56be-40a4-ba31-b4e376ccb47f](https://www.ft.com/content/49294716-56be-40a4-ba31-b4e376ccb47f)
-
-### Galán revoluciona Iberdrola con un nuevo organigrama
-- Source: Expansion
-- summary: El presidente de la mayor energética española crea un nuevo sistema entre directivos 'top' con un esquema dual en áreas clave, para que se apoyen o, llegado el caso, sirvan de suplentes. Leer
-- Published: Mon, 22 Jun 2026 00:13:34 +0200
-- Link: [https://www.expansion.com/empresas/energia/2026/06/22/6a382481468aeb4a778b457d.html](https://www.expansion.com/empresas/energia/2026/06/22/6a382481468aeb4a778b457d.html)
-
-### Escrivá: "Limitar las hipotecas es intrusivo y hay que hacerlo con mucho cuidado"
-- Source: Expansion
-- summary: El supervisor publicará un Libro Blanco en el que incluirá todos los análisis y consecuencias que podrían provocar los topes al crédito hipotecario. Leer
-- Published: Mon, 22 Jun 2026 00:17:38 +0200
-- Link: [https://www.expansion.com/empresas/banca/2026/06/22/6a3849db468aebb23e8b45aa.html](https://www.expansion.com/empresas/banca/2026/06/22/6a3849db468aebb23e8b45aa.html)
-
-### La Primera de Expansión sobre Escrivá, Iberdrola, Santander, Colombia, Starmer y Nike
-- Source: Expansion
-- summary: EXPANSIÓN entrevista al Gobernador del Banco de España, José Luis Escrivá. El supervisor publicará un Libro Blanco en el que incluirá todos los análisis y consecuencias que podrían provocar los topes al crédito hipotecario. Leer
-- Published: Mon, 22 Jun 2026 07:27:48 +0200
-- Link: [https://www.expansion.com/podcasts/la-primera-de-expansion/2026/06/22/6a38c3d9e5fdeacf3d8b4595.html](https://www.expansion.com/podcasts/la-primera-de-expansion/2026/06/22/6a38c3d9e5fdeacf3d8b4595.html)
-
-### Histórica ayuda de 6.000 millones a cien empresas por producir luz
-- Source: Expansion
-- summary: El Consejo de Ministros prevé aprobar una medida que desbloquea, después de años, uno de los grandes problemas industriales en España. Leer
-- Published: Mon, 22 Jun 2026 00:17:37 +0200
-- Link: [https://www.expansion.com/empresas/energia/2026/06/22/6a38147c468aebe9218b459c.html](https://www.expansion.com/empresas/energia/2026/06/22/6a38147c468aebe9218b459c.html)
-
-### Los tres escenarios de riesgo latentes para la Bolsa
-- Source: Expansion
-- summary: Las Bolsas han escalado a nuevos máximos históricos. De cara a la segunda mitad del año, las perspectivas de UBS siguen siendo positivas, en especial para EEUU y Asia.  Pero la propia firma admite que "invertir en el entorno actual también requiere prestar mucha atención a diversos escenarios de riesgo para construir carteras sólidas". Leer
-- Published: Mon, 22 Jun 2026 00:35:07 +0200
-- Link: [https://www.expansion.com/mercados/2026/06/22/6a353ab7468aebb23e8b456e.html](https://www.expansion.com/mercados/2026/06/22/6a353ab7468aebb23e8b456e.html)
-
-### El Ibex duda al filo de sus récords
-- Source: Expansion
-- summary: La semana comienza con una tregua en la agenda financiera. Esta calma se traslada al conjunto de los mercados, gracias también a que las negociaciones finales entre EEUU e Irán parecen encauzarse, y a que el petróleo cotiza a la baja. El Ibex espera mayores referencias, incluidas las de Wall Street, para activar un nuevo asalto a sus récords. Leer
-- Published: Mon, 22 Jun 2026 08:11:34 +0200
-- Link: [https://www.expansion.com/mercados/cronica-bolsa/2026/06/22/6a38c93ee5fdead3658b4594.html](https://www.expansion.com/mercados/cronica-bolsa/2026/06/22/6a38c93ee5fdead3658b4594.html)
-
-### Mark Mobius, el inversor más aventurero
-- Source: Expansion
-- summary: Fue pionero en apostar por mercados emergentes que generaban desconfianza por su inestabilidad o por regímenes dictatoriales. Pasaba 250 días al año fuera de casa para descubrir empresas con gran potencial. Leer
-- Published: Mon, 22 Jun 2026 07:30:03 +0200
-- Link: [https://www.expansion.com/podcasts/genios-finanzas/2026/06/22/6a353a1ee5fdea1b748b4589.html](https://www.expansion.com/podcasts/genios-finanzas/2026/06/22/6a353a1ee5fdea1b748b4589.html)
-
-### Barclays nombra a Luis Zumárraga CEO en España
-- Source: Expansion
-- summary: El ejecutivo toma las riendas tras la salida de Portanet y las suma a sus cargos en la estructura europea. Leer
-- Published: Mon, 22 Jun 2026 00:35:10 +0200
-- Link: [https://www.expansion.com/empresas/banca/2026/06/22/6a357216e5fdea511b8b456d.html](https://www.expansion.com/empresas/banca/2026/06/22/6a357216e5fdea511b8b456d.html)
-
-### Colombia: De la Espriella gana las presidenciales por menos de un punto sobre Cepeda
-- Source: Expansion
-- summary: El candidato de extrema derecha Abelardo de la Espriella ha llamado a la unidad nacional y ha prometido gobernar para todos los colombianos después de imponerse por un estrecho margen de menos de un punto porcentual al izquierdista Iván Cepeda en las elecciones presidenciales más reñidas de la historia reciente. Leer
-- Published: Mon, 22 Jun 2026 07:31:56 +0200
-- Link: [https://www.expansion.com/latinoamerica/2026/06/22/6a38c86ee5fdea43458b4586.html](https://www.expansion.com/latinoamerica/2026/06/22/6a38c86ee5fdea43458b4586.html)
-
-### Quién es Abelardo de la Espriella, el eventual presidente electo de Colombia
-- Source: Expansion
-- summary: El abogado de ultraderecha Abelardo de la Espriella, llamado el Tigre por sus seguidores, se ha proclamado presidente electo de Colombia tras imponerse ayer por menos de un punto de diferencia al izquierdista Iván Cepeda en la segunda vuelta de las elecciones presidenciales. Leer
-- Published: Mon, 22 Jun 2026 07:55:29 +0200
-- Link: [https://www.expansion.com/latinoamerica/2026/06/22/6a38ce44468aeb59598b459a.html](https://www.expansion.com/latinoamerica/2026/06/22/6a38ce44468aeb59598b459a.html)
-
-### Los sesenta sectores que crean empleo
-- Source: Expansion
-- summary: La construcción de edificios lidera la creación de empleo el último año, seguida de la industria alimentaria, la educación, los servicios a edificios y las actividades recreativas. Leer
-- Published: Mon, 22 Jun 2026 00:36:29 +0200
-- Link: [https://www.expansion.com/economia/2026/06/22/6a383bade5fdea44308b4589.html](https://www.expansion.com/economia/2026/06/22/6a383bade5fdea44308b4589.html)
-
-### Charles Manski: "Las previsiones económicas no son fiables ante la incertidumbre actual"
-- Source: Expansion
-- summary: En una entrevista a EXPANSIÓN, el Premio Fundación BBVA Fronteras del Conocimiento de Economía de 2026, Charles Manski, afirma que la inteligencia artificial "es sólo un paso más en la revolución tecnológica y no afectará al empleo, pero es muy peligrosa para tomar decisiones". Leer
-- Published: Mon, 22 Jun 2026 00:36:30 +0200
-- Link: [https://www.expansion.com/economia/2026/06/22/6a35795b468aebf6548b4582.html](https://www.expansion.com/economia/2026/06/22/6a35795b468aebf6548b4582.html)
-
-### Starmer, al borde de la dimisión por la fuerte presión interna de su partido
-- Source: Expansion
-- summary: Entre la espada y la pared. Es la delicada situación política en que se encuentra el primer ministro británico, Keir Starmer, ante la creciente y asfixiante presión de su propia formación, el Partido Laborista, para que renuncie a su cargo como premier, hasta el punto de que algunos medios británicos descontaban ayer que su dimisión podría producirse hoy mismo. Leer
-- Published: Mon, 22 Jun 2026 00:36:57 +0200
-- Link: [https://www.expansion.com/economia/2026/06/22/6a38474ee5fdea54098b4586.html](https://www.expansion.com/economia/2026/06/22/6a38474ee5fdea54098b4586.html)
-
-### Paz en Irán: Dónde invertir para sacar el máximo partido a la Bolsa
-- Source: Expansion
-- summary: Los mercados han reaccionado al alza al acuerdo de paz entre Estados Unidos e Irán y hay que rehacer las carteras para sacar todo el partido a las Bolsas. Leer
-- Published: Wed, 17 Jun 2026 15:48:09 +0200
-- Link: [https://www.expansion.com/podcasts/en-accion/2026/06/17/6a32a1e3468aebe6028b457f.html](https://www.expansion.com/podcasts/en-accion/2026/06/17/6a32a1e3468aebe6028b457f.html)
-
-### Zhou Qunfei, la autodidacta detrás de la pantalla táctil del iPhone
-- Source: Expansion
-- summary: Ha pasado de trabajar por un dólar al día a sentarse en la misma mesa que Elon Musk y Tim Cook. Su empresa, Lens Technology, suministra superficies de vidrio a Apple y Tesla. Leer
-- Published: Mon, 15 Jun 2026 12:21:42 +0200
-- Link: [https://www.expansion.com/podcasts/genios-finanzas/2026/06/15/6a2fcb01468aebca328b457c.html](https://www.expansion.com/podcasts/genios-finanzas/2026/06/15/6a2fcb01468aebca328b457c.html)
-
-### Por qué el sueldo seguirá siendo un secreto, con Beatriz Ardid
-- Source: Expansion
-- summary: La entrada en vigor de la ley de transparencia salarial el próximo mes de junio, no dejará al descubierto su sueldo, pero a partir de entonces desaparece la cláusula de confidencialidad de los contratos y el sueldo medio por categorías será público. Leer
-- Published: Tue, 21 Apr 2026 03:22:06 +0200
-- Link: [https://www.expansion.com/podcasts/trabajo-y-mas/2026/04/21/69e61a70468aebad418b4596.html](https://www.expansion.com/podcasts/trabajo-y-mas/2026/04/21/69e61a70468aebad418b4596.html)
-
-### La Primera de Expansión sobre Santander, Goldman Sachs, Mundial, Renault, China y SpaceX
-- Source: Expansion
-- summary: Santander reordena la banca comercial y nombra dos responsables globales. Matías Sánchez asume el área de Particulares, y Borja Oyarzábal, la rama de Empresas. Daniel Barriuso, actual jefe de la unidad, sigue en el grupo como asesor de la presidenta y el CEO. Leer
-- Published: Fri, 19 Jun 2026 07:21:39 +0200
-- Link: [https://www.expansion.com/podcasts/la-primera-de-expansion/2026/06/19/6a34ccdc468aeb41018b4598.html](https://www.expansion.com/podcasts/la-primera-de-expansion/2026/06/19/6a34ccdc468aeb41018b4598.html)
-
-### EXPANSIÓN: 40 años de innovación y liderazgo
-- Source: Expansion
-- summary: De pionero del papel salmón a líder digital con una visión global, EXPANSIÓN celebra 40 años analizando la vida empresarial española y transformando la información económica en un servicio imprescindible para todos. Leer
-- Published: Tue, 26 May 2026 10:44:46 +0200
-- Link: [https://www.expansion.com/especiales/40-aniversario-expansion/2026/05/26/6a145649e5fdea2d2a8b459e.html](https://www.expansion.com/especiales/40-aniversario-expansion/2026/05/26/6a145649e5fdea2d2a8b459e.html)
-
-### Irán paraliza la negociación con EEUU tras las nuevas amenazas de Trump
-- Source: Expansion
-- summary: Irán ha interrumpido este domingo las conversaciones con Estados Unidos en Suiza tras las nuevas amenazas lanzadas por el presidente estadounidense Donald Trump contra la República Islámica, informó la agencia IRNA. Leer
-- Published: Sun, 21 Jun 2026 20:40:45 +0200
-- Link: [https://www.expansion.com/economia/2026/06/21/6a382fd2468aeb295d8b4599.html](https://www.expansion.com/economia/2026/06/21/6a382fd2468aeb295d8b4599.html)
-
-### Silver Lake prepara la venta de su 93% en el Grupo BC
-- Source: Expansion
-- summary: La gestora de capital riesgo estadounidense está analizando todas las alternativas estratégicas disponibles junto a sus asesores. Leer
-- Published: Mon, 22 Jun 2026 00:36:58 +0200
-- Link: [https://www.expansion.com/empresas/2026/06/22/6a382dbc468aebb8668b45a9.html](https://www.expansion.com/empresas/2026/06/22/6a382dbc468aebb8668b45a9.html)
-
-### StepStone, APG y Azora redoblan la puja por las residencias de mayores
-- Source: Expansion
-- summary: StepStone y Greykite con Vitalia; APG y Renta con Wellder o Azora pisan el acelerador en un negocio con una inversión potencial en España de 19.000 millones hasta 2035. Leer
-- Published: Mon, 22 Jun 2026 00:36:59 +0200
-- Link: [https://www.expansion.com/inmobiliario/mercado/2026/06/22/6a357c6c468aeb47738b45a9.html](https://www.expansion.com/inmobiliario/mercado/2026/06/22/6a357c6c468aeb47738b45a9.html)
-
-### Descubra la fórmula que identifica la mejor empresa para trabajar
-- Source: Expansion
-- summary: Aunque las clasificaciones ayudan, la opinión de quienes trabajan en una empresa, la de aquellos que la dejaron y la de quienes la siguen recomendando es el mejor termómetro para dar con la mejor opción. Leer
-- Published: Fri, 19 Jun 2026 12:23:44 +0200
-- Link: [https://www.expansion.com/expansion-empleo/desarrollo-de-carrera/2026/06/19/6a350db9468aeb003e8b45a2.html](https://www.expansion.com/expansion-empleo/desarrollo-de-carrera/2026/06/19/6a350db9468aeb003e8b45a2.html)
-
-### Merz: Alemania pierde cada mes entre 10.000 y 14.000 puestos de trabajo en la industria
-- Source: Expansion
-- summary: El canciller alemán, Friedrich Merz, afirmó este domingo que en Alemania se pierden cada mes entre 10.000 y 15.000 puestos de trabajo en la industria y abogó por reformas estructurales para ayudar a las empresas a que sigan siendo competitivas para mantener el bienestar en el futuro. Leer
-- Published: Sun, 21 Jun 2026 23:52:39 +0200
-- Link: [https://www.expansion.com/economia/2026/06/21/6a385c8ce5fdea40278b4588.html](https://www.expansion.com/economia/2026/06/21/6a385c8ce5fdea40278b4588.html)
-
-### El juez Peinado envía a juicio a Begoña Gómez y le retira el pasaporte
-- Source: Expansion
-- summary: El juez Juan Carlos Peinado ha enviado a juicio a Begoña Gómez, mujer del presidente del Gobierno, Pedro Sánchez, y ha fijado como medidas cautelares la retirada del pasaporte, le prohíbe salir del territorio nacional y estipula una comparecencia quincenal en el juzgado. Leer
-- Published: Sat, 20 Jun 2026 13:46:45 +0200
-- Link: [https://www.expansion.com/economia/2026/06/20/6a367cd4e5fdea1b048b4574.html](https://www.expansion.com/economia/2026/06/20/6a367cd4e5fdea1b048b4574.html)
-
-### El capital privado mantiene su impulso en Latinoamérica
-- Source: Expansion
-- summary: La región captó 8.570 millones de dólares en nuevos fondos e invirtió un total de 25.600 millones durante el año pasado. Leer
-- Published: Mon, 22 Jun 2026 00:37:15 +0200
-- Link: [https://www.expansion.com/latinoamerica/iberoamericana-empresarial/2026/06/22/6a3843cf468aeb816f8b4573.html](https://www.expansion.com/latinoamerica/iberoamericana-empresarial/2026/06/22/6a3843cf468aeb816f8b4573.html)
-
-### Cuba denuncia que EEUU ejerce un "bloqueo total, similar a uno de tipo militar" en el país
-- Source: Expansion
-- summary: El ministro cubano de Exteriores, Bruno Rodríguez, denunció este sábado que EEUU ejerce un "bloqueo total" al país caribeño, "similar a uno de tipo militar" al referirse al asedio petrolero iniciado por Washington desde enero y a las sanciones reforzadas contra empresas que mantengan negocios con el Estado isleño. Leer
-- Published: Sat, 20 Jun 2026 19:20:50 +0200
-- Link: [https://www.expansion.com/latinoamerica/2026/06/20/6a36c60b468aeb3a518b45bb.html](https://www.expansion.com/latinoamerica/2026/06/20/6a36c60b468aeb3a518b45bb.html)
-
-### La España de la que habla Sánchez no existe
-- Source: Expansion
-- summary: La combinación de altos precios de la vivienda y salarios bajos es el drama de numerosos españoles. Leer
-- Published: Fri, 19 Jun 2026 23:51:34 +0200
-- Link: [https://www.expansion.com/economia/2026/06/19/6a35a08c468aeb3c658b4581.html](https://www.expansion.com/economia/2026/06/19/6a35a08c468aeb3c658b4581.html)
-
-### Beko: "Los electrodomésticos serán cada vez más proactivos"
-- Source: Expansion
-- summary: El CEO de Beko Europa explica cómo están integrando tecnología tanto en su cadena de producción como en los propios dispositivos, con la inteligencia artificial como protagonista. Leer
-- Published: Mon, 22 Jun 2026 00:37:35 +0200
-- Link: [https://www.expansion.com/economia-digital/protagonistas/2026/06/22/6a350e1be5fdeac8298b4570.html](https://www.expansion.com/economia-digital/protagonistas/2026/06/22/6a350e1be5fdeac8298b4570.html)
-
-### ¿Dudas con la declaración de la Renta?
-- Source: Expansion
-- summary: ¿Cuáles son las principales novedades de la campaña de la Renta 2025? ¿Qué debo tener en cuenta sobre indemnizaciones, despidos y rescates de planes de pensiones? ¿Cómo puedo modificar mis datos fiscales? Los socios del área fiscal de Andersen Borja de Gabriel (director del área fiscal) y Pablo Gómez-Acebo (de izquierda a derecha en la foto), contestarán a sus dudas a partir del 6 de abril de 2026 y durante toda la campaña de la Renta 2025. Leer
-- Published: Fri, 27 Mar 2026 10:29:59 +0100
-- Link: [https://www.expansion.com/encuentros/andersen/2026/04/06/index.html](https://www.expansion.com/encuentros/andersen/2026/04/06/index.html)
-
-### Model 3, C-HR+, Dolphin Surf, EV3, R5, Elroq: los coches eléctricos que triunfan en España
-- Source: Expansion
-- summary: Los modelos totalmente eléctricos representan ya el 15% de todas las ventas de turismos nuevos en el canal de particulares en España. Leer
-- Published: Sat, 20 Jun 2026 00:05:40 +0200
-- Link: [https://www.expansion.com/empresas/motor/2026/06/20/6a352314468aeb03518b45a3.html](https://www.expansion.com/empresas/motor/2026/06/20/6a352314468aeb03518b45a3.html)
+### Toward Mitigating Process-Induced Performance Degradation in 3.5D Heterogeneous Packages via Pre-Silicon Firmware Co-Optimization [SCORE: 95/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26176
+- **AI Summary:**
+Details a pre-silicon firmware scheduling layer (XRM-SSD V24) for Intel's 3.5D heterogeneous packages. Enables proactive thermal management through 20-50ms look-ahead voltage rail positioning. Projects significant reductions in EDA guard-bands and improved compute efficiency.
+- **Justification:** High-impact engineering breakthrough for 3.5D packaging that directly addresses physical thermal limits in advanced silicon, critical for future AI hardware scaling.
+- **Metrics:** Immediacy(20), Scale(20), Permanence(20), Reverberance(20), Novelty(15)
 
 ---
 
-## World (112 articles)
-
-### Trump-backed political outsider wins Colombia election, initial count shows
-- Source: BBC World
-- summary: Abelardo de la Espriella appears to have narrowly defeated his rival Iván Cepeda, who says the preliminary count is "not yet official or binding".
-- Published: Mon, 22 Jun 2026 03:31:40 GMT
-- Link: [https://www.bbc.com/news/articles/clye4ky2yzpo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/clye4ky2yzpo?at_medium=RSS&at_campaign=rss)
-
-### Russian troop build-up threatens city seen as key to seizing Ukraine's Donbas
-- Source: BBC World
-- summary: If Kostyantynivka falls, Russian forces would be able push towards Ukraine's last remaining strongholds in the east.
-- Published: Sun, 21 Jun 2026 23:57:59 GMT
-- Link: [https://www.bbc.com/news/articles/c9w2g0ewk95o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c9w2g0ewk95o?at_medium=RSS&at_campaign=rss)
-
-### Cape Verde fan goes wild live on BBC News as his country scores
-- Source: BBC World
-- summary: During a live BBC News broadcast, reporter Paul Njie interviews a Cape Verde fan when the country suddenly scores its first ever World Cup goal against Uruguay in the 2026 World Cup.
-- Published: Sun, 21 Jun 2026 23:53:13 GMT
-- Link: [https://www.bbc.com/sport/football/videos/cyv0n4g6p77o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/sport/football/videos/cyv0n4g6p77o?at_medium=RSS&at_campaign=rss)
-
-### Trump says repairs to algae-plagued Reflecting Pool will begin immediately
-- Source: BBC World
-- summary: Despite a multi-million dollar renovation, the Washington DC landmark has peeling paint and algae. Trump claims vandals are partly to blame.
-- Published: Mon, 22 Jun 2026 00:54:43 GMT
-- Link: [https://www.bbc.com/news/articles/c872e8d9el1o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c872e8d9el1o?at_medium=RSS&at_campaign=rss)
-
-### Largest ever cocaine bust in Australia after police raid underground bunker
-- Source: BBC World
-- summary: Police seized 2.7 tonnes of cocaine worth an estimated A$816m after searching a property in western Sydney.
-- Published: Mon, 22 Jun 2026 01:40:00 GMT
-- Link: [https://www.bbc.com/news/articles/c14ygjzr8j7o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c14ygjzr8j7o?at_medium=RSS&at_campaign=rss)
-
-### Tight security as Indian students resit medical exam after alleged paper leak
-- Source: BBC World
-- summary: Millions of candidates face biometric checks and frisking as air force deployed to secure exam papers.
-- Published: Sun, 21 Jun 2026 11:06:31 GMT
-- Link: [https://www.bbc.com/news/articles/cwy0gjqv783o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cwy0gjqv783o?at_medium=RSS&at_campaign=rss)
-
-### Israeli strikes kill six people in Gaza including Al Jazeera cameraman, officials say
-- Source: BBC World
-- summary: The Israeli military accused Ahmed Wishah of being a "Hamas sniper operative", without providing evidence.
-- Published: Sat, 20 Jun 2026 21:57:36 GMT
-- Link: [https://www.bbc.com/news/articles/c4gy26p6pwzo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c4gy26p6pwzo?at_medium=RSS&at_campaign=rss)
-
-### Ethiopia PM's party wins landslide as fears grow of new conflict
-- Source: BBC World
-- summary: Abiy Ahmed's party retains its huge majority despite unrest in several parts of Ethiopia and tensions with its neighbours.
-- Published: Sun, 21 Jun 2026 15:01:28 GMT
-- Link: [https://www.bbc.com/news/articles/cz750q5e3w3o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cz750q5e3w3o?at_medium=RSS&at_campaign=rss)
-
-### Dutch royals enjoy two big results in one World Cup day
-- Source: BBC World
-- summary: There may be about 5,000 miles between the Netherlands and their former colony Curacao but members of the Dutch royal family managed to see both sides play on Saturday.
-- Published: Sun, 21 Jun 2026 09:45:57 GMT
-- Link: [https://www.bbc.com/sport/football/articles/c4gydq973nqo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/sport/football/articles/c4gydq973nqo?at_medium=RSS&at_campaign=rss)
-
-### Former Olympian denies vandalising Washington Reflecting Pool after arrest
-- Source: BBC World
-- summary: Davey Hearn says he was simply touching the new paint at the site out of curiosity and did not remove or alter it.
-- Published: Sun, 21 Jun 2026 07:16:54 GMT
-- Link: [https://www.bbc.com/news/articles/c8d26051vv2o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c8d26051vv2o?at_medium=RSS&at_campaign=rss)
-
-### African and Caribbean nations call for formal apology for transatlantic slavery
-- Source: BBC World
-- summary: The leaders have asked for apologies from the countries that benefited from the slave trade, as well as debt relief and financial compensation.
-- Published: Sat, 20 Jun 2026 02:33:30 GMT
-- Link: [https://www.bbc.com/news/articles/cm2rl8z5x7no?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cm2rl8z5x7no?at_medium=RSS&at_campaign=rss)
-
-### Fuel sales halted in occupied Crimea as Ukraine targets oil facilities
-- Source: BBC World
-- summary: Fuel had already been rationed due to shortages caused by Kyiv's attacks against supply routes in Russian-occupied territories.
-- Published: Sun, 21 Jun 2026 10:55:05 GMT
-- Link: [https://www.bbc.com/news/articles/clyx2lk9d15o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/clyx2lk9d15o?at_medium=RSS&at_campaign=rss)
-
-### Indian cricketer, 15, hits record-breaking 50 in just 11 balls
-- Source: BBC World
-- summary: Vaibhav Sooryavanshi breaks the record for the fastest 50-over List A half-century in history on the same day he was not included in India's one-day international squad.
-- Published: Sun, 21 Jun 2026 11:10:21 GMT
-- Link: [https://www.bbc.com/sport/cricket/articles/czdev6lp8p9o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/sport/cricket/articles/czdev6lp8p9o?at_medium=RSS&at_campaign=rss)
-
-### Zelensky returns highest Polish honour after award stripped
-- Source: BBC World
-- summary: Ukraine's president said his country was open to "engagement" about "difficult and painful chapters of our shared past".
-- Published: Sat, 20 Jun 2026 16:34:15 GMT
-- Link: [https://www.bbc.com/news/articles/c2lye7xje9yo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c2lye7xje9yo?at_medium=RSS&at_campaign=rss)
-
-### Lebanese turtle conservationist Mona Khalil killed by Israeli strike
-- Source: BBC World
-- summary: Mona Khalil, who had refused to leave the beach she had spent years protecting, died after several days in hospital, an environmental group said.
-- Published: Sat, 20 Jun 2026 17:40:43 GMT
-- Link: [https://www.bbc.com/news/articles/cwylx1vq18zo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cwylx1vq18zo?at_medium=RSS&at_campaign=rss)
-
-### US to stop funding HIV programmes in South Africa
-- Source: BBC World
-- summary: More than eight million South Africans are living with HIV – the highest number of any country in the world.
-- Published: Fri, 19 Jun 2026 23:35:07 GMT
-- Link: [https://www.bbc.com/news/articles/cdr457lxr71o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cdr457lxr71o?at_medium=RSS&at_campaign=rss)
-
-### Bolivian president declares state of emergency
-- Source: BBC World
-- summary: The move comes after weeks of anti-government protests that have caused a shortage of basic goods in Bolivia.
-- Published: Sat, 20 Jun 2026 15:27:09 GMT
-- Link: [https://www.bbc.com/news/articles/cr47wn92zdgo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cr47wn92zdgo?at_medium=RSS&at_campaign=rss)
-
-### Tourist dies in Dominican Republic luxury resort fire
-- Source: BBC World
-- summary: Nearly 1,700 people were evacuated from the huge blaze at Viva Wyndham Dominicus Beach in Bayahibe, a popular resort town on the Caribbean coast.
-- Published: Sat, 20 Jun 2026 17:33:25 GMT
-- Link: [https://www.bbc.com/news/articles/c932k8010j1o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c932k8010j1o?at_medium=RSS&at_campaign=rss)
-
-### James Burrows, legendary director of Cheers and Friends, dies aged 85
-- Source: BBC World
-- summary: Best-known as co-creator of sitcom Cheers, Burrows directed more than 1,000 episodes of other classics including the Big Bang Theory and Will and Grace.
-- Published: Sat, 20 Jun 2026 00:23:46 GMT
-- Link: [https://www.bbc.com/news/articles/ce8k07x523eo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/ce8k07x523eo?at_medium=RSS&at_campaign=rss)
-
-### Boy, 12, wins hearts after trying to check sick chicken into Ethiopian hospital
-- Source: BBC World
-- summary: Markos's beloved hen was not responding to any treatments - so he did the only thing he could think of.
-- Published: Fri, 19 Jun 2026 10:25:30 GMT
-- Link: [https://www.bbc.com/news/articles/cy49e7w3rmxo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cy49e7w3rmxo?at_medium=RSS&at_campaign=rss)
-
-### Morocco captain Achraf Hakimi to stand trial for rape
-- Source: BBC World
-- summary: French prosecutors confirm Morocco captain Achraf Hakimi will stand trial for rape, in accusations dating back to 2023.
-- Published: Fri, 19 Jun 2026 10:28:22 GMT
-- Link: [https://www.bbc.com/sport/football/articles/c20y18z7le1o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/sport/football/articles/c20y18z7le1o?at_medium=RSS&at_campaign=rss)
-
-### Zimbabwe MPs pass bill to extend president's time in power
-- Source: BBC World
-- summary: The proposal would extend Emmerson Mnangagwa's term by two years and scrap direct presidential elections.
-- Published: Fri, 19 Jun 2026 08:03:32 GMT
-- Link: [https://www.bbc.com/news/articles/c20y15m0337o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c20y15m0337o?at_medium=RSS&at_campaign=rss)
-
-### Six-year-old Ebola patient taken from DR Congo hospital found and 'doing well'
-- Source: BBC World
-- summary: Health facilities have come under attack during the current outbreak as a result of misinformation and fear.
-- Published: Fri, 19 Jun 2026 14:45:57 GMT
-- Link: [https://www.bbc.com/news/articles/c0qyg29wpk2o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c0qyg29wpk2o?at_medium=RSS&at_campaign=rss)
-
-### Currency crash and visa crackdowns force Indian students to rethink studying abroad
-- Source: BBC World
-- summary: A weaker rupee and tougher immigration rules are pushing Indian students away from popular destinations like the US and UK.
-- Published: Sun, 21 Jun 2026 21:55:43 GMT
-- Link: [https://www.bbc.com/news/articles/c8x2gd9lkxzo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/c8x2gd9lkxzo?at_medium=RSS&at_campaign=rss)
-
-### Steve Rosenberg: Moscow oil refinery attack brings Russia's war with Ukraine closer to home
-- Source: BBC World
-- summary: There are moments when life in Moscow feels completely normal - Thursday morning wasn't one of them, writes Steve Rosenberg.
-- Published: Sat, 20 Jun 2026 10:19:34 GMT
-- Link: [https://www.bbc.com/news/articles/cp3xqkxp3x5o?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cp3xqkxp3x5o?at_medium=RSS&at_campaign=rss)
-
-### Why an AI company cleaned my New York City apartment for free
-- Source: BBC World
-- summary: An AI company is sending free cleaners door-to-door in a bid to train the robots it hopes one day will replace them.
-- Published: Sat, 20 Jun 2026 23:18:55 GMT
-- Link: [https://www.bbc.com/news/articles/cpwerjy20kyo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cpwerjy20kyo?at_medium=RSS&at_campaign=rss)
-
-### Thousands killed in US-Israeli war on Iran - but experts say true total may never be known
-- Source: BBC World
-- summary: Experts say internet, media and government restrictions have all hampered casualty reporting across the region.
-- Published: Fri, 19 Jun 2026 05:33:59 GMT
-- Link: [https://www.bbc.com/news/articles/cy735xlv50ko?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/articles/cy735xlv50ko?at_medium=RSS&at_campaign=rss)
-
-### Parisians cool off in canal amid 'red alert' heatwave
-- Source: BBC World
-- summary: France has issued red heatwave alerts for around half the country as temperatures soar to record levels.
-- Published: Sun, 21 Jun 2026 17:15:56 GMT
-- Link: [https://www.bbc.com/news/videos/c802denngxeo?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/videos/c802denngxeo?at_medium=RSS&at_campaign=rss)
-
-### BBC sees destroyed villages in Israeli-occupied southern Lebanon
-- Source: BBC World
-- summary: Travelling with a humanitarian convoy, BBC's Hugo Bachega has been given rare access to a part of Lebanon under Israeli occupation.
-- Published: Sat, 20 Jun 2026 16:37:03 GMT
-- Link: [https://www.bbc.com/news/videos/c8r2pyv3e2po?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/videos/c8r2pyv3e2po?at_medium=RSS&at_campaign=rss)
-
-### Would you choose to take a 22-hour non-stop flight?
-- Source: BBC World
-- summary: The BBC asked Sydney locals if they would take the newly announced, longest ever commercial flight from Sydney to London.
-- Published: Fri, 19 Jun 2026 18:47:31 GMT
-- Link: [https://www.bbc.com/news/videos/cn4dqg0dz5go?at_medium=RSS&at_campaign=rss](https://www.bbc.com/news/videos/cn4dqg0dz5go?at_medium=RSS&at_campaign=rss)
-
-### Cover Story newsletter: How we chose the cover image
-- Source: The Economist
-- summary: The thinking behind our designs about free speech in America, spotting a genius and Britain going bust
-- Published: Fri, 26 Sep 2025 16:52:35 +0000
-- Link: [https://www.economist.com/the-world-this-week/2025/09/26/cover-story-newsletter-how-we-chose-the-cover-image](https://www.economist.com/the-world-this-week/2025/09/26/cover-story-newsletter-how-we-chose-the-cover-image)
-
-### Satellite lofted for first Arab country
-- Source: China Daily
-- summary: A Chinese-made communications satellite became the first "export" of such a spacecraft to an Arab country when it was launched by China on Monday for Algeria.
-- Published: 2017-12-12T00:27:08.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/12/WS5a2f225ea3108bc8c67219dd.html](http://www.chinadaily.com.cn/a/201712/12/WS5a2f225ea3108bc8c67219dd.html)
-
-### Satellite lofted for first Arab country
-- Source: China Daily
-- summary: A Chinese-made communications satellite became the first "export" of such a spacecraft to an Arab country when it was launched by China on Monday for Algeria.
-- Published: 2017-12-12T00:27:08.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/12/WS5a2f225ea3108bc8c67219dd.html](http://www.chinadaily.com.cn/a/201712/12/WS5a2f225ea3108bc8c67219dd.html)
-
-### WWII memorials solemn reminders of war tragedy
-- Source: China Daily
-- summary: Memorial days were set up by governments of the war’s major belligerents to remember those who died or sacrificed themselves, and to remind people of tragedies caused by war. Here are ways different countries keep the memory of the wartime history alive.
-- Published: 2017-12-11T23:14:10.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/12/WS5a2f1143a3108bc8c6721944.html](http://www.chinadaily.com.cn/a/201712/12/WS5a2f1143a3108bc8c6721944.html)
-
-### WWII memorials solemn reminders of war tragedy
-- Source: China Daily
-- summary: Memorial days were set up by governments of the war’s major belligerents to remember those who died or sacrificed themselves, and to remind people of tragedies caused by war. Here are ways different countries keep the memory of the wartime history alive.
-- Published: 2017-12-11T23:14:10.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/12/WS5a2f1143a3108bc8c6721944.html](http://www.chinadaily.com.cn/a/201712/12/WS5a2f1143a3108bc8c6721944.html)
-
-### Chinese, Russian and Indian ministers meet
-- Source: China Daily
-- summary: China, Russia and India agreed to maintain regional security and economic architecture in the Asia-Pacific, according to a joint statement issued on Monday after the 15th trilateral meeting of the foreign ministers of the three countries.
-- Published: 2017-12-11T22:57:46.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/12/WS5a2f0d6ca3108bc8c6721934.html](http://www.chinadaily.com.cn/a/201712/12/WS5a2f0d6ca3108bc8c6721934.html)
-
-### Chinese, Russian and Indian ministers meet
-- Source: China Daily
-- summary: China, Russia and India agreed to maintain regional security and economic architecture in the Asia-Pacific, according to a joint statement issued on Monday after the 15th trilateral meeting of the foreign ministers of the three countries.
-- Published: 2017-12-11T22:57:46.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/12/WS5a2f0d6ca3108bc8c6721934.html](http://www.chinadaily.com.cn/a/201712/12/WS5a2f0d6ca3108bc8c6721934.html)
-
-### Chinese, Russian and Indian ministers meet
-- Source: China Daily
-- summary: China, Russia and India agreed to maintain regional security and economic architecture in the Asia-Pacific, according to a joint statement issued on Monday after the 15th trilateral meeting of the foreign ministers of the three countries.
-- Published: 2017-12-11T22:57:46.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/12/WS5a2f0d6ca3108bc8c6721934.html](http://www.chinadaily.com.cn/a/201712/12/WS5a2f0d6ca3108bc8c6721934.html)
-
-### Nanjing massacre remembered on 80th anniversary
-- Source: China Daily
-- summary: A memorial service to mark the 80th anniversary of the Nanjing Massacre committed by the Japanese military during World War II brought together hundreds of activists and members of the Chinese and other Asian communities on Sunday in San Francisco.
-- Published: 2017-12-11T18:58:49.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/12/WS5a2ed569a3108bc8c6721912.html](http://www.chinadaily.com.cn/a/201712/12/WS5a2ed569a3108bc8c6721912.html)
-
-### Nanjing massacre remembered on 80th anniversary
-- Source: China Daily
-- summary: A memorial service to mark the 80th anniversary of the Nanjing Massacre committed by the Japanese military during World War II brought together hundreds of activists and members of the Chinese and other Asian communities on Sunday in San Francisco.
-- Published: 2017-12-11T18:58:49.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/12/WS5a2ed569a3108bc8c6721912.html](http://www.chinadaily.com.cn/a/201712/12/WS5a2ed569a3108bc8c6721912.html)
-
-### Young Chinese-Irish ballroom dancer goes international
-- Source: China Daily
-- summary: Kerry Sui, a 10-year-old Chinese-Irish dancer, and her dance partner Francis Carty are set to compete in Italy and perform on Chinese TV after winning the British juvenile ballroom championship.
-- Published: 2017-12-11T18:10:21.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/12/WS5a2eca0fa3108bc8c672190e.html](http://www.chinadaily.com.cn/a/201712/12/WS5a2eca0fa3108bc8c672190e.html)
-
-### Would-be suicide bomber sets off explosion in NYC
-- Source: China Daily
-- summary: A would-be suicide bomber set off part of a homemade explosive device in a subway passage between Times Square and the Port Authority Bus Terminal in Midtown Manhattan during Monday's morning rush hour, seriously wounding himself and injuring four others, police said.
-- Published: 2017-12-11T17:34:03.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/12/WS5a2ec18ca3108bc8c6721902.html](http://www.chinadaily.com.cn/a/201712/12/WS5a2ec18ca3108bc8c6721902.html)
-
-### Four injured in Manhattan terror-related explosion
-- Source: China Daily
-- summary: Police said four people were injured as a device attached to a suspected bomber exploded prematurely at the New York Port Authority bus terminal in Midtown Manhattan during Monday’s morning rush hour.
-- Published: 2017-12-11T16:23:04.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/12/WS5a2eb0e8a3108bc8c67218fb.html](http://www.chinadaily.com.cn/a/201712/12/WS5a2eb0e8a3108bc8c67218fb.html)
-
-### Bad weather causes massive travel disruption in Britain
-- Source: China Daily
-- summary: Severe frost, rains and icy roads after heavy snowfall have caused major travel disruption across large parts of Britain on Monday.
-- Published: 2017-12-11T15:18:04.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2ea1aea3108bc8c67218f5.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2ea1aea3108bc8c67218f5.html)
-
-### Four injured in New York City blast, suspect nabbed
-- Source: China Daily
-- summary: Several people were hurt in an explosion in the New York City subway near the Times Square area of Manhattan in early Monday morning.
-- Published: 2017-12-11T13:29:50.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2e884fa3103f77d55ac367.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2e884fa3103f77d55ac367.html)
-
-### Universities champion new ideas
-- Source: China Daily
-- summary: Tsinghua University and Imperial College London have launched a joint fund to support bold scientific ideas in their early stages.
-- Published: 2017-12-11T10:14:32.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2e5a8aa31095b331af46bc.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2e5a8aa31095b331af46bc.html)
-
-### Welsh national side helping with Chinese soccer goals
-- Source: China Daily
-- summary: Fans of the Welsh national soccer team have experienced some dizzying highs and disappointing lows in the last 18 months.
-- Published: 2017-12-11T10:02:08.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2e57a1a31095b331af444e.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2e57a1a31095b331af444e.html)
-
-### South San Francisco elects first Chinese-American mayor
-- Source: China Daily
-- summary: Liza Lau Normandy has been elected mayor of South San Francisco, the first Chinese-American to be elected in the city's 110 years history, according to World Journal.
-- Published: 2017-12-11T06:31:31.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2e2643a310eefe3e9a28fd.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2e2643a310eefe3e9a28fd.html)
-
-### South San Francisco elects first Chinese-American mayor
-- Source: China Daily
-- summary: Liza Lau Normandy has been elected mayor of South San Francisco, the first Chinese-American to be elected in the city's 110 years history, according to World Journal.
-- Published: 2017-12-11T06:31:31.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2e2643a310eefe3e9a28fd.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2e2643a310eefe3e9a28fd.html)
-
-### Algerian boy, 12, wins Shenzhen talent contest
-- Source: China Daily
-- summary: A 12-year-old Algerian boy was crowned winner of the eighth Shenzhen Expats Chinese Talent Competition on Sunday.
-- Published: 2017-12-11T05:51:21.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2e1cd9a310eefe3e9a28ac.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2e1cd9a310eefe3e9a28ac.html)
-
-### China launches communication satellite for Algeria
-- Source: China Daily
-- summary: China launched Algeria's first communication satellite, Alcomsat-1, into a preset orbit from the Xichang Satellite Launch Center in the southwestern province of Sichuan early Monday.
-- Published: 2017-12-11T02:33:57.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html)
-
-### China launches communication satellite for Algeria
-- Source: China Daily
-- summary: China launched Algeria's first communication satellite, Alcomsat-1, into a preset orbit from the Xichang Satellite Launch Center in the southwestern province of Sichuan early Monday.
-- Published: 2017-12-11T02:33:57.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html)
-
-### China launches communication satellite for Algeria
-- Source: China Daily
-- summary: China launched Algeria's first communication satellite, Alcomsat-1, into a preset orbit from the Xichang Satellite Launch Center in the southwestern province of Sichuan early Monday.
-- Published: 2017-12-11T02:33:57.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html)
-
-### China launches communication satellite for Algeria
-- Source: China Daily
-- summary: China launched Algeria's first communication satellite, Alcomsat-1, into a preset orbit from the Xichang Satellite Launch Center in the southwestern province of Sichuan early Monday.
-- Published: 2017-12-11T02:33:57.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dee96a310eefe3e9a163a.html)
-
-### Nanjing massacre remembered
-- Source: China Daily
-- summary: A memorial service to mark the 80th anniversary of the Nanjing Massacre committed by the Japanese military during World War II brought together hundreds of activists and members of the Chinese and other Asian communities on Sunday in San Francisco.
-- Published: 2017-12-11T02:24:46.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html)
-
-### Nanjing massacre remembered
-- Source: China Daily
-- summary: A memorial service to mark the 80th anniversary of the Nanjing Massacre committed by the Japanese military during World War II brought together hundreds of activists and members of the Chinese and other Asian communities on Sunday in San Francisco.
-- Published: 2017-12-11T02:24:46.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html)
-
-### Nanjing massacre remembered
-- Source: China Daily
-- summary: A memorial service to mark the 80th anniversary of the Nanjing Massacre committed by the Japanese military during World War II brought together hundreds of activists and members of the Chinese and other Asian communities on Sunday in San Francisco.
-- Published: 2017-12-11T02:24:46.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html)
-
-### Nanjing massacre remembered
-- Source: China Daily
-- summary: A memorial service to mark the 80th anniversary of the Nanjing Massacre committed by the Japanese military during World War II brought together hundreds of activists and members of the Chinese and other Asian communities on Sunday in San Francisco.
-- Published: 2017-12-11T02:24:46.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html)
-
-### Nanjing massacre remembered
-- Source: China Daily
-- summary: A memorial service to mark the 80th anniversary of the Nanjing Massacre committed by the Japanese military during World War II brought together hundreds of activists and members of the Chinese and other Asian communities on Sunday in San Francisco.
-- Published: 2017-12-11T02:24:46.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2dec6fa310eefe3e9a161b.html)
-
-### Autopsy: Jiang suffered several injuries before the fatal stab
-- Source: China Daily
-- summary: The trial of the alleged murderer of Chinese student Jiang Ge began at 10 am on Monday in Tokyo. It will last seven days and the verdict is expected on Dec 20.
-- Published: 2017-12-11T02:12:40.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2de998a310eefe3e9a160b.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2de998a310eefe3e9a160b.html)
-
-### Anti-nuclear weapon campaigner ICAN receives 2017 Nobel Peace Prize
-- Source: China Daily
-- summary: The International Campaign to Abolish Nuclear Weapons (ICAN) received the 2017 Nobel Peace Prize at an awarding ceremony here Sunday, for its efforts to give new momentum to the process of abolishing nuclear weapons.
-- Published: 2017-12-11T02:12:09.000+0000
-- Link: [http://www.chinadaily.com.cn/a/201712/11/WS5a2de979a310eefe3e9a1604.html](http://www.chinadaily.com.cn/a/201712/11/WS5a2de979a310eefe3e9a1604.html)
-
-### US-Iran talks end in Switzerland, mediators say
-- Source: deutsche welle
-- summary: According to mediators from Qatar and Pakistan, the talks between United States and Iranian officials in Switzerland have ended with both sides agreeing on a roadmap. Technical talks will continue.
-- Published: Unknown
-- Link: [https://www.dw.com/en/us-iran-talks-end-in-switzerland-mediators-say/live-77641405?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/us-iran-talks-end-in-switzerland-mediators-say/live-77641405?maca=en-rss-en-all-1573-rdf)
-
-### Colombia election: Hard-right candidate claims victory
-- Source: deutsche welle
-- summary: Right-wing presidential candidate, Abelardo de la Espriella, won 49.66% of the Colombians' votes, according to preliminary results.
-- Published: Unknown
-- Link: [https://www.dw.com/en/colombia-election-hard-right-candidate-claims-victory/a-77650646?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/colombia-election-hard-right-candidate-claims-victory/a-77650646?maca=en-rss-en-all-1573-rdf)
-
-### Deniz Undav: Germany's 2026 World Cup supersub
-- Source: deutsche welle
-- summary: With three goals in two games, striker Deniz Undav is the man in focus for Germany at the World Cup. But things could have turned out very differently for the Stuttgart striker.
-- Published: Unknown
-- Link: [https://www.dw.com/en/deniz-undav-germany-s-2026-world-cup-supersub/a-77650649?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/deniz-undav-germany-s-2026-world-cup-supersub/a-77650649?maca=en-rss-en-all-1573-rdf)
-
-### Czechia: Thousands march in support of public media funding
-- Source: deutsche welle
-- summary: Prime Minister Andrej Babis' government has been accused of seeking to take control over Czech public media. The plan would leave broadcasters with a 15% funding cut and no guarantees of continued future funding.
-- Published: Unknown
-- Link: [https://www.dw.com/en/czechia-thousands-march-in-support-of-public-media-funding/a-77650608?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/czechia-thousands-march-in-support-of-public-media-funding/a-77650608?maca=en-rss-en-all-1573-rdf)
-
-### Severe heat wave sweeps Europe, triggering alerts and disruptions
-- Source: deutsche welle
-- summary: Authorities accross Europe have warned of temperatures exceeding 39 and 40 degrees Celsius as a 'heat dome' sets in. Germany also faces the threat of extreme thunderstorms.
-- Published: Unknown
-- Link: [https://www.dw.com/en/severe-heat-wave-sweeps-europe-triggering-alerts-and-disruptions/a-77648446?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/severe-heat-wave-sweeps-europe-triggering-alerts-and-disruptions/a-77648446?maca=en-rss-en-all-1573-rdf)
-
-### Romania's Dan taps new PM, breaks democratic norms
-- Source: deutsche welle
-- summary: President Nicusor Dan has nominated a new prime minister, without consulting Romania’s governing parties. Critics accuse Dan of breaking democratic rules.
-- Published: Unknown
-- Link: [https://www.dw.com/en/romania-s-dan-taps-new-pm-breaks-democratic-norms/a-77618469?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/romania-s-dan-taps-new-pm-breaks-democratic-norms/a-77618469?maca=en-rss-en-all-1573-rdf)
-
-### Scottish police arrest man over Edinburgh attacks
-- Source: deutsche welle
-- summary: Five people were injured in the attacks on Friday that were described by Prime Minister Keir Starmer as being motivated by "anti-Muslim hatred."
-- Published: Unknown
-- Link: [https://www.dw.com/en/scottish-police-arrest-man-over-edinburgh-attacks/a-77647568?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/scottish-police-arrest-man-over-edinburgh-attacks/a-77647568?maca=en-rss-en-all-1573-rdf)
-
-### Ethiopia's ruling party wins overwhelming majority in parliament
-- Source: deutsche welle
-- summary: Prime Minister Abiy Ahmed’s Prosperity Party comfortably secured another parliamentary majority, defeating a fragmented opposition.
-- Published: Unknown
-- Link: [https://www.dw.com/en/ethiopia-s-ruling-party-wins-overwhelming-majority-in-parliament/a-77647557?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/ethiopia-s-ruling-party-wins-overwhelming-majority-in-parliament/a-77647557?maca=en-rss-en-all-1573-rdf)
-
-### AI scandal rocks the German media
-- Source: deutsche welle
-- summary: Two leading German newspapers have deleted articles created with the use of artificial intelligence. Many fear an increasing reliance on AI will damage the credibility of German media outlets.
-- Published: Unknown
-- Link: [https://www.dw.com/en/ai-scandal-rocks-the-german-media/a-77606407?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/ai-scandal-rocks-the-german-media/a-77606407?maca=en-rss-en-all-1573-rdf)
-
-### UK's Starmer mulls 'political realities' after Burnham by-election
-- Source: deutsche welle
-- summary: A member of UK Prime Minister Keir Starmer's Cabinet said it would be "delusional" to pretend there was no threat to his position. But he also said he had no information suggesting he might quit, as a newspaper reported.
-- Published: Unknown
-- Link: [https://www.dw.com/en/uk-s-starmer-mulls-political-realities-after-burnham-by-election/a-77644772?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/uk-s-starmer-mulls-political-realities-after-burnham-by-election/a-77644772?maca=en-rss-en-all-1573-rdf)
-
-### Stonehenge revelers ring in summer solstice
-- Source: deutsche welle
-- summary: Thousands celebrated through the night at Stonehenge in southwest England, ushering in the sunrise on the longest day of the year in the Northern Hemisphere. The stone circle aligns with the sun's path at the solstices.
-- Published: Unknown
-- Link: [https://www.dw.com/en/stonehenge-revelers-ring-in-summer-solstice/a-77643500?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/stonehenge-revelers-ring-in-summer-solstice/a-77643500?maca=en-rss-en-all-1573-rdf)
-
-### Germany could scrap law banning insults against politicians
-- Source: deutsche welle
-- summary: Germany's special law prohibiting the insulting of politicians has led to cases that many people consider absurd. Some members of the government want to abolish the law; others think there's a good reason to retain it.
-- Published: Unknown
-- Link: [https://www.dw.com/en/germany-could-scrap-law-banning-insults-against-politicians/a-77630055?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/germany-could-scrap-law-banning-insults-against-politicians/a-77630055?maca=en-rss-en-all-1573-rdf)
-
-### Sudan: UN warns of mass atrocities in El-Obeid
-- Source: deutsche welle
-- summary: The United Nations Security Council has called on the paramilitary RSF in Sudan to not launch an attack on the city of El-Obeid.
-- Published: Unknown
-- Link: [https://www.dw.com/en/sudan-un-warns-of-mass-atrocities-in-el-obeid/a-77642972?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/sudan-un-warns-of-mass-atrocities-in-el-obeid/a-77642972?maca=en-rss-en-all-1573-rdf)
-
-### Undav heroics help Germany beat Ivory Coast
-- Source: deutsche welle
-- summary: In Germany's second 2026 World Cup game, Deniz Undav helped Germany to a comeback win against Ivory Coast in Toronto.
-- Published: Unknown
-- Link: [https://www.dw.com/en/undav-heroics-help-germany-beat-ivory-coast/a-77639564?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/undav-heroics-help-germany-beat-ivory-coast/a-77639564?maca=en-rss-en-all-1573-rdf)
-
-### Terror police probe suspected anti-Muslim attacks in Edinburgh
-- Source: deutsche welle
-- summary: Counterterrorism police have taken charge after a series of violent attacks in the Scottish capital that left five men injured.
-- Published: Unknown
-- Link: [https://www.dw.com/en/terror-police-probe-suspected-anti-muslim-attacks-in-edinburgh/a-77639385?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/terror-police-probe-suspected-anti-muslim-attacks-in-edinburgh/a-77639385?maca=en-rss-en-all-1573-rdf)
-
-### Are Ukraine drones really exposing gaps in Russia's defense?
-- Source: deutsche welle
-- summary: Once seen as almost impenetrable, Russian air defenses are now under growing strain from Ukrainian drones. A recent attack on Moscow has reignited debate over Russian vulnerabilities.
-- Published: Unknown
-- Link: [https://www.dw.com/en/are-ukraine-drones-really-exposing-gaps-in-russia-s-defense/a-77639467?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/are-ukraine-drones-really-exposing-gaps-in-russia-s-defense/a-77639467?maca=en-rss-en-all-1573-rdf)
-
-### France bans alcohol during Fete de la Musique amid heat wave
-- Source: deutsche welle
-- summary: France is taking additional measures as millions of people gear up for Fete de la Musique under punishing temperatures.
-- Published: Unknown
-- Link: [https://www.dw.com/en/france-bans-alcohol-during-fete-de-la-musique-amid-heat-wave/a-77639233?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/france-bans-alcohol-during-fete-de-la-musique-amid-heat-wave/a-77639233?maca=en-rss-en-all-1573-rdf)
-
-### Spain: PM's wife must face corruption trial, judge rules
-- Source: deutsche welle
-- summary: A court in Madrid ruled that there is sufficient evidence against Begona Gomez, the wife of Prime Minister Pedro Sanchez. The 55-year-old university director is banned from leaving the country.
-- Published: Unknown
-- Link: [https://www.dw.com/en/spain-pm-s-wife-must-face-corruption-trial-judge-rules/a-77638811?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/spain-pm-s-wife-must-face-corruption-trial-judge-rules/a-77638811?maca=en-rss-en-all-1573-rdf)
-
-### Zelenskyy returns Poland's highest honor as row deepens
-- Source: deutsche welle
-- summary: Ukraine's president has returned a medal to Poland after a decision to strip him of the country's highest honor. Warsaw has been one of Kyiv's key allies since Russia began its war in Ukraine.
-- Published: Unknown
-- Link: [https://www.dw.com/en/zelenskyy-returns-poland-s-highest-honor-as-row-deepens/a-77637366?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/zelenskyy-returns-poland-s-highest-honor-as-row-deepens/a-77637366?maca=en-rss-en-all-1573-rdf)
-
-### Inequality is elementary to Germany's school system
-- Source: deutsche welle
-- summary: Children's paths through Germany's school system are often determined before their first day of kindergarten, according to the national report on education. An elementary school in Bonn is offering a new model for kids.
-- Published: Unknown
-- Link: [https://www.dw.com/en/inequality-is-elementary-to-germany-s-school-system/a-77613220?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/inequality-is-elementary-to-germany-s-school-system/a-77613220?maca=en-rss-en-all-1573-rdf)
-
-### EU ban on BPA chemical in food packaging takes effect
-- Source: deutsche welle
-- summary: From July 2026 onwards, BPA will no longer be permitted in EU food packaging. The industrial chemical is known to interfere with the human hormonal system.
-- Published: Unknown
-- Link: [https://www.dw.com/en/eu-ban-on-bpa-chemical-in-food-packaging-takes-effect/a-77630680?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/eu-ban-on-bpa-chemical-in-food-packaging-takes-effect/a-77630680?maca=en-rss-en-all-1573-rdf)
-
-### German journalist detained in Syria back home, lawyer says
-- Source: deutsche welle
-- summary: Eva Maria Michelmann vanished in Syria in January as government forces advanced on Kurdish fighters in the northeast. The German government last week said it was working to get her home.
-- Published: Unknown
-- Link: [https://www.dw.com/en/german-journalist-detained-in-syria-back-home-lawyer-says/a-77631412?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/german-journalist-detained-in-syria-back-home-lawyer-says/a-77631412?maca=en-rss-en-all-1573-rdf)
-
-### What to expect from the strongest El Nino in over a century
-- Source: deutsche welle
-- summary: Warnings of a mighty El Nino weather pattern this year could bring drought, flooding and extreme heat. Can we prepare for the worst of it?
-- Published: Unknown
-- Link: [https://www.dw.com/en/what-to-expect-from-the-strongest-el-nino-in-over-a-century/a-77469489?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/what-to-expect-from-the-strongest-el-nino-in-over-a-century/a-77469489?maca=en-rss-en-all-1573-rdf)
-
-### As heat waves grow more frequent and fierce, cities worldwide are racing to cool streets and reshape urban life. But can they adapt quickly enough?
-- Source: deutsche welle
-- summary: As heat waves grow more frequent and fierce, cities worldwide are racing to cool streets and reshape urban life.
-- Published: Unknown
-- Link: [https://www.dw.com/en/as-heat-waves-grow-more-frequent-and-fierce-cities-worldwide-are-racing-to-cool-streets-and-reshape-urban-life-but-can-they-adapt-quickly-enough/a-77504229?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/as-heat-waves-grow-more-frequent-and-fierce-cities-worldwide-are-racing-to-cool-streets-and-reshape-urban-life-but-can-they-adapt-quickly-enough/a-77504229?maca=en-rss-en-all-1573-rdf)
-
-### Can Europe build its own AI heavyweights to rival the US?
-- Source: deutsche welle
-- summary: With AI dominated by US firms, Europe is pushing for more independence. New partnerships, investments and startups aim to boost the continent's digital sovereignty, but challenges around funding and regulation remain.
-- Published: Unknown
-- Link: [https://www.dw.com/en/can-europe-build-its-own-ai-heavyweights-to-rival-the-us/a-77629735?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/can-europe-build-its-own-ai-heavyweights-to-rival-the-us/a-77629735?maca=en-rss-en-all-1573-rdf)
-
-### Women tackling coal dust and other eco wins this week
-- Source: deutsche welle
-- summary: Indian women fight back against toxic coal dust, the US hits a solar milestone, and there's good news for soil in Kenya and cars worldwide.
-- Published: Unknown
-- Link: [https://www.dw.com/en/women-tackling-coal-dust-and-other-eco-wins-this-week/a-77627984?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/women-tackling-coal-dust-and-other-eco-wins-this-week/a-77627984?maca=en-rss-en-all-1573-rdf)
-
-### New exhibitions for Anish Kapoor: Art on the edge
-- Source: deutsche welle
-- summary: His art challenges our perception: Forms vanish and perspectives shift. Anish Kapoor leads the viewer to the edge of the abyss — and sometimes, even beyond. Two new exhibitions revisit his work.
-- Published: Unknown
-- Link: [https://www.dw.com/en/new-exhibitions-for-anish-kapoor-art-on-the-edge/a-77580647?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/new-exhibitions-for-anish-kapoor-art-on-the-edge/a-77580647?maca=en-rss-en-all-1573-rdf)
-
-### Germany's Left Party is dreaming big
-- Source: deutsche welle
-- summary: The socialist Left Party has seen its membership soar and is especially popular with young female voters. Could it soon come to power in the city state of Berlin?
-- Published: Unknown
-- Link: [https://www.dw.com/en/germany-s-left-party-is-dreaming-big/a-77627530?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/germany-s-left-party-is-dreaming-big/a-77627530?maca=en-rss-en-all-1573-rdf)
-
-### Czech government causes alarm with plan to scrap license fee
-- Source: deutsche welle
-- summary: The Czech government has approved a bill to put the funding of public service media under direct political control. Critics warn that if passed, the bill would put a pillar of Czech democracy at risk.
-- Published: Unknown
-- Link: [https://www.dw.com/en/czech-government-causes-alarm-with-plan-to-scrap-license-fee/a-77625913?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/czech-government-causes-alarm-with-plan-to-scrap-license-fee/a-77625913?maca=en-rss-en-all-1573-rdf)
-
-### US curbs Anthropic AI access, raising global concerns
-- Source: deutsche welle
-- summary: The Trump administration has restricted foreign access to Anthropic's latest AI models over security fears, forcing a global shutdown. Could the row hurt the Claude-maker's IPO plans and set a far-reaching precedent?
-- Published: Unknown
-- Link: [https://www.dw.com/en/us-curbs-anthropic-ai-access-raising-global-concerns/a-77577694?maca=en-rss-en-all-1573-rdf](https://www.dw.com/en/us-curbs-anthropic-ai-access-raising-global-concerns/a-77577694?maca=en-rss-en-all-1573-rdf)
-
-### El CGPJ examina a Peinado hoy mismo bajo presión del Gobierno
-- Source: El Mundo
-- summary: Decide este lunes si es «falta grave» sugerir que la Policía podría ayudar a huir a Begoña Gómez Leer
-- Published: Sun, 21 Jun 2026 23:40:42 +0200
-- Link: [https://www.elmundo.es/espana/2026/06/21/6a38001be9cf4a726c8b457e.html](https://www.elmundo.es/espana/2026/06/21/6a38001be9cf4a726c8b457e.html)
-
-### Begoña, una de los nuestros
-- Source: El Mundo
-- summary: En ningún caso como en este ha conseguido Sánchez implicar con tanto éxito al Gobierno, su partido y la mayoría de su electorado: se persigue a mi esposa porque se nos persigue a los socialistas Leer
-- Published: Mon, 22 Jun 2026 02:22:10 +0200
-- Link: [https://www.elmundo.es/espana/2026/06/22/6a38127ce9cf4a5f168b45a2.html](https://www.elmundo.es/espana/2026/06/22/6a38127ce9cf4a5f168b45a2.html)
-
-### El PSOE acelera su calendario de primarias para elegir a los candidatos de 2027 en medio de la tormenta judicial
-- Source: El Mundo
-- summary: Los territorios podrán optar por los meses de julio, septiembre o noviembre para convocar sus procesos internos Leer
-- Published: Mon, 22 Jun 2026 02:22:11 +0200
-- Link: [https://www.elmundo.es/espana/2026/06/22/6a35068bfc6c83561f8b4587.html](https://www.elmundo.es/espana/2026/06/22/6a35068bfc6c83561f8b4587.html)
-
-### No tener más hijos por no poder pagar la guardería: "Es inviable y como hagas jornada partida, estás vendida"
-- Source: El Mundo
-- summary: Los precios de los centros privados superan los 700 euros en las grandes ciudades, rebasando ya el 30% de los ingresos por hogar en plena crisis demográfica Leer
-- Published: Sun, 21 Jun 2026 22:49:59 +0200
-- Link: [https://www.elmundo.es/economia/2026/06/21/6a0c959421efa058188b45df.html](https://www.elmundo.es/economia/2026/06/21/6a0c959421efa058188b45df.html)
-
-### La cloaca de Leire se 'sincronizó' con la comisión de investigación de la 'operación Cataluña'
-- Source: El Mundo
-- summary: La trama presumía de usar el peso del PSOE en investigaciones parlamentarias para impulsar sus ataques a los fiscales y la UCO Leer
-- Published: Sun, 21 Jun 2026 22:50:22 +0200
-- Link: [https://www.elmundo.es/espana/2026/06/21/6a3812f5fc6c837c358b4589.html](https://www.elmundo.es/espana/2026/06/21/6a3812f5fc6c837c358b4589.html)
-
-### Zapatero se arriesga con su declaración de máximos a que surja "un Aldama"
-- Source: El Mundo
-- summary: El ex presidente se expone a que la confesión de cualquier otro acusado cobre más valor para el juez y la Fiscalía Anticorrupción Leer
-- Published: Sun, 21 Jun 2026 22:50:13 +0200
-- Link: [https://www.elmundo.es/espana/2026/06/21/6a3805d9e9cf4a33078b4590.html](https://www.elmundo.es/espana/2026/06/21/6a3805d9e9cf4a33078b4590.html)
-
-### Así se apartó Lamine de la presión tras el partido ante Cabo Verde: la Play, un viaje de cinco horas y el primer gol
-- Source: El Mundo
-- summary: "Rodrigo es Balón de Oro, Pedri es el mejor centrocampista del mundo, están Nico, Dani Olmo, Mikel... todos son muy buenos. Son de talla mundial y por eso somos favoritos", dice el barcelonista. Leer
-- Published: Mon, 22 Jun 2026 02:54:04 +0200
-- Link: [https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/22/6a384d85fdddffca788b457d.html](https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/22/6a384d85fdddffca788b457d.html)
-
-### El derechista Abelardo de la Espriella será el próximo presidente de Colombia
-- Source: El Mundo
-- summary: Se impone por un margen de un punto en un país totalmente partido en dos / El presidente Gustavo Petro había sugerido a los suyos tomar las calles si su delfín, Iván Cepeda, no era el elegido Leer
-- Published: Mon, 22 Jun 2026 07:15:33 +0200
-- Link: [https://www.elmundo.es/internacional/2026/06/22/6a38603ee85ece7b1b8b457e.html](https://www.elmundo.es/internacional/2026/06/22/6a38603ee85ece7b1b8b457e.html)
-
-### Abelardo de la Espriella, un Tigre para darle la vuelta a Colombia
-- Source: El Mundo
-- summary: El ganador de las elecciones colombianas promete adelgazar el Estado, agilizar trámites para crear empresas, reducir impuestos, perseguir la evasión y la corrupción que devora billones cada año, construir diez mega cárceles a lo Bukele, romper la paz total de Petro y ser implacable con las bandas Leer
-- Published: Mon, 22 Jun 2026 00:09:53 +0200
-- Link: [https://www.elmundo.es/internacional/2026/06/01/6a1d138afc6c8371028b456e.html](https://www.elmundo.es/internacional/2026/06/01/6a1d138afc6c8371028b456e.html)
-
-### Uruguay tampoco puede con Cabo Verde y pone en bandeja a España el primer puesto del grupo
-- Source: El Mundo
-- summary: La Celeste remontó el gol inicial de los africanos, pero un clamoroso error desembocó en el 2-2. A los de De la Fuente les debería valer un empate el viernes para ser líderes. Leer
-- Published: Mon, 22 Jun 2026 02:18:29 +0200
-- Link: [https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/22/6a387499e85ece96668b45c2.html](https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/22/6a387499e85ece96668b45c2.html)
-
-### Jesús Casas, seleccionador de Irak durante tres años: "Teníamos a varios jugadores analfabetos, en Bagdad lo importante era sobrevivir, no la escuela"
-- Source: El Mundo
-- summary: El español, asistente de Luis Enrique hasta 2022, llegó a la selección iraquí ese año y se marchó en 2025, camino del Mundial. "Mi familia pensaba que me iba con los cascos azules, pero es un pueblo que quiere olvidar la guerra", cuenta a EL MUNDO Leer
-- Published: Sun, 21 Jun 2026 22:49:05 +0200
-- Link: [https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/21/6a381af4fc6c8362788b4594.html](https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/21/6a381af4fc6c8362788b4594.html)
-
-### Bélgica vuelve a decepcionar ante la desterrada Irán y se complican sus opciones en el grupo G
-- Source: El Mundo
-- summary: Los de Rudi García fueron incapaces de marcar un gol y la expulsión de Ngoy les cortó su ritmo en el segundo tiempo Leer
-- Published: Sun, 21 Jun 2026 23:17:17 +0200
-- Link: [https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/21/6a3837c1e4d4d8585d8b456e.html](https://www.elmundo.es/deportes/futbol/mundial-de-futbol/2026/06/21/6a3837c1e4d4d8585d8b456e.html)
-
-### Sumy, el frente olvidado de la guerra: "Éramos una isla en medio de rusos"
-- Source: El Mundo
-- summary: La región, símbolo de la resistencia ucraniana, es una pista de entrenamiento para los drones de Putin: "Quiere aterrorizarnos" Leer
-- Published: Sun, 21 Jun 2026 22:49:41 +0200
-- Link: [https://www.elmundo.es/internacional/2026/06/21/6a3812b9e4d4d83e1a8b4582.html](https://www.elmundo.es/internacional/2026/06/21/6a3812b9e4d4d83e1a8b4582.html)
-
-### La crisis sin fin de la vivienda: "Es el mayor problema social y económico de España"
-- Source: El Mundo
-- summary: Hay una cifra que ayuda a entender el problema: cada año se crean más del doble de hogares que viviendas nuevas Leer
-- Published: Mon, 22 Jun 2026 00:00:00 +0200
-- Link: [https://www.elmundo.es/podcasts/el-mundo-al-dia/2026/06/22/6a358fc6e4d4d837328b4581.html](https://www.elmundo.es/podcasts/el-mundo-al-dia/2026/06/22/6a358fc6e4d4d837328b4581.html)
-
-### Junts no cree en los Presupuestos de Sánchez: "Lo usa como arma para justificar elecciones sin ligarlas a la corrupción"
-- Source: El Mundo
-- summary: Seguirá sin apoyar la moción de censura del PP: "A Feijóo le da igual la moción de censura. En el fondo, ya sabe que antes o después ganará" Leer
-- Published: Mon, 22 Jun 2026 02:28:23 +0200
-- Link: [https://www.elmundo.es/cataluna/2026/06/22/6a3808cdfdddff3a488b45ba.html](https://www.elmundo.es/cataluna/2026/06/22/6a3808cdfdddff3a488b45ba.html)
-
-### Jero García, escritor: "El peor 'bullying' es el que provoca la invisibilidad; un niño prefiere que le peguen a sentirse solo"
-- Source: El Mundo
-- summary: Ex boxeador y educador, sabe de los problemas de la juventud a pie de calle y no ceja de luchar contra el acoso escolar dando conferencias en los colegios. Publica 'Camino de vuelta', donde todo, por duro que parezca, es verdad. Leer
-- Published: Mon, 22 Jun 2026 00:19:49 +0200
-- Link: [https://www.elmundo.es/papel/lideres/2026/06/22/6a33cf19e4d4d82b618b4583.html](https://www.elmundo.es/papel/lideres/2026/06/22/6a33cf19e4d4d82b618b4583.html)
-
-### Xavier Torrens, experto en seguridad: «En España la violencia del narco alcanzará pronto a la población»
-- Source: El Mundo
-- summary: Alerta de que España, principal productor europeo de cannabis, está importando el crimen organizado, y que esté ya entró en la fase de corromper a políticos, jueces, fiscales y policías Leer
-- Published: Mon, 22 Jun 2026 01:30:39 +0200
-- Link: [https://www.elmundo.es/cataluna/2026/06/22/6a380ae6fc6c831c048b4577.html](https://www.elmundo.es/cataluna/2026/06/22/6a380ae6fc6c831c048b4577.html)
-
-### Más escaleras mecánicas de la calle al Metro para mejorar el acceso: hoy, se estrenan en Prosperidad y, de aquí a septiembre, en San Blas y Estrella
-- Source: El Mundo
-- summary: La Comunidad de Madrid invertirá 3,5 millones de euros para hacer más cómodo el uso del transporte público al viajero Leer
-- Published: Mon, 22 Jun 2026 00:20:53 +0200
-- Link: [https://www.elmundo.es/madrid/2026/06/22/6a37cf04fc6c8353588b4590.html](https://www.elmundo.es/madrid/2026/06/22/6a37cf04fc6c8353588b4590.html)
-
-### Chronovisor, la fascinante primera película de la historia para ser exclusivamente leída
-- Source: El Mundo
-- summary: Cinemajove enmudece entusiasmado con la película de los estadounidenses Kevin Walker y Jack Auen, un vertiginoso juguete borgiano que inventa el noir de biblioteca Leer
-- Published: Sun, 21 Jun 2026 21:35:03 +0200
-- Link: [https://www.elmundo.es/cultura/cine/2026/06/21/6a37d26fe4d4d87c398b458c.html](https://www.elmundo.es/cultura/cine/2026/06/21/6a37d26fe4d4d87c398b458c.html)
-
-### Adiós a los polvos de sol: el producto de maquillaje sencillísimo de aplicar que cambiará tu cara este verano
-- Source: El Mundo
-- summary: El colorete es el fenómeno del año. Según el tono y la aplicación, y con manicuras que lo complementan, se adapta a cualquier ocasión, como acreditan estos cuatro looks realizados con Bourjois y Sally Hansen.  Leer
-- Published: Mon, 22 Jun 2026 00:16:23 +0200
-- Link: [https://www.elmundo.es/yodona/belleza/2026/06/22/6a2fc10ce4d4d8dc038b458c.html](https://www.elmundo.es/yodona/belleza/2026/06/22/6a2fc10ce4d4d8dc038b458c.html)
-
-### Álex Rayón, experto en Inteligencia Artificial: "La IA no viene a sustituir al enólogo, sino a quitarle horas de Excel"
-- Source: El Mundo
-- summary: Mientras drones y algoritmos radiografían la viña y ordenan el caos de cifras, este especialista en transformación digital reivindica un modelo en el que la tecnología hace el trabajo sucio y la intuición del bodeguero firma el vino Leer
-- Published: Mon, 22 Jun 2026 01:30:41 +0200
-- Link: [https://www.elmundo.es/metropoli/elmundovino/2026/06/22/6a35063521efa076218b45a0.html](https://www.elmundo.es/metropoli/elmundovino/2026/06/22/6a35063521efa076218b45a0.html)
+### Account-History Features for Social Bot Detection in the Era of Large Language Models [SCORE: 81/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26127
+- **AI Summary:**
+- Investigates the effectiveness of account-history features for social bot detection, given that LLMs can generate human-like text, weakening content-based detection.- A random forest model using only account-history features achieved ROC-AUC of 0.977 on a Twitter corpus, outperforming content-only baselines (0.830).- Adversarial settings confirmed that content classifiers degrade significantly, while behavioral classifiers remain robust, suggesting account-history features are primary signals.
+- **Justification:** This paper presents a paradigm-shifting insight for social bot detection, demonstrating the critical and enduring importance of account-history features over content in the LLM era, with immediate and widespread implications for social media integrity.
+- **Metrics:** Immediacy(15), Scale(18), Permanence(15), Reverberance(18), Novelty(15)
+
+---
+
+### Hot AI in Cold Space: Thermal-Crosstalk-Aware Scheduling for Sustainable Orbital AI Clusters [SCORE: 75/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26150
+- **AI Summary:**
+- Identifies the 'Proximity-Thermal Paradox' in orbital data centers where high-density AI training causes thermal stagnation.
+- Proposes Thermal-Load Balancing (TLB) to treat spatial cooling variances as a primary resource management dimension.
+- Aims to extend hardware lifespan and maintain model performance by dynamically migrating workloads to cooler units.
+- **Justification:** Addresses a critical bottleneck for the future of orbital infrastructure and sustainable AI, representing a high-stakes engineering challenge.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(15), Reverberance(15), Novelty(15)
+
+---
+
+### AlgoEvolve: LLM-driven Meta-evolution of Algorithmic Trading Programs [SCORE: 75/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26173
+- **AI Summary:**
+Presents AlgoEvolve, an LLM-driven framework for the evolutionary discovery of algorithmic trading strategies. Features a meta-evolutionary loop that optimizes prompts to improve search heuristics. Demonstrates emergent, regime-adaptive logic in complex, noisy financial environments.
+- **Justification:** Significant application of LLM-driven evolutionary computation to high-stakes, non-stationary financial environments, showing potential for autonomous strategy generation.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(15), Reverberance(15), Novelty(15)
+
+---
+
+### KG-TRACE: A Neuro-Symbolic Framework for Mechanistic Grounding in Antimicrobial Resistance Prediction [SCORE: 75/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26179
+- **AI Summary:**
+Presents KG-TRACE, a neuro-symbolic framework for antimicrobial resistance prediction. Integrates WHO knowledge graphs to provide mechanistic grounding for neural genomic models. Introduces the Biological Grounding Ratio (BGR) to quantify alignment between AI predictions and biological pathways.
+- **Justification:** Strong contribution to clinical AI trust by bridging neural predictive models with symbolic biological knowledge graphs.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(15), Reverberance(15), Novelty(15)
+
+---
+
+### Generative AI and Copyright Infringement: A Legal-Technical Analysis of AI Music Generation Systems Under 17 U.S.C. Title 17 [SCORE: 70/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26111
+- **AI Summary:**
+The paper maps AI technical components to copyright risks, distinguishing between protected lyrics/melodies and less-regulated vocal likeness. It identifies a regulatory gap in federal law regarding synthetic voice cloning. The analysis provides a framework for navigating the evolving landscape of AI music generation liability.
+- **Justification:** This addresses a high-stakes legal intersection of AI and intellectual property that is currently driving significant litigation and potential legislative reform.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+### The Governance Inversion Hypothesis: Why More AI Regulation May Produce Less Organisational Control [SCORE: 70/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26117
+- **AI Summary:**
+Introduces the Governance Inversion Hypothesis, arguing that excessive regulatory formalization can paradoxically erode operational control over AI. Identifies four mechanisms of failure: authority fragmentation, symbolic expansion, externalization, and paralysis. Suggests that current governance trends may create institutions that appear compliant while losing actual oversight capacity.
+- **Justification:** The Governance Inversion Hypothesis offers a critical, high-level insight into the structural failure of current AI regulatory trends, which is highly relevant to policy makers.
+- **Metrics:** Immediacy(10), Scale(15), Permanence(15), Reverberance(15), Novelty(15)
+
+---
+
+### Multilateral Clearing on Invoice Graphs: Path Enabled Compensation Versus Cycle Restricted Netting [SCORE: 67/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26126
+- **AI Summary:**
+- Develops a path-enabled clearing framework for invoice-backed trade networks to mitigate liquidity stress from late payments.- Introduces Byppay, a local compensation procedure that reduces obligations along open chains, unlike cycle-restricted netting which only clears obligations in directed cycles.- Empirical analysis on a 2021 IMI invoice corpus (EUR 19.67 billion) shows Byppay achieves EUR 10.60 billion (53.87%) debt relief, significantly more than cycle-restricted netting's EUR 4.13 billion (20.99%).
+- **Justification:** This paper offers a highly practical and empirically validated solution to a widespread economic problem (late payments and liquidity stress), with significant potential for immediate and structural impact on businesses and supply chains.
+- **Metrics:** Immediacy(10), Scale(15), Permanence(15), Reverberance(15), Novelty(12)
+
+---
+
+### Thinking Like a Scientist? A Structural Study of LLM-Generated Research Methods [SCORE: 67/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26130
+- **AI Summary:**
+- Analyzes the methodological suggestions of GPT-5.1, Gemini 3 Pro, and DeepSeek-V3.2 when prompted with research questions from arXiv computer science papers.- Finds that LLMs suggest a much narrower range of methods compared to human-authored papers, with the effective number of model entities contracting significantly.- LLM-to-paper correlations are lower than inter-LLM correlations, indicating shared distortions and a risk of narrowing researchers' methodological search space.
+- **Justification:** This paper provides critical, novel insights into the inherent biases and limitations of leading LLMs in guiding scientific methodology, with immediate and significant implications for the research community and the future of AI-assisted discovery.
+- **Metrics:** Immediacy(10), Scale(12), Permanence(15), Reverberance(15), Novelty(15)
+
+---
+
+### Code evolution for link prediction in complex networks [SCORE: 65/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26132
+- **AI Summary:**
+- Explores automated code-evolution systems for generating machine-designed methods for link prediction in complex networks.- Evolved algorithms significantly outperform human-designed methods (average AUC 0.915 vs. 0.783 over 580 networks) and are more computationally efficient.- The discovered methods incorporate novel selections and combinations of node- and link-features, illustrating the potential of LLMs and genetic algorithms for algorithmic innovation and scientific discovery.
+- **Justification:** This paper showcases a significant advancement in automated algorithmic discovery, demonstrating that machine-designed methods can outperform human experts in complex tasks like link prediction, with broad and lasting implications for scientific innovation.
+- **Metrics:** Immediacy(8), Scale(12), Permanence(15), Reverberance(15), Novelty(15)
+
+---
+
+### Refusal Lives Downstream of Persona in Chat Models [SCORE: 65/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26161
+- **AI Summary:**
+- Demonstrates that refusal in chat models is gated by persona, rather than being an isolated mechanism.
+- Shows that steering a model toward a compliant persona can suppress refusal rates from 97% to 2%.
+- Suggests that refusal is computed downstream, allowing for targeted intervention in late-layer activation space.
+- **Justification:** Significant insight into LLM safety and steerability, revealing that refusal mechanisms are gated by persona, which has major implications for model alignment.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(10), Reverberance(10), Novelty(15)
+
+---
+
+### \chisao{}: A GPU-Native Parallel Optimizer for Multimodal Black-Box Functions via Convergence-Anticonvergence Oscillation [SCORE: 65/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26164
+- **AI Summary:**
+- Introduces \chisao{}, a GPU-native optimizer using convergence-anticonvergence oscillation to escape local traps.
+- Achieves 100% mode recovery on complex benchmarks where CPU baselines fail, with up to 39x speedup.
+- Operates as a derivative-free, population-based optimizer suitable for high-dimensional multimodal black-box functions.
+- **Justification:** A highly efficient, GPU-native optimization algorithm that provides massive speedups for black-box functions, with broad utility in scientific computing.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(10), Reverberance(10), Novelty(15)
+
+---
+
+### The Effortless Trap: Productive Struggle, AI, and the Illusion of Learning [SCORE: 65/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26181
+- **AI Summary:**
+Analyzes the impact of AI on student learning, identifying the 'effortless trap' where AI replaces necessary cognitive work. Proposes a six-move pedagogical model to guide AI placement in curricula. Demonstrates that well-engineered AI tutors can double learning outcomes compared to unguarded tools.
+- **Justification:** Provides a critical, evidence-based framework for AI integration in education, addressing the 'illusion of learning' problem.
+- **Metrics:** Immediacy(10), Scale(15), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+### Mitigating High-Frequency Geometric Noise in Non-Parametric 1-Bit Sparse [SCORE: 60/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26137
+- **AI Summary:**
+- Evaluates a deterministic, non-parametric dual-manifold execution framework for energy-efficient neuromorphic computing, mapping integer vectors into an ultra-sparse, 1-bit binary population code.- Identifies and mitigates high-frequency geometric noise during linear reconstruction, which is strictly orthogonal to the core signal topology.- Demonstrates that a low-overhead, hardware-level digital low-pass filter eliminates this artifact, achieving near-zero reconstruction errors and validating a stable, multiplier-free alternative for edge-AI hardware.
+- **Justification:** This paper offers a significant and novel hardware-level innovation for energy-efficient neuromorphic computing, addressing a critical challenge for edge-AI with potential for structural impact on future computing architectures.
+- **Metrics:** Immediacy(8), Scale(10), Permanence(15), Reverberance(12), Novelty(15)
+
+---
+
+### Necessary but Not Sufficient: Temperature Control and Reproducibility in LLM-as-Judge Safety Evaluations [SCORE: 60/100]
+- **Source:** arXiv (Computer Science) | **Link:** https://arxiv.org/abs/2606.26185
+- **AI Summary:**
+• LLM-as-judge safety evaluations are often non-deterministic due to unseeded or default temperature settings, leading to significant pass/fail variance. • Even with temperature=0, borderline safety cases remain non-reproducible, exposing a structural flaw in current evaluation harnesses. • Researchers recommend treating grader disagreement as a mandatory health metric to prevent noise from being misreported as safety properties.
+- **Justification:** Highlights a critical, overlooked vulnerability in AI safety evaluation pipelines that directly impacts the reliability of current deployment gating mechanisms.
+- **Metrics:** Immediacy(15), Scale(10), Permanence(10), Reverberance(15), Novelty(10)
+
+---
+
+### InSilico Is on a Mission: Be No. 1 in China, Create ‘God Drug’ With AI [SCORE: 60/100]
+- **Source:** The Wall Street Journal - Tech | **Link:** https://www.wsj.com/business/insilico-is-on-a-mission-be-no-1-in-china-create-god-drug-with-ai-8f59f9eb?mod=rss_Technology
+- **AI Summary:**
+- InSilico, a pharmaceutical company, aims to become the leading player in China for AI-driven drug discovery.- The company, which was the first to advance an AI-developed drug to clinical trials, is now focusing on creating "longevity treatments."- This strategy leverages generative AI to develop what they term a "God Drug," indicating a significant long-term vision for healthcare innovation.
+- **Justification:** InSilico's ambitious goal to lead AI-driven drug discovery, particularly for longevity, represents a potentially paradigm-shifting endeavor with significant long-term reverberations for healthcare.
+- **Metrics:** Immediacy(5), Scale(10), Permanence(15), Reverberance(15), Novelty(15)
+
+---
+
+## Economics (2 articles)
+
+### Brutal nights and humidity mark Europe’s record June temperatures [SCORE: 81/100]
+- **Source:** Financial Times | **Link:** https://www.ft.com/content/a2ea8432-f871-40c9-89bf-a18ee091413f
+- **AI Summary:**
+- Europe experienced record-breaking temperatures in June, characterized by brutal nights and high humidity.- Scientists report that daytime temperature peaks on the continent are rising three times faster than the wider rate of global warming.- These extreme conditions have immediate and widespread impacts on public health, infrastructure, and various sectors across Europe.
+- **Justification:** Record-breaking temperatures across Europe, accelerating three times faster than global warming, represent a critical and immediate manifestation of a permanent climate shift with widespread and severe reverberations.
+- **Metrics:** Immediacy(15), Scale(18), Permanence(18), Reverberance(18), Novelty(12)
+
+---
+
+### Meloni redesigns Italy’s election rules to stay in power [SCORE: 65/100]
+- **Source:** Financial Times | **Link:** https://www.ft.com/content/e5ce6c30-e813-474f-a9b6-a8b26192d35a
+- **AI Summary:**
+- Italian Prime Minister Meloni is implementing changes to national election rules.
+- Opposition parties characterize the move as an authoritarian attempt to consolidate power.
+- The redesign of electoral mechanisms raises concerns about the stability and fairness of future Italian governance.
+- **Justification:** Structural changes to election laws in a G7 nation represent a significant democratic backsliding risk with regional implications.
+- **Metrics:** Immediacy(15), Scale(10), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+## World (31 articles)
+
+### Asia stock markets slide as tech shares slump [SCORE: 85/100]
+- **Source:** BBC News - World | **Link:** https://www.bbc.co.uk/news/articles/ce8jz40k00ro?at_medium=RSS&at_campaign=rss
+- **AI Summary:**
+- Asian stock markets experienced a sharp sell-off, with South Korea's Kospi triggering circuit breakers.
+- Investors are reassessing the high valuations of AI-related tech firms amid rising component costs for consumer electronics.
+- The market volatility reflects growing skepticism regarding the immediate profitability of massive AI infrastructure investments.
+- **Justification:** A major correction in Asian tech markets triggered by AI valuation concerns and component cost inflation signals a potential global liquidity and sentiment shift.
+- **Metrics:** Immediacy(20), Scale(20), Permanence(15), Reverberance(20), Novelty(10)
+
+---
+
+### Cargo ship hit by projectile in Hormuz as Iran issues renewed passage warning [SCORE: 85/100]
+- **Source:** Euronews | **Link:** http://www.euronews.com/2026/06/25/cargo-ship-hit-by-projectile-in-hormuz-as-iran-issues-renewed-passage-warning
+- **AI Summary:**
+A cargo ship was struck by a projectile in the Strait of Hormuz, prompting the IMO to pause evacuation efforts for stranded vessels. The incident follows an explicit warning from Iran's IRGC that vessels transiting without their permission would face consequences. This escalation threatens a vital global energy corridor and complicates international efforts to secure maritime passage.
+- **Justification:** The attack on a vessel in a critical maritime chokepoint, combined with explicit Iranian threats, represents a major escalation in regional instability and global energy security risks.
+- **Metrics:** Immediacy(19), Scale(18), Permanence(15), Reverberance(19), Novelty(14)
+
+---
+
+### Iran Strikes Ship in Strait of Hormuz, Undermining Efforts to Restore Traffic [SCORE: 83/100]
+- **Source:** The New York Times - World | **Link:** https://www.nytimes.com/2026/06/25/world/middleeast/iran-strait-of-hormuz-threat-rubio-bahrain.html
+- **AI Summary:**
+• Iran has conducted a strike on a ship in the Strait of Hormuz, confirming threats to disrupt global shipping. • The attack directly undermines U.S.-led efforts to secure the waterway and stabilize regional peace agreements. • This kinetic action risks triggering a broader maritime conflict and significant volatility in global energy markets.
+- **Justification:** A direct kinetic strike in a critical global maritime chokepoint constitutes a major escalation with immediate global economic and security implications.
+- **Metrics:** Immediacy(20), Scale(18), Permanence(15), Reverberance(20), Novelty(10)
+
+---
+
+### Rescues and prayers a day after Venezuelan earthquakes [SCORE: 80/100]
+- **Source:** BBC News - World | **Link:** https://www.bbc.co.uk/news/videos/cz6vny382q9o?at_medium=RSS&at_campaign=rss
+- **AI Summary:**
+- Two consecutive earthquakes (7.2 and 7.5 magnitude) have devastated Venezuela, particularly the coastal state of La Guaira. - Official reports indicate over 235 deaths and thousands of injuries, with infrastructure collapse widespread. - Rescue efforts are hampered by insufficient resources, government mismanagement, and a massive number of missing persons.
+- **Justification:** A major natural disaster in a politically unstable, oil-rich nation creates significant humanitarian and potential systemic risks.
+- **Metrics:** Immediacy(20), Scale(15), Permanence(15), Reverberance(15), Novelty(15)
+
+---
+
+### Supreme Court Expands Trump’s Power Over Immigration With TPS and Southern Border Decisions [SCORE: 80/100]
+- **Source:** The New York Times - World | **Link:** https://www.nytimes.com/2026/06/25/us/politics/supreme-court-temporary-protected-status.html
+- **AI Summary:**
+• The Supreme Court ruled in favor of the administration regarding the rescission of deportation protections. • The decision grants the executive branch broader authority to restrict entry at the southern border. • The ruling impacts hundreds of thousands of individuals and sets a major legal precedent for immigration enforcement.
+- **Justification:** A major judicial ruling that fundamentally alters immigration policy and executive authority, carrying significant political and social weight.
+- **Metrics:** Immediacy(20), Scale(20), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+### Venezuela: 235 dead in devastating, back-to-back earthquakes [SCORE: 80/100]
+- **Source:** deutsche welle | **Link:** https://www.dw.com/en/venezuela-235-dead-in-devastating-back-to-back-earthquakes/live-77699720?maca=en-rss-en-all-1573-rdf
+- **AI Summary:**
+Twin earthquakes of magnitude 7.2 and 7.5 have killed at least 235 people in Venezuela, with over 1,500 injured. The government has declared a state of emergency as search-and-rescue operations continue in Caracas and La Guaira. The United States has deployed warships and pledged $150 million in aid to support the disaster response.
+- **Justification:** A major natural disaster with high casualties and significant international military intervention constitutes a high-impact, paradigm-shifting event.
+- **Metrics:** Immediacy(20), Scale(20), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+### US Supreme Court clears way for mass deportations of Haitians and Syrians [SCORE: 78/100]
+- **Source:** Euronews | **Link:** http://www.euronews.com/2026/06/25/us-supreme-court-clears-way-for-mass-deportations-of-haitians-and-syrians
+- **AI Summary:**
+The US Supreme Court ruled 6-3 that the Trump administration has unreviewable authority to terminate Temporary Protected Status (TPS) for foreign nationals. The decision immediately threatens the legal status of roughly 350,000 Haitians and 6,000 Syrians, with potential future impacts on citizens of El Salvador, Lebanon, Sudan, and Ukraine. The majority opinion explicitly rejected claims of racial bias in the administration's decision-making process.
+- **Justification:** The Supreme Court ruling establishes a significant legal precedent that grants the executive branch unchecked authority over humanitarian protections, directly impacting hundreds of thousands of lives.
+- **Metrics:** Immediacy(18), Scale(15), Permanence(16), Reverberance(17), Novelty(12)
+
+---
+
+### UN pauses Strait of Hormuz evacuation plan after cargo ship attacked [SCORE: 75/100]
+- **Source:** BBC News - World | **Link:** https://www.bbc.co.uk/news/articles/cjwg9np904qo?at_medium=RSS&at_campaign=rss
+- **AI Summary:**
+- The UN has paused evacuation efforts for 11,000 sailors in the Strait of Hormuz following an attack on a cargo ship.
+- Iran's IRGC previously warned against using non-coordinated routes, complicating maritime safety.
+- The incident undermines recent diplomatic efforts to secure commercial passage through the volatile waterway.
+- **Justification:** The disruption of a critical maritime chokepoint and the failure of UN-led de-escalation efforts poses a direct threat to global energy and supply chain security.
+- **Metrics:** Immediacy(20), Scale(15), Permanence(10), Reverberance(20), Novelty(10)
+
+---
+
+### Supreme Court allows Trump to end protected status for Haitian and Syrian immigrants [SCORE: 75/100]
+- **Source:** BBC News - World | **Link:** https://www.bbc.co.uk/news/articles/c4g8ym422lko?at_medium=RSS&at_campaign=rss
+- **AI Summary:**
+- The Supreme Court ruled 6-3 that the Trump administration can terminate Temporary Protected Status (TPS) for Haitian and Syrian migrants.
+- The ruling limits judicial review of executive immigration decisions and mandates that asylum claims must be made on US soil.
+- The decision creates significant legal risk for hundreds of thousands of residents and potential for widespread deportation.
+- **Justification:** A Supreme Court ruling that enables mass deportation and limits judicial oversight of executive immigration policy is a major structural shift in US domestic policy.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(20), Reverberance(15), Novelty(10)
+
+---
+
+### La tragedia de los terremotos afianza el eje Trump-Venezuela: "Estaremos ahí para nuestros nuevos y grandes amigos" [SCORE: 75/100]
+- **Source:** El Mundo | **Link:** https://www.elmundo.es/internacional/2026/06/26/6a3d3951e9cf4afe278b458e.html
+- **AI Summary:**
+- A major earthquake in Venezuela has triggered an immediate and high-profile humanitarian and logistical response from the US government. - The disaster has solidified a new, cooperative geopolitical alignment between the US and the current Venezuelan administration. - The US is leveraging its military and diplomatic resources to establish a dominant influence over the country's recovery and political trajectory.
+- **Justification:** The convergence of a natural disaster with a major geopolitical realignment in Venezuela under US influence represents a significant shift in regional power dynamics.
+- **Metrics:** Immediacy(18), Scale(15), Permanence(12), Reverberance(16), Novelty(14)
+
+---
+
+### 100,000 jobs and four plants: Volkswagen reportedly plans radical overhaul [SCORE: 75/100]
+- **Source:** Euronews | **Link:** http://www.euronews.com/business/2026/06/26/100000-jobs-and-four-plants-volkswagen-reportedly-plans-radical-overhaul
+- **AI Summary:**
+Volkswagen is reportedly planning its most radical overhaul, potentially cutting up to 100,000 jobs worldwide and closing four German plants, doubling previous estimates. The plan includes spinning off the core Volkswagen brand and components division into independent companies. This upheaval is driven by a deep-rooted structural crisis, declining profits, and increasing competition from Chinese manufacturers.
+- **Justification:** Volkswagen's reported radical overhaul, involving massive job cuts and plant closures, represents a significant structural shift with immediate and long-term economic and operational consequences for a major global company and its workforce.
+- **Metrics:** Immediacy(15), Scale(20), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+### Gulf states weigh living side by side with Iran as Tehran weaponises Hormuz [SCORE: 75/100]
+- **Source:** Euronews | **Link:** http://www.euronews.com/2026/06/26/gulf-states-weigh-living-side-by-side-with-iran-as-tehran-weaponises-hormuz
+- **AI Summary:**
+Gulf states and the US have formed a unified front to address Iranian threats to the Strait of Hormuz and regional security. Despite ongoing peace negotiations, the IRGC continues to challenge maritime freedom, leading to direct confrontations. The GCC remains concerned that the US-Iran framework fails to adequately address Iran's missile capabilities and regional proxy influence.
+- **Justification:** The escalation of tensions in the Strait of Hormuz involving US-GCC coordination against Iranian aggression represents a high-stakes geopolitical shift with immediate global energy market implications.
+- **Metrics:** Immediacy(18), Scale(15), Permanence(12), Reverberance(16), Novelty(14)
+
+---
+
+### Microsoft and Apple raise prices as AI-driven chip shortages hit Xbox, Macs and iPads [SCORE: 75/100]
+- **Source:** Euronews | **Link:** http://www.euronews.com/business/2026/06/26/microsoft-and-apple-raise-prices-as-ai-driven-chip-shortages-hit-xbox-macs-and-ipads
+- **AI Summary:**
+Microsoft and Apple are raising prices on consoles and computers due to a massive surge in memory chip demand from AI data centers. Analysts warn that this component scarcity is an unprecedented challenge for the electronics industry. Further price hikes for other consumer devices, including iPhones, are expected as the AI boom continues to disrupt supply chains.
+- **Justification:** The direct impact of AI-driven hardware shortages on consumer electronics pricing signals a structural shift in the tech supply chain and inflationary pressures.
+- **Metrics:** Immediacy(16), Scale(18), Permanence(14), Reverberance(15), Novelty(12)
+
+---
+
+### Earthquake is devastating blow to Venezuela at time of uncertainty [SCORE: 70/100]
+- **Source:** BBC News - World | **Link:** https://www.bbc.co.uk/news/articles/c3vynpw7rk4o?at_medium=RSS&at_campaign=rss
+- **AI Summary:**
+- Venezuela faces a humanitarian crisis following twin earthquakes amid a fragile post-Maduro political transition.
+- Interim leader Delcy Rodríguez is managing the response while under scrutiny from the US-backed opposition.
+- The disaster highlights the ongoing struggle to reform state infrastructure previously managed by military officials.
+- **Justification:** The intersection of a major natural disaster with a regime change and US military intervention creates a high-stakes geopolitical environment.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+### El exilio metropolitano ya no es asequible: compartir piso es más caro en el cinturón de las grandes ciudades y llega a superar los 700 euros por habitación [SCORE: 70/100]
+- **Source:** El Mundo | **Link:** https://www.elmundo.es/economia/vivienda/2026/06/25/6a3d09bffc6c833e038b4593.html
+- **AI Summary:**
+• Rental prices for rooms in the outskirts of major Spanish cities now exceed those in city centers. • Municipalities far from Madrid and Barcelona are experiencing extreme price pressure due to limited housing supply and high demand. • The traditional strategy of moving to the periphery for affordability has effectively collapsed.
+- **Justification:** This highlights a significant structural failure in the housing market, indicating that the 'metropolitan exile' strategy for affordability is no longer viable.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+### El Gobierno y el PP sí pactan para blindar el secretismo sobre el precio de los medicamentos [SCORE: 70/100]
+- **Source:** El Mundo | **Link:** https://www.elmundo.es/ciencia-y-salud/salud/2026/06/26/6a3d0ec8e85ece332b8b45b6.html
+- **AI Summary:**
+• Major Spanish political parties have reached a consensus to legally mandate the confidentiality of drug prices paid by the state. • The government argues this secrecy is necessary to ensure patient access to innovation, while critics claim it prevents effective public oversight. • The legislation is being fast-tracked through secondary amendments to avoid public scrutiny.
+- **Justification:** A bipartisan legislative move to institutionalize opacity in public spending on pharmaceuticals represents a significant shift in governance and transparency.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+### How a Jet Fuel Refinery Is Scrambling After the Iran War Oil Shock [SCORE: 70/100]
+- **Source:** The New York Times - World | **Link:** https://www.nytimes.com/2026/06/26/world/asia/iran-war-korea-jet-fuel.html
+- **AI Summary:**
+• Ulsan-based refineries are struggling to pivot away from Middle Eastern oil imports. • The shift is necessitated by supply shocks resulting from the Iran conflict. • The disruption threatens jet fuel supply chains to the U.S. West Coast.
+- **Justification:** Energy supply chain disruptions in the wake of conflict represent a significant structural risk to global fuel markets.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+### Devastating Earthquakes Will Test Venezuela’s Newfound Alliance With U.S. [SCORE: 70/100]
+- **Source:** The New York Times - World | **Link:** https://www.nytimes.com/2026/06/25/world/americas/devastating-earthquakes-will-test-venezuelas-newfound-alliance-with-us.html
+- **AI Summary:**
+• Venezuela's earthquake disaster tests the viability of its new alliance with the U.S. • The U.S. administration faces pressure to provide aid following its previous military intervention. • The crisis forces a pivot from rhetoric to tangible humanitarian and political action.
+- **Justification:** The intersection of natural disaster and military intervention creates a high-stakes diplomatic and operational dilemma.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+### Europe heat wave 'virtually impossible' without human impact [SCORE: 70/100]
+- **Source:** deutsche welle | **Link:** https://www.dw.com/en/europe-heat-wave-virtually-impossible-without-human-impact/live-77663026?maca=en-rss-en-all-1573-rdf
+- **AI Summary:**
+A rapid attribution study concludes Europe's record heat wave is 'virtually impossible' without human-induced climate change. The extreme weather has forced the cancellation of major festivals and caused over 50 drownings in France. Utility provider EDF is committing €80 million to install cooling systems in schools to mitigate future heat-stress risks.
+- **Justification:** The extreme heat wave represents a significant, recurring climate-driven disruption to European infrastructure and public safety.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+### US Supreme Court sides with Bayer over Roundup cancer suits [SCORE: 70/100]
+- **Source:** deutsche welle | **Link:** https://www.dw.com/en/us-supreme-court-sides-with-bayer-over-roundup-cancer-suits/a-77713004?maca=en-rss-en-all-1573-rdf
+- **AI Summary:**
+The US Supreme Court ruled 7-2 to limit lawsuits against Bayer regarding Roundup weedkiller, citing federal EPA labeling standards. The decision overturns a $1.25 million verdict and provides a legal shield for the company against state-level cancer warning claims. The ruling has drawn bipartisan criticism regarding corporate accountability versus regulatory clarity.
+- **Justification:** A Supreme Court ruling on corporate liability and regulatory preemption has significant long-term implications for US tort law and industry regulation.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+### Europe’s severe June heatwave ‘virtually impossible’ 50 years ago, climate scientists say [SCORE: 70/100]
+- **Source:** France 24 - Europe | **Link:** https://www.france24.com/en/europe/20260626-europe-severe-june-heatwave-virtually-impossible-50-years-go-climate-scientists-say
+- **AI Summary:**
+Climate scientists state that Europe's severe June heatwave would have been 'virtually impossible' 50 years ago, attributing its intensity unequivocally to human-caused climate change. A similar heatwave in 1976 would have been 3.5°C cooler, and even compared to 2003, the current event is notably extreme. The study highlights the rapid increase in intense heat events due to global warming.
+- **Justification:** This article presents a significant scientific finding directly linking current extreme weather events to climate change, with broad implications for future climate policy and understanding.
+- **Metrics:** Immediacy(10), Scale(15), Permanence(15), Reverberance(15), Novelty(15)
+
+---
+
+### Iran: UK navy reports cargo vessel hit in Strait of Hormuz [SCORE: 66/100]
+- **Source:** deutsche welle | **Link:** https://www.dw.com/en/iran-uk-navy-reports-cargo-vessel-hit-in-strait-of-hormuz/live-77702733?maca=en-rss-en-all-1573-rdf
+- **AI Summary:**
+A cargo vessel was struck by an unknown projectile in the Strait of Hormuz, prompting the IMO to pause seafarer evacuation plans. The incident occurs amidst heightened tensions as the US and Iran clash over maritime security and regional proxy conflicts. Israel maintains a hardline stance on Hezbollah disarmament, complicating ongoing ceasefire negotiations.
+- **Justification:** The attack on a vessel in the Strait of Hormuz directly threatens global energy supply chains and risks escalating regional conflict.
+- **Metrics:** Immediacy(18), Scale(15), Permanence(10), Reverberance(18), Novelty(5)
+
+---
+
+### Oil price falls back to pre-Iran war levels [SCORE: 65/100]
+- **Source:** BBC News - World | **Link:** https://www.bbc.co.uk/news/articles/c0jy7d7wzv4o?at_medium=RSS&at_campaign=rss
+- **AI Summary:**
+- Brent crude prices have returned to pre-conflict levels following the partial reopening of the Strait of Hormuz. - A US-Iran Memorandum of Understanding has facilitated a gradual resumption of maritime traffic, though volumes remain below pre-war averages. - Despite the de-escalation, analysts warn that the situation remains volatile and susceptible to renewed regional tensions.
+- **Justification:** The stabilization of a critical global energy chokepoint is a significant geopolitical and economic development, though it remains fragile.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(10), Reverberance(15), Novelty(10)
+
+---
+
+### After Supreme Court TPS Ruling, What Conditions May Haitian and Syrian Deportees Face? [SCORE: 65/100]
+- **Source:** The New York Times - World | **Link:** https://www.nytimes.com/2026/06/25/world/americas/haitians-syrians-deportations-us.html
+- **AI Summary:**
+• The Supreme Court authorized the termination of TPS for certain Haitian and Syrian nationals. • The ruling enables the administration to proceed with mass deportations. • Legal experts are assessing the humanitarian risks for those returned to their countries of origin.
+- **Justification:** Supreme Court rulings on humanitarian protections have immediate and long-term implications for domestic policy and international relations.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(15), Reverberance(15), Novelty(5)
+
+---
+
+### Latin America: Why are voters turning to the right? [SCORE: 65/100]
+- **Source:** deutsche welle | **Link:** https://www.dw.com/en/latin-america-why-are-voters-turning-to-the-right/a-77711864?maca=en-rss-en-all-1573-rdf
+- **AI Summary:**
+Latin America is experiencing a significant political shift toward right-wing and populist leadership. Experts attribute this trend to widespread dissatisfaction with crime, social inequality, and the failure of incumbent governments. Upcoming elections in Brazil are expected to further test the durability of this regional 'punitive populism' model.
+- **Justification:** The regional political shift in Latin America represents a major geopolitical realignment with long-term consequences for the hemisphere.
+- **Metrics:** Immediacy(10), Scale(15), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+### ​​Paris court rules TotalEnergies must account for indirect emissions and tighten climate policies [SCORE: 65/100]
+- **Source:** Euronews | **Link:** http://www.euronews.com/2026/06/26/paris-court-rules-totalenergies-must-account-for-indirect-emissions-and-tighten-climate-po
+- **AI Summary:**
+A Paris court ruled that TotalEnergies must account for indirect emissions and strengthen its climate policies. While the ruling stopped short of full liability for customer actions, it marks a major legal shift in corporate environmental accountability. The decision is expected to influence future climate litigation against major energy firms.
+- **Justification:** A significant legal precedent that expands corporate liability for indirect emissions, likely to trigger widespread litigation and policy shifts.
+- **Metrics:** Immediacy(10), Scale(15), Permanence(15), Reverberance(15), Novelty(10)
+
+---
+
+### UK foreign policy to remain unchanged despite government transition, deputy PM Lammy says [SCORE: 65/100]
+- **Source:** Euronews | **Link:** http://www.euronews.com/my-europe/2026/06/26/uk-foreign-policy-to-remain-unchanged-despite-government-transition-deputy-pm-lammy-says
+- **AI Summary:**
+- UK Deputy PM David Lammy confirms foreign policy continuity despite the upcoming leadership transition. - The UK pledged £290 million to Ukraine, signaling sustained commitment. - The EU-UK summit has been postponed due to the domestic political shift in London.
+- **Justification:** The UK political transition and its impact on foreign policy and EU relations represent a significant, albeit expected, shift in European stability.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(10), Reverberance(15), Novelty(10)
+
+---
+
+### Death toll from Venezuela earthquakes rises to 235, search and rescue efforts continue [SCORE: 64/100]
+- **Source:** Euronews | **Link:** http://www.euronews.com/2026/06/26/deal-toll-from-venezuela-earthquakes-rises-to-235-as-state-led-search-and-rescue-efforts-c
+- **AI Summary:**
+A pair of powerful earthquakes in Venezuela has resulted in at least 235 deaths and thousands of injuries, marking a major national disaster. The US has temporarily waived sanctions to facilitate humanitarian aid, though rescue efforts are hampered by infrastructure damage and political instability. The event adds significant pressure to the current administration.
+- **Justification:** A major natural disaster in a politically unstable nation like Venezuela creates immediate humanitarian and potential regional security consequences.
+- **Metrics:** Immediacy(18), Scale(14), Permanence(10), Reverberance(12), Novelty(10)
+
+---
+
+### Rescuers search rubble for survivors as Venezuela earthquakes kill at least 235 [SCORE: 60/100]
+- **Source:** BBC News - World | **Link:** https://www.bbc.co.uk/news/articles/cjegdqw5d3yo?at_medium=RSS&at_campaign=rss
+- **AI Summary:**
+- Twin earthquakes exceeding magnitude 7.0 have struck Venezuela.
+- Casualties are confirmed at 235 deaths with over 4,300 injured.
+- The disaster exacerbates existing infrastructure failures and humanitarian distress in the country.
+- **Justification:** A major natural disaster in a politically unstable state creates immediate humanitarian and operational crises.
+- **Metrics:** Immediacy(20), Scale(15), Permanence(10), Reverberance(10), Novelty(5)
+
+---
+
+### Zelensky Steps Up Threats Against Belarus for Aiding Drone Attacks [SCORE: 60/100]
+- **Source:** The New York Times - World | **Link:** https://www.nytimes.com/2026/06/26/world/europe/zelensky-belarus-drones-relay.html
+- **AI Summary:**
+• Ukraine has issued formal threats against Belarus regarding its alleged support for Russian drone strikes. • Intelligence suggests Belarus is providing radio relay infrastructure to improve Russian drone targeting precision. • This development risks drawing Belarus deeper into the active conflict zone.
+- **Justification:** Escalation of the Ukraine-Russia conflict involving Belarus signals a potential widening of the theater of operations.
+- **Metrics:** Immediacy(15), Scale(12), Permanence(8), Reverberance(15), Novelty(10)
+
+---
+
+### Two Earthquakes Hit Venezuela: What to Know About Death Toll, Damage and Rescue Response [SCORE: 60/100]
+- **Source:** The New York Times - World | **Link:** https://www.nytimes.com/2026/06/25/world/americas/venezuela-earthquakes-death-toll-aid-response.html
+- **AI Summary:**
+• Two major back-to-back earthquakes struck Venezuela's northern, densely populated regions. • The second tremor is confirmed as the most powerful seismic event in the country in over 100 years. • Authorities are currently assessing the death toll and the extent of infrastructure damage.
+- **Justification:** High-impact disaster reporting detailing the strongest seismic event in a century, which carries significant regional instability risks.
+- **Metrics:** Immediacy(15), Scale(15), Permanence(10), Reverberance(10), Novelty(10)
 
 ---
 

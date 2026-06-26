@@ -1,7 +1,16 @@
 import os
 from google import genai
 from typing import Optional
+from google.genai.errors import APIError
+import time
+from pathlib import Path
 
+
+FALLBACK_MODELS = [
+    "gemini-3.5-flash",
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite"
+]
 
 def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:
     """Return a secret from Streamlit or environment variables."""
@@ -105,16 +114,6 @@ def generate_briefing(
     Returns:
         str: The generated briefing.
     """
-    import time
-    import logging
-    import httpx
-    from pathlib import Path
-
-    logger = logging.getLogger(__name__)
-    logging.basicConfig(level=logging.INFO)
-
-    max_attempts = 3
-    backoff_base = 5
 
     # Save the prompt to a temporary file for debugging if all attempts fail
     dump_path = Path("output/debug_prompt.txt")
@@ -123,71 +122,32 @@ def generate_briefing(
     except Exception:
         pass
 
-    last_exc = None
-    for attempt in range(1, max_attempts + 1):
+    for model_name in FALLBACK_MODELS:
         try:
-            logger.info(f"Generating briefing (attempt {attempt}/{max_attempts})...")
+            
             response = client.models.generate_content(
-                model="gemini-3.5-flash",
+                model=model_name,
                 contents=prompt,
             )
-
-            # Extract and display token usage
-            usage = getattr(response, "usage_metadata", None)
-            if usage:
-                prompt_tokens = getattr(usage, "prompt_token_count", None)
-                output_tokens = getattr(usage, "candidates_token_count", None)
-                try:
-                    total_tokens = (prompt_tokens or 0) + (output_tokens or 0)
-                except Exception:
-                    total_tokens = None
-
-                logger.info("--- Token Usage ---")
-                logger.info(f"Prompt tokens: {prompt_tokens}")
-                logger.info(f"Output tokens: {output_tokens}")
-                logger.info(f"Total tokens used: {total_tokens}")
-                logger.info("-------------------")
-
+            
             return response.text if getattr(response, "text", None) else "No briefing generated."
 
-        except Exception as e:
-            last_exc = e
-            # Log detailed info for httpx/httpcore errors
-            if isinstance(e, httpx.HTTPError):
-                logger.warning(f"HTTP error during generate_content: {e!r}")
+        except APIError as api_err:
+            # Catch transient server overloads
+            if api_err.code == 503:
+                print(f"⚠️ Model {model_name} is overloaded (503). Attempting fallback...")
+                time.sleep(5)
+                continue
             else:
-                logger.warning(f"Error during generate_content: {e!r}")
+                print(f"Google API Error ({api_err.code}): {api_err.message}")
+                time.sleep(5)
+                continue 
 
-            # If final attempt, raise, otherwise back off and retry
-            if attempt == max_attempts:
-                logger.error("All attempts to generate briefing failed. Prompt saved to debug_prompt.txt")
-                raise
+        except Exception as e:
+            print(f"Unexpected system failure on model {model_name}: {e}")
+            time.sleep(5)
+            continue
 
-            sleep_seconds = backoff_base ** attempt
-            logger.info(f"Retrying after {sleep_seconds}s...")
-            time.sleep(sleep_seconds)
-
-    # If loop exits unexpectedly, re-raise last exception
-    if last_exc:
-        raise last_exc
-    return "No briefing generated."
-
-
-def save_briefing(
-    briefing: str,
-    output_path: str
-):
-    """Saves the generated briefing to a specified file.
-
-    Args:
-        briefing (str): The generated briefing.
-        output_path (str): The path to the file where the briefing will be saved.
-    """
-    with open(
-        output_path,
-        "w",
-        encoding="utf-8"
-    ) as f:
-
-        f.write(briefing)
+    print("🚨 All fallback models exhausted. Synthesis failed.")
+    return "## Pipeline Error\n\nThe ISOLATE pipeline successfully enriched the data, but the final synthesis models were entirely unavailable due to extreme cloud demand. Please run the pipeline again later."
 
