@@ -6,7 +6,7 @@ from models.article import Article
 
 now_utc = datetime.now(timezone.utc)
 yesterday_utc = now_utc - timedelta(days=1)    
-threshold_utc = datetime.combine(yesterday_utc.date(), time(17, 0, 0))
+threshold_utc = datetime.combine(yesterday_utc.date(), time(15, 0, 0))
 
 
 def collect_articles(

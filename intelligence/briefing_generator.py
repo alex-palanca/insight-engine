@@ -114,7 +114,7 @@ def generate_briefing(
     logging.basicConfig(level=logging.INFO)
 
     max_attempts = 3
-    backoff_base = 2
+    backoff_base = 5
 
     # Save the prompt to a temporary file for debugging if all attempts fail
     dump_path = Path("output/debug_prompt.txt")
