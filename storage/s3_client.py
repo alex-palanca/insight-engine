@@ -82,3 +82,7 @@ class S3Storage:
     @staticmethod
     def briefing_key(date: str):
         return f"briefings/IB_{date}.md"
+
+    @staticmethod
+    def markdown_key(date: str):
+        return f"markdown/{date}.md"

@@ -29,6 +29,8 @@ def main():
     
     print("Formatting articles...")
     markdown = formatter.format_context(enriched_articles)
+    print("Uploading formatted document...")
+    storage.upload_markdown(today,markdown)
 
     print("Generating IB report...")
     briefing = briefing_generator.create_intelligence_briefing(markdown)

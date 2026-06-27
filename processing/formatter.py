@@ -9,7 +9,6 @@ def format_context(articles):
     """
     Acts as a pure data formatter. Takes enriched JSON and returns 
     a highly-dense Markdown string for the Synthesizer LLM. 
-    Does NOT save to disk.
     """
     date = datetime.now().strftime("%Y-%m-%d")
     print("Formatting enriched data in-memory...")
