@@ -26,13 +26,14 @@ def upload_markdown(date: str,content):
 
     cloud.upload_content(
         content,
-        cloud.article_key(date)
+        cloud.markdown_key(date)
     )
 
 def obtain_markdown(date: str):
-    cloud.get_file_content(
+    markdown =cloud.get_file_content(
         cloud.markdown_key(date)
     )
+    return markdown
 
 def download_articles(date: str):
 

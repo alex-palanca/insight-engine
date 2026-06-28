@@ -39,9 +39,15 @@ def run_synthesis():
         print("Did you run the ingestion stage first?")
         sys.exit(1)
         
-    print("Generating Intelligence Briefing...")
-    briefing_generator.create_intelligence_briefing(markdown)
-    print("Synthesis complete.")
+    if markdown:
+        print("Generating Intelligence Briefing...")
+        briefing = briefing_generator.create_intelligence_briefing(markdown)
+        print(briefing)
+        print("Uploading Intelligence briefing...")
+        storage.upload_briefing(today,briefing)
+        print("Synthesis complete.")
+    else:
+        print("Error: Could not obtain the formatted articles")
 
 
 def main():
