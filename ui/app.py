@@ -254,49 +254,70 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Navigation bar
-with st.container():
+# --- Reusable UI Component for Data Lineage ---
+def render_artifacts(date_str: str, briefing_content: str):
+    """Renders the Briefing, Markdown, and JSON into organized tabs."""
+    
+    col1, _ = st.columns([1, 8])
+    with col1:
+        st.metric("Date", date_str)
 
+    # Use tabs to showcase the Data Lineage
+    tab_briefing, tab_markdown, tab_json = st.tabs([
+        "🧠 Intelligence Briefing", 
+        "📑 Context (Markdown)", 
+        "💾 Raw Data (JSON)"
+    ])
+
+    with tab_briefing:
+        st.markdown('<div class="briefing-card">', unsafe_allow_html=True)
+        st.markdown(briefing_content)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with tab_markdown:
+        md_content = services.get_markdown_report(date_str)
+        if md_content:
+            st.markdown('<div class="briefing-card">', unsafe_allow_html=True)
+            st.markdown(md_content)
+            st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            st.info(f"No intermediate markdown found in S3 for {date_str}.")
+
+    with tab_json:
+        json_data = services.get_raw_articles(date_str)
+        if json_data:
+            # Streamlit's st.json provides a great interactive tree viewer automatically
+            st.json(json_data, expanded=False) 
+        else:
+            st.info(f"No raw JSON data found in S3 for {date_str}.")
+
+
+# --- Navigation bar ---
+with st.container():
     page = st.segmented_control(
         "Navigation",
-        [
-            "Today's Briefing",
-            "Historical Briefings"
-        ],
+        ["Today's Briefing", "Historical Briefings"],
         default="Today's Briefing"
     )
 
-# Today's briefing
+# --- Page Routing ---
 if page == "Today's Briefing":
-
     briefing_files = services.get_briefing_files()
 
     if not briefing_files:
-        st.warning("No briefing files found.")
+        st.warning("No briefing files found in S3.")
     else:
         latest_briefing = briefing_files[0]
         briefing_date = services.get_briefing_date(latest_briefing)
         content = services.briefing_loader(latest_briefing)
+        
+        render_artifacts(briefing_date, content)
 
-        col1, _ = st.columns([1, 8])
-        with col1:
-            st.metric("Date", briefing_date)
-
-        st.markdown("""
-        <div class="briefing-card">
-        """, unsafe_allow_html=True)
-        st.markdown(content)
-        st.markdown("""
-        </div>
-        """, unsafe_allow_html=True)
-
-# Historical briefings
 elif page == "Historical Briefings":
-
     briefing_files = services.get_briefing_files()
 
     if not briefing_files:
-        st.warning("No briefing files found.")
+        st.warning("No historical briefing files found in S3.")
     else:
         selected_file = st.selectbox(
             "Select a briefing",
@@ -304,17 +325,8 @@ elif page == "Historical Briefings":
             format_func=services.get_briefing_date
         )
 
-        briefing_date = services.get_briefing_date(selected_file)
-        content = services.briefing_loader(selected_file)
-
-        col1, _ = st.columns([1, 8])
-        with col1:
-            st.metric("Date", briefing_date)
-
-        st.markdown("""
-        <div class="briefing-card">
-        """, unsafe_allow_html=True)
-        st.markdown(content)
-        st.markdown("""
-        </div>
-        """, unsafe_allow_html=True)
+        if selected_file:
+            briefing_date = services.get_briefing_date(selected_file)
+            content = services.briefing_loader(selected_file)
+            
+            render_artifacts(briefing_date, content)

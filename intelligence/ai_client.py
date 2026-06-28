@@ -1,31 +1,14 @@
 # summarizer/ai_client.py
-import os
+import config.env_ini as env
 import json
 from google import genai
 from google.genai import types
 from google.genai.errors import APIError
 import asyncio
-from typing import Optional
 from config.score_system import BatchEvaluation, SCORING_SYSTEM_PROMPT
 
-def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:
-    """Return a secret from Streamlit or environment variables."""
-    try:
-        import streamlit as st
-        from streamlit.errors import StreamlitSecretNotFoundError
-
-        if hasattr(st, "secrets"):
-            try:
-                return st.secrets.get(name, os.getenv(name, default))
-            except StreamlitSecretNotFoundError:
-                return os.getenv(name, default)
-    except ModuleNotFoundError:
-        pass
-
-    return os.getenv(name, default)
-
 # Set up global client initialization for this module
-key = get_secret("GOOGLE_API_KEY")
+key = env.get_env_var("GOOGLE_API_KEY")
 if not key:
     raise ValueError(
         "GOOGLE_API_KEY is not set in the environment variables or Streamlit secrets."

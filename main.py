@@ -1,5 +1,7 @@
 from config import env_ini, feed_loader # noqa: F401
 import asyncio
+import sys
+import argparse
 import ingestion.rss_collector as rss_collector
 from processing import formatter
 from processing.enrichment import enrich_articles_pipeline
@@ -8,11 +10,9 @@ from storage import storage_utils as storage
 from datetime import datetime
 
 
-today = datetime.now().strftime(
-        "%Y-%m-%d"
-    )
+today = datetime.now().strftime("%Y-%m-%d")
 
-def main():
+def run_ingestion():
     feeds = feed_loader.load_feeds()
 
     print("Starting article collection...")
@@ -20,7 +20,7 @@ def main():
 
     print("Enriching and scoring articles (Async Pipeline)...")
     enriched_articles = asyncio.run(enrich_articles_pipeline(cleaned_articles))
-
+    print("Uploading enriched articles...")
     storage.save_articles(enriched_articles)
     
     print("Formatting articles...")
@@ -28,12 +28,38 @@ def main():
     print("Uploading formatted document...")
     storage.upload_markdown(today,markdown)
 
-    print("Generating IB report...")
-    briefing = briefing_generator.create_intelligence_briefing(markdown)
-    print("Saving Intelligence Briefing...")
-    storage.upload_briefing(today,briefing)
+    print("Ingestion complete.")
 
-    print("Finished successfully.")
+def run_synthesis():
+    try:
+        print("Obtaining markdown report...")
+        markdown = storage.obtain_markdown(today)
+    except FileNotFoundError:
+        print("Error: Could not find the formatted for today")
+        print("Did you run the ingestion stage first?")
+        sys.exit(1)
+        
+    print("Generating Intelligence Briefing...")
+    briefing_generator.create_intelligence_briefing(markdown)
+    print("Synthesis complete.")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="ISOLATE Intelligence Pipeline")
+    parser.add_argument(
+        'stage', 
+        choices=['ingest','ing','synthesize','syn', 'all'], 
+        nargs='?', 
+        default='all',
+        help="Pipeline stage to execute (default: all)"
+    )
+    args = parser.parse_args()
+
+    if args.stage in ['ingest', 'ing','all']:
+        run_ingestion()
+    
+    if args.stage in ['synthesize', 'syn','all']:
+        run_synthesis()
 
 if __name__ == "__main__":
 
