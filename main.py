@@ -1,14 +1,10 @@
-import os
-from dotenv import load_dotenv
-load_dotenv()
-
+from config import env_ini, feed_loader # noqa: F401
 import asyncio
 import ingestion.rss_collector as rss_collector
 from processing import formatter
 from processing.enrichment import enrich_articles_pipeline
 from intelligence import briefing_generator
 from storage import storage_utils as storage
-import config
 from datetime import datetime
 
 
@@ -17,7 +13,7 @@ today = datetime.now().strftime(
     )
 
 def main():
-    feeds = config.feed_loader.load_feeds()
+    feeds = feed_loader.load_feeds()
 
     print("Starting article collection...")
     cleaned_articles = rss_collector.collect_articles(feeds,200,50)
