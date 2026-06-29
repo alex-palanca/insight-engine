@@ -3,7 +3,7 @@ name: Daily Intelligence Briefing
 on:
   schedule:
     - cron: "45 5 * * *"
-    - cron: "0 15 * * *"
+    - cron: "15 15 * * *"
 
   workflow_dispatch:
 

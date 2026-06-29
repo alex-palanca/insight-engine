@@ -31,10 +31,10 @@ Identify and synthesize the top 3 to 5 (maximum) highest-impact events today. Gr
 * **What Happened:** 1-2 sentences. Stick strictly to verifiable facts, incorporating relevant numbers, hard timelines, and specific actors.
 * **Why It Matters & Implications:** 1-2 sentences. Outline immediate consequences alongside systemic second/third-order economic, regulatory, or competitive spillovers.
 * **Domain Focus:** List the dominant `source_tags` and relevant `article_tags` that define this development's footprint.
-* **Sources:** [Source Name](URL) | [Conflicting Source Name](URL) (If applicable)
+* **Sources:** [Source Name](URL) | [Conflicting Source Name](URL) (If applicable)  !IMPORTANT: URL must be accesible
 
 ### 2. [Clear, Factual Title]
-(Continue for a maximum of 5 developments)
+(Continue for a maximum of 8 developments)
 
 ## Systemic Signals & Anomalies
 Provide a maximum of 3 highly compressed bullets covering critical macro shifts. Only generate this section if the dataset contains clear evidence of:

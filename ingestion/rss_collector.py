@@ -91,7 +91,7 @@ def collect_articles(
                         category_counts[category] += 1
                         source_count += 1
                 
-                    except ValidationError as e:
+                    except ValidationError:
                         # The data contract was violated
                         continue
             

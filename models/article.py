@@ -5,7 +5,7 @@ import re
 # We can move your global constants here
 MIN_SUMMARY_LENGTH = 100
 INVALID_SUMMARY_MARKERS = [
-    "Unknown"
+    "Unknown",
     "no summary available",
     "summary unavailable",
     "unable to retrieve summary",
