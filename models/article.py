@@ -83,6 +83,7 @@ class Article(BaseModel):
         description="Variable-trust tags extracted natively from the RSS feed"
     )
     summary: str
+    source_url: HttpUrl = Field(..., description="URL of the RSS feed source")
 
 
     @field_validator('summary')

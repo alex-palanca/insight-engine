@@ -7,6 +7,7 @@ from processing import formatter
 from processing.enrichment import enrich_articles_pipeline
 from intelligence import briefing_generator
 from storage import storage_utils as storage
+from storage import db_service as db
 from datetime import datetime
 
 
@@ -18,6 +19,9 @@ def run_ingestion():
 
     print("Starting article collection...", flush=True)
     cleaned_articles = rss_collector.collect_articles(feeds,200,50)
+
+    print("Storing cleaned articles to neon...", flush=True)
+    db.db_save(cleaned_articles)
 
     print("Enriching and scoring articles (Async Pipeline)...", flush=True)
     enriched_articles = asyncio.run(enrich_articles_pipeline(cleaned_articles))

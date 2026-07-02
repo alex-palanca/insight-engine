@@ -83,7 +83,8 @@ def collect_articles(
                                 category=category,
                                 source_tags=yaml_tags, 
                                 article_tags=native_tags,
-                                summary=entry.get("summary", "")
+                                summary=entry.get("summary", ""),
+                                source_url=feed_info.get("url", "")
                         )
 
                         raw_articles.append(article.model_dump(mode='json'))
