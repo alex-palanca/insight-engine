@@ -25,6 +25,9 @@ def run_ingestion():
 
     print("Enriching and scoring articles (Async Pipeline)...", flush=True)
     enriched_articles = asyncio.run(enrich_articles_pipeline(cleaned_articles))
+    
+    print("Storing enriched articles to neon...", flush=True)
+    db.db_save(enriched_articles, stage="silver")
     print("Uploading enriched articles...", flush=True)
     storage.save_articles(enriched_articles)
     

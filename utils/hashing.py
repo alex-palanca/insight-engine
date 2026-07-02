@@ -1,3 +1,5 @@
+import re
+import unicodedata
 import uuid
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
@@ -14,7 +16,16 @@ def normalize_url(url: str) -> str:
     clean_url = urlunparse((parsed.scheme.lower(), parsed.netloc.lower(), parsed.path, parsed.params, clean_query, ''))
     return clean_url.rstrip('/')
 
-def generate_article_id(url: str) -> uuid.UUID:
+def normalize_title(title: str) -> str:
+    if not title: return ""
+    normalized = unicodedata.normalize('NFKD', title).encode('ASCII', 'ignore').decode('utf-8')
+    normalized = re.sub(r'[^\w\s]', '', normalized.lower())
+    return re.sub(r'\s+', ' ', normalized).strip()
+
+def generate_article_id(title: str, url: str) -> uuid.UUID:
     safe_url = normalize_url(url)
+    safe_title = normalize_title(title)
+
+    composite_string = f"{safe_title}|{safe_url}"
     
-    return uuid.uuid5(ISOLATE_ID_NAMESPACE, safe_url)
+    return uuid.uuid5(ISOLATE_ID_NAMESPACE, composite_string)

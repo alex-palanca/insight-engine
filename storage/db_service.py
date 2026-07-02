@@ -58,7 +58,7 @@ class Article(Base):
     content_id = Column(PG_UUID(as_uuid=True), unique=True, nullable=False, index=True)
     title = Column(String, nullable=False)
     link = Column(String, unique=True, nullable=False) # CRITICAL: Acts as our deduplication firewall
-    published = Column(String, nullable=True)
+    published = Column(DateTime, nullable=True)
 
     # BRONZE LAYER (Raw Data)
     article_tags = Column(JSONB, nullable=True)
@@ -144,17 +144,18 @@ class NeonDatabaseService:
                         session.flush()
 
                     # 2. Native PostgreSQL UPSERT Execution
+                    article_title = item.get('title', '')
                     article_link = item.get('link', '')
                     
                     # This returns a Python UUID object
-                    deterministic_uuid = generate_article_id(article_link)
+                    deterministic_uuid = generate_article_id(article_title, article_link)
 
                     insert_op = insert(Article).values(
-                        
+
                         content_id=deterministic_uuid,
-                        title=item.get('title'),
-                        link=item.get('link'),
-                        published=item.get('published'),
+                        title=article_title,
+                        link=article_link,
+                        published=datetime.fromisoformat(item.get('published')),
                         article_tags=item.get('article_tags', []),
                         raw_summary=item.get('summary'),
                         source_id=source_obj.id,
@@ -177,25 +178,25 @@ class NeonDatabaseService:
                 print(f"Database batch operation failed! Executed full transaction rollback. Error: {e}")
                 raise e
             
-    def save_silver_data(self, articles_data: list):
+    def save_silver_data(self, enriched_articles: list):
         """
-        Takes a list of raw article dictionaries from rss_collector.py, extracts/upserts sources,
-        and saves unique articles with optimal batch queries.
+        Takes a list of AI-enriched article dictionaries and updates the existing 
+        Bronze records in the database with their new Silver metrics.
         
         Expected structure per item:
         {
-           'title': '...', 'link': '...', 'published': '...', 
-           'summary': '...', 'source': '...', 'category': '...', 'source_url': '...'
+           'title': '...', 'link': '...', 'ai_summary': '...', 
+           'score': 85, 'metrics': {...}, 'justification': '...'
         }
         """
-        if not articles_data:
+        if not enriched_articles:
             return
 
         # Open an isolated Unit of Work (Session).
         with self._SessionMarker() as session:
             try:
-                for item in articles_data:
-                    # 1. Manage Source Extraction & Verification
+                for item in enriched_articles:
+
                     source_name = item.get('source', 'Unknown Source')
                     source_obj = session.query(Source).filter(Source.name == source_name).first()
                     
@@ -208,25 +209,46 @@ class NeonDatabaseService:
                         session.add(source_obj)
                         session.flush()
 
-                    # 2. Native PostgreSQL UPSERT Execution
+                    article_title = item.get('title', '')
+                    article_link = item.get('link', '')
+                    deterministic_uuid = generate_article_id(article_title,article_link)
+
                     insert_op = insert(Article).values(
-                        title=item.get('title'),
-                        link=item.get('link'),
-                        published=item.get('published'),
-                        summary=item.get('summary'),
+                        content_id=deterministic_uuid,
+                        title=article_title,
+                        link=article_link,
+                        published=datetime.fromisoformat(item.get('published')),
+                        article_tags=item.get('article_tags', []),
+                        raw_summary=item.get('summary'),
                         source_id=source_obj.id,
-                        collected_at=datetime.now()
+                        collected_at=datetime.now(),
+ 
+                        ai_summary=item.get('ai_summary'),
+                        score=item.get('score'),
+                        metrics=item.get('metrics', {}),
+                        justification=item.get('justification'),
+                        enriched_at=datetime.now()
                     )
                     
-                    # This tells Neon to ignore the row entirely if the URL unique constraint triggers.
-                    upsert_op = insert_op.on_conflict_do_nothing(index_elements=['link'])
-                    
+                    upsert_op = insert_op.on_conflict_do_update(
+                        index_elements=['content_id'], # The column with the unique=True constraint
+                        set_={
+                            # 'excluded' is a special SQLAlchemy/Postgres keyword. 
+                            # It refers to the new data we TRIED to insert but was "excluded" due to the conflict.
+                            'ai_summary': insert_op.excluded.ai_summary,
+                            'score': insert_op.excluded.score,
+                            'metrics': insert_op.excluded.metrics,
+                            'justification': insert_op.excluded.justification,
+                            'enriched_at': insert_op.excluded.enriched_at
+                        }
+                    )
+
                     # Transmits the compiled SQL across the network wire to Neon
                     session.execute(upsert_op)
 
                 # Pushes all accumulated structural operations to persistent storage simultaneously
                 session.commit()
-                print(f"Successfully processed batch of {len(articles_data)} articles to Neon DB.")
+                print(f"Successfully synchronized {len(enriched_articles)} enriched articles to DB.")
                 
             except Exception as e:
                 # If ANY query in the block fails, rollback returns the database state to zero technical debt

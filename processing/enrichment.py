@@ -85,7 +85,4 @@ async def enrich_articles_pipeline(articles: list[dict]) -> list[dict]:
             
     # Step 3: Sort by score descending and filter out low-signal noise
     enriched_articles.sort(key=lambda x: x.get('score', 0), reverse=True)
-    high_signal_articles = [a for a in enriched_articles if a.get('score', 0) >= 60]
-    
-    print(f"Enrichment complete. Kept {len(high_signal_articles)} high-signal articles out of {len(articles)}.")
-    return high_signal_articles
+    return enriched_articles
