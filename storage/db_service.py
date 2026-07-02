@@ -4,6 +4,10 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, Da
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+
+
+from utils.hashing import generate_article_id
 
 
 # ORM SETUP & SCHEMA DEFINITIONS
@@ -51,6 +55,7 @@ class Article(Base):
     __tablename__ = 'articles'
     
     id = Column(Integer, primary_key=True)
+    content_id = Column(PG_UUID(as_uuid=True), unique=True, nullable=False, index=True)
     title = Column(String, nullable=False)
     link = Column(String, unique=True, nullable=False) # CRITICAL: Acts as our deduplication firewall
     published = Column(String, nullable=True)
@@ -139,7 +144,14 @@ class NeonDatabaseService:
                         session.flush()
 
                     # 2. Native PostgreSQL UPSERT Execution
+                    article_link = item.get('link', '')
+                    
+                    # This returns a Python UUID object
+                    deterministic_uuid = generate_article_id(article_link)
+
                     insert_op = insert(Article).values(
+                        
+                        content_id=deterministic_uuid,
                         title=item.get('title'),
                         link=item.get('link'),
                         published=item.get('published'),
@@ -230,7 +242,7 @@ def db_save(articles: list,stage: str = "bronze"):
     """
     try:
         db_service = NeonDatabaseService()
-        #db_service.initialize_schema()  # Ensure schema is ready before saving
+        db_service.initialize_schema()  # Ensure schema is ready before saving
         if stage == "bronze":
             db_service.save_bronze_data(articles)
         if stage == "silver":
