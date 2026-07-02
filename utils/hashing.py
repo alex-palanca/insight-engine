@@ -17,7 +17,8 @@ def normalize_url(url: str) -> str:
     return clean_url.rstrip('/')
 
 def normalize_title(title: str) -> str:
-    if not title: return ""
+    if not title: 
+        return ""
     normalized = unicodedata.normalize('NFKD', title).encode('ASCII', 'ignore').decode('utf-8')
     normalized = re.sub(r'[^\w\s]', '', normalized.lower())
     return re.sub(r'\s+', ' ', normalized).strip()

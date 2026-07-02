@@ -21,18 +21,19 @@ def run_ingestion():
     cleaned_articles = rss_collector.collect_articles(feeds,200,50)
 
     print("Storing cleaned articles to neon...", flush=True)
-    db.db_save(cleaned_articles)
+    db.db_save_return(cleaned_articles)
 
     print("Enriching and scoring articles (Async Pipeline)...", flush=True)
     enriched_articles = asyncio.run(enrich_articles_pipeline(cleaned_articles))
-    
-    print("Storing enriched articles to neon...", flush=True)
-    db.db_save(enriched_articles, stage="silver")
+
     print("Uploading enriched articles...", flush=True)
     storage.save_articles(enriched_articles)
+    print("Storing enriched articles to neon...", flush=True)
+    filtered_articles = db.db_save_return(enriched_articles, stage="silver")
+
     
     print("Formatting articles...", flush=True)
-    markdown = formatter.format_context(enriched_articles)
+    markdown = formatter.format_context(filtered_articles)
     print("Uploading formatted document...", flush=True)
     storage.upload_markdown(today,markdown)
 

@@ -1,6 +1,6 @@
 from config import env_ini as env
 from datetime import datetime
-from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, DateTime, ForeignKey, func
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.dialects.postgresql import JSONB
@@ -87,9 +87,9 @@ class NeonDatabaseService:
     """
     Handles connections, session lifecycles, schema initialization, and transactional batch writing.
     """
-    def __init__(self, database_url: str = None):
+    def __init__(self):
         # Fall back to environment variable if connection string isn't explicitly passed
-        self.db_url = database_url or env.get_env_var("DATABASE_URL")
+        self.db_url = env.get_env_var("DATABASE_URL")
         if not self.db_url:
             raise ValueError("DATABASE_URL environment variable or argument is missing.")
             
@@ -256,19 +256,61 @@ class NeonDatabaseService:
                 print(f"Database batch operation failed! Executed full transaction rollback. Error: {e}")
                 raise e
             
+    def get_articles(self,min_score: int) -> list:
+        """
+        Retrieves today's articles from the database and maps them back into 
+        the dictionary format expected by the markdown report generator.
+        """
+        with self._SessionMarker() as session:
+            try:
+                today = datetime.now().date()
+                
+                query_results = session.query(Article).join(Source).filter(
+                    func.date(Article.collected_at) == today,
+                    Article.score >= min_score
+                ).order_by(Article.score.desc()).all()
+                
+                # Map the SQLAlchemy ORM objects back to plain dictionaries
+                articles_data = []
+                for db_article in query_results:
+                    articles_data.append({
+                        # Base / Bronze Fields
+                        "title": db_article.title,
+                        "link": db_article.link,
+                        "published": db_article.published.isoformat() if db_article.published else "Unknown",
+                        "source": db_article.source.name,
+                        "category": db_article.source.category,
+                        
+                        # Silver / Enriched Fields
+                        "ai_summary": db_article.ai_summary,
+                        "score": db_article.score,
+                        "metrics": db_article.metrics,
+                        "justification": db_article.justification   
+                    })
+                    
+                print(f"Retrieved {len(articles_data)} articles from the database for reporting.")
+                return articles_data
+                
+            except Exception as e:
+                print(f"Failed to retrieve articles for report: {e}")
+                raise e
+            
 # Service to use
-def db_save(articles: list,stage: str = "bronze"):
+def db_save_return(articles: list = None, stage: str = "bronze"):
     """
     Public-facing function to save a batch of articles to the database.
     Options : raw (bronze) or enriched (silver) data. Defaults to bronze.
     """
     try:
         db_service = NeonDatabaseService()
-        db_service.initialize_schema()  # Ensure schema is ready before saving
+        #db_service.initialize_schema()  # Ensure schema is ready before saving
         if stage == "bronze":
             db_service.save_bronze_data(articles)
         if stage == "silver":
-            db_service.save_silver_data(articles)
+            if articles:
+                db_service.save_silver_data(articles)
+            return db_service.get_articles(60) # Return the enriched articles for further processing
+        
     except Exception as e:
         print(f"Failed to save articles to the database: {e}")
         raise e
