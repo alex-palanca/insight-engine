@@ -9,9 +9,11 @@ from intelligence import briefing_generator
 from storage import storage_utils as storage
 from storage import db_service as db
 from datetime import datetime
+from processing.clustering_engine import events_clustering
 
 
 today = datetime.now().strftime("%Y-%m-%d")
+
 
 def run_ingestion():
     print("Loading feeds...", flush=True)
@@ -31,6 +33,8 @@ def run_ingestion():
     print("Storing enriched articles to neon...", flush=True)
     filtered_articles = db.db_save_return(enriched_articles, stage="silver")
 
+    print("Identifying new events...", flush=True)
+    events_clustering(score=60, similarity_threshold=0.42, max_df=0.75, min_df=2)
     
     print("Formatting articles...", flush=True)
     markdown = formatter.format_context(filtered_articles)
@@ -80,4 +84,5 @@ def main():
 
 if __name__ == "__main__":
 
+    
     main()

@@ -2,7 +2,7 @@
 
 > **From Information to Intelligence.** > ISOLATE is a personal intelligence platform designed to extract high-density signal from high-volume noise using asynchronous data engineering and LLM Map-Reduce patterns.
 
-Most news platforms optimize for engagement. ISOLATE optimizes for consequence. It autonomously ingests hundreds of global sources, mathematically scores them using intelligence community frameworks, and synthesizes the highest-value data into an executive briefing.
+Most news platforms optimize for engagement. ISOLATE optimizes for consequence. It autonomously ingests hundreds of global sources, mathematically scores them using intelligence community frameworks, and synthesizes the highest-value data into an executive briefing. See ROADMAP.md for planned future features.
 
 ## 🏗 Architecture
 
