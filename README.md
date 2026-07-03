@@ -1,32 +1,34 @@
-# ISOLATE 📡
+# ISOLATE
 
-> **From Information to Intelligence.** > ISOLATE is a personal intelligence platform designed to extract high-density signal from high-volume noise using asynchronous data engineering and LLM Map-Reduce patterns.
+ISOLATE is a lightweight intelligence pipeline that collects news from RSS feeds, enriches articles with AI, clusters related stories into events, and produces daily briefing outputs.
 
-Most news platforms optimize for engagement. ISOLATE optimizes for consequence. It autonomously ingests hundreds of global sources, mathematically scores them using intelligence community frameworks, and synthesizes the highest-value data into an executive briefing. See ROADMAP.md for planned future features.
+## What it does
 
-## 🏗 Architecture
+- Ingests articles from YAML-configured feeds
+- Extracts and cleans article content
+- Enriches articles with Gemini-based summaries and scores
+- Groups related stories into event clusters
+- Formats the best content into markdown reports and briefing text
+- Stores results in a database and optional cloud storage
 
-ISOLATE operates on a strict **Map-Reduce** pipeline:
+## Current architecture
 
-1. **Ingestion:** Parses custom RSS feeds configured via YAML.
-2. **Enrichment (The Map Phase):** - Uses `aiohttp` and `trafilatura` for highly concurrent, non-blocking article extraction.
-   - Implements **Graceful Degradation**: If a site uses anti-bot protection or paywalls, the system autonomously falls back to RSS summaries.
-3. **Scoring & Evaluation:** - Batches articles to respect API rate limits and optimize LLM context windows.
-   - Uses **Structured Outputs (Pydantic)** to force Gemini Flash to evaluate articles on a strict 100-point rubric: *Immediacy, Scale, Permanence, Reverberance, and Novelty*.
-   - Aggressively filters out any data scoring below 60/100.
-4. **Synthesis (The Reduce Phase):** Compiles the mathematically filtered data into dense, highly contextual Markdown reports.
-5. **Delivery:** Stores artifacts in AWS S3 and serves them via a modern Streamlit web dashboard.
+- Ingestion lives in the ingestion package
+- Processing and enrichment logic lives in processing
+- Gemini prompts and generation logic live in intelligence
+- Article and event persistence uses SQLAlchemy with Neon/Postgres
+- Output delivery uses storage helpers and a simple Streamlit UI
+- Scheduled runs are supported through GitHub Actions
 
-## ⚙️ Tech Stack
+## Quick start
 
-* **Core:** Python 3.12+, `asyncio` (Event-driven concurrency)
-* **AI/LLM:** Google GenAI SDK (Gemini 2.5 Flash / Flash-Lite), `pydantic` (Schema enforcement)
-* **Data Extraction:** `aiohttp`, `trafilatura`, `feedparser`
-* **Infrastructure:** AWS S3 (`boto3`), GitHub Actions (CRON automation)
-* **UI:** Streamlit
+```bash
+pip install -r requirements.txt
+python main.py ingest
+python main.py enrich
+python main.py events_processing
+python main.py format
+python main.py synthesize
+```
 
-## 🚀 Quick Start
-
-1. **Clone & Install**
-   ```bash
-   pip install -r requirements.txt
+The main pipeline entry point is main.py.

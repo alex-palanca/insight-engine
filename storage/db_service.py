@@ -42,6 +42,9 @@ class Event(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     summary = Column(Text, nullable=True)
+    tags = Column(JSONB, nullable=True)
+    importance = Column(String, nullable=True)
+    category = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.now()) # Automatically stamps when the event was clustered
 
     articles = relationship("Article", back_populates="event")
