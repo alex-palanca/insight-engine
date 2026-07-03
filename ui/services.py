@@ -8,8 +8,89 @@ if str(project_root) not in sys.path:
 from storage.s3_client import S3Storage as s3
 
 
-
 cloud = s3()
+
+
+def get_db_service():
+    """Create a database service client for PostgreSQL-backed tables."""
+    try:
+        from storage.db_service import NeonDatabaseService
+        return NeonDatabaseService()
+    except Exception as exc:
+        print(f"Database connection failed: {exc}")
+        return None
+
+
+def get_events() -> list[dict]:
+    """Fetch all events from the PostgreSQL events table, including linked article URLs."""
+    db_service = get_db_service()
+    if not db_service:
+        return []
+
+    from storage.db_service import Event
+
+    with db_service._SessionMarker() as session:
+        try:
+            rows = session.query(Event).order_by(Event.importance.asc(), Event.created_at.desc()).all()
+            result = []
+            for row in rows:
+                article_links = []
+                for article in row.articles:
+                    if article.link:
+                        article_links.append(article.link)
+
+                result.append(
+                    {
+                        "id": row.id,
+                        "name": row.name,
+                        "summary": row.summary,
+                        "tags": row.tags or [],
+                        "importance": row.importance,
+                        "category": row.category,
+                        "created_at": row.created_at.isoformat() if row.created_at else None,
+                        "article_links": article_links,
+                    }
+                )
+            return result
+        except Exception as exc:
+            print(f"Failed to load events: {exc}")
+            return []
+
+
+def get_sources() -> list[dict]:
+    """Fetch all sources from the PostgreSQL sources table, ordered by category and name."""
+    db_service = get_db_service()
+    if not db_service:
+        return []
+
+    from storage.db_service import Source
+
+    with db_service._SessionMarker() as session:
+        try:
+            rows = session.query(Source).order_by(Source.category.asc(), Source.name.asc()).all()
+            return [
+                {
+                    "id": row.id,
+                    "name": row.name,
+                    "category": row.category,
+                    "tier": row.tier,
+                    "region": row.region,
+                    "source_tags": row.source_tags or [],
+                    "url": row.url,
+                }
+                for row in rows
+            ]
+        except Exception as exc:
+            print(f"Failed to load sources: {exc}")
+            return []
+
+
+def get_database_tables() -> dict[str, list[dict]]:
+    """Return the current events and sources tables for dashboard display."""
+    return {
+        "events": get_events(),
+        "sources": get_sources(),
+    }
 
 
 def get_briefing_files():

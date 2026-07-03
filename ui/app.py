@@ -221,12 +221,70 @@ def render_artifacts(date_str: str, briefing_content: str):
 with st.container():
     page = st.segmented_control(
         "Navigation",
-        ["Today's Briefing", "Historical Briefings"],
+        ["Today's Briefing", "Historical Briefings", "Database Explorer"],
         default="Today's Briefing"
     )
 
 # --- Page Routing ---
-if page == "Today's Briefing":
+if page == "Database Explorer":
+    explorer_view = st.radio(
+        "Explorer",
+        ["Events", "Sources"],
+        horizontal=True,
+        label_visibility="collapsed"
+    )
+
+    if explorer_view == "Events":
+        st.subheader("Events")
+        tables = services.get_database_tables()
+        events = tables.get("events", [])
+        if events:
+            for event in events:
+                with st.container():
+                    article_links = event.get("article_links") or []
+                    links_html = "".join(
+                        f"<div style='margin-top:0.25rem;'><a href='{link}' target='_blank' rel='noopener noreferrer' style='color:#2563eb;text-decoration:none;'>{link}</a></div>"
+                        for link in article_links
+                    ) or "<div style='margin-top:0.25rem;color:#64748b;'>No linked articles</div>"
+                    st.markdown(
+                        f"""
+                        <div style="border:1px solid #e2e8f0;border-radius:16px;padding:1rem 1rem 0.8rem;margin-bottom:0.8rem;background:#ffffff;box-shadow:0 6px 18px rgba(15,23,42,0.04);">
+                          <div style="font-size:0.9rem;color:#64748b;margin-bottom:0.3rem;">{event.get('category') or 'uncategorized'} · {event.get('importance') or 'unknown'}</div>
+                          <div style="font-size:1.1rem;font-weight:700;color:#0f172a;margin-bottom:0.35rem;">{event.get('name', 'Untitled event')}</div>
+                          <div style="font-size:0.95rem;color:#334155;margin-bottom:0.4rem;">{(event.get('summary') or 'No summary available')[:220]}</div>
+                          <div style="font-size:0.82rem;color:#64748b;margin-bottom:0.35rem;">Tags: {', '.join(event.get('tags') or []) if event.get('tags') else 'None'}</div>
+                          <div style="font-size:0.88rem;color:#0f172a;font-weight:600;">Articles</div>
+                          {links_html}
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+        else:
+            st.info("No events found or the database is unavailable.")
+    else:
+        st.subheader("Sources")
+        tables = services.get_database_tables()
+        sources = tables.get("sources", [])
+        if sources:
+            for source in sources:
+                with st.container():
+                    source_url = source.get("url", "") or ""
+                    source_url_html = f"<div style='margin-top:0.25rem;'><a href='{source_url}' target='_blank' rel='noopener noreferrer' style='color:#2563eb;text-decoration:none;'>{source_url}</a></div>" if source_url else "<div style='margin-top:0.25rem;color:#64748b;'>No URL available</div>"
+                    st.markdown(
+                        f"""
+                        <div style="border:1px solid #e2e8f0;border-radius:16px;padding:1rem 1rem 0.8rem;margin-bottom:0.8rem;background:#ffffff;box-shadow:0 6px 18px rgba(15,23,42,0.04);">
+                          <div style="font-size:1.05rem;font-weight:700;color:#0f172a;margin-bottom:0.25rem;">{source.get('name', 'Unnamed source')}</div>
+                          <div style="font-size:0.9rem;color:#64748b;margin-bottom:0.3rem;">{source.get('category') or 'uncategorized'} · {source.get('tier') or 'unknown tier'}</div>
+                          {source_url_html}
+                          <div style="font-size:0.82rem;color:#64748b;margin-top:0.35rem;">Tags: {', '.join(source.get('source_tags') or []) if source.get('source_tags') else 'None'}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+        else:
+            st.info("No sources found or the database is unavailable.")
+
+elif page == "Today's Briefing":
     briefing_files = services.get_briefing_files()
 
     if not briefing_files:
