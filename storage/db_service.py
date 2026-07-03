@@ -110,6 +110,32 @@ class NeonDatabaseService:
         """
         Base.metadata.create_all(self.engine)
 
+    def reset_events(self):
+        """
+        Deletes all events and removes event assignments from articles.
+        Intended for rebuilding events from scratch.
+        """
+        with self._SessionMarker() as session:
+
+            try:
+
+                # Remove event references
+                session.query(Article).update(
+                    {Article.event_id: None}
+                )
+
+                # Delete all events
+                session.query(Event).delete()
+
+                session.commit()
+
+                print("Events successfully reset.")
+
+            except Exception:
+
+                session.rollback()
+                raise
+
     def save_bronze_data(self, articles_data: list):
         """
         Takes a list of raw article dictionaries from rss_collector.py, extracts/upserts sources,
@@ -263,7 +289,7 @@ class NeonDatabaseService:
                 print(f"Failed to retrieve articles for report: {e}")
                 raise e
             
-# Service to use
+# SERVICES TO USE
 def db_save_return(articles: list = None, stage: str = "bronze"):
     """
     Public-facing function to save a batch of articles to the database.

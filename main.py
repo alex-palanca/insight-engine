@@ -13,6 +13,7 @@ from processing.clustering_engine import events_clustering
 
 
 today = datetime.now().strftime("%Y-%m-%d")
+neon = db.NeonDatabaseService()
 
 
 def run_ingestion():
@@ -32,6 +33,9 @@ def run_ingestion():
     storage.save_articles(enriched_articles)
     print("Storing enriched articles to neon...", flush=True)
     filtered_articles = db.db_save_return(enriched_articles, stage="silver")
+
+    print("Resetting events...", flush=True)
+    neon.reset_events()
 
     print("Identifying new events...", flush=True)
     events_clustering(score=60, similarity_threshold=0.42, max_df=0.75, min_df=2)
