@@ -197,54 +197,22 @@ class NeonDatabaseService:
             try:
                 for item in enriched_articles:
 
-                    source_name = item.get('source', 'Unknown Source')
-                    source_obj = session.query(Source).filter(Source.name == source_name).first()
-                    
-                    if not source_obj:
-                        source_obj = Source(
-                            name=source_name,
-                            category=item.get('category'),
-                            url=item.get('source_url')
-                        )
-                        session.add(source_obj)
-                        session.flush()
+                    article = (
+                    session.query(Article)
+                    .filter_by(link=item["link"])
+                    .first()
+                )
+                 
+                    if article:
 
-                    article_title = item.get('title', '')
-                    article_link = item.get('link', '')
-                    deterministic_uuid = generate_article_id(article_title,article_link)
+                        article.ai_summary = item["ai_summary"]
+                        article.score = item["score"]
+                        article.metrics = item["metrics"]
+                        article.justification = item["justification"]
+                        article.enriched_at = datetime.now()
 
-                    insert_op = insert(Article).values(
-                        content_id=deterministic_uuid,
-                        title=article_title,
-                        link=article_link,
-                        published=datetime.fromisoformat(item.get('published')),
-                        article_tags=item.get('article_tags', []),
-                        raw_summary=item.get('summary'),
-                        source_id=source_obj.id,
-                        collected_at=datetime.now(),
- 
-                        ai_summary=item.get('ai_summary'),
-                        score=item.get('score'),
-                        metrics=item.get('metrics', {}),
-                        justification=item.get('justification'),
-                        enriched_at=datetime.now()
-                    )
-                    
-                    upsert_op = insert_op.on_conflict_do_update(
-                        index_elements=['content_id'], # The column with the unique=True constraint
-                        set_={
-                            # 'excluded' is a special SQLAlchemy/Postgres keyword. 
-                            # It refers to the new data we TRIED to insert but was "excluded" due to the conflict.
-                            'ai_summary': insert_op.excluded.ai_summary,
-                            'score': insert_op.excluded.score,
-                            'metrics': insert_op.excluded.metrics,
-                            'justification': insert_op.excluded.justification,
-                            'enriched_at': insert_op.excluded.enriched_at
-                        }
-                    )
-
-                    # Transmits the compiled SQL across the network wire to Neon
-                    session.execute(upsert_op)
+                    else:
+                        print(f"Warning: Article with link '{item['link']}' not found in DB. Skipping Silver update.")
 
                 # Pushes all accumulated structural operations to persistent storage simultaneously
                 session.commit()
