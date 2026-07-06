@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 import json
+from urllib.parse import urlparse
 # Ensure the project root is on sys.path so ui imports work from any cwd.
 project_root = Path(__file__).resolve().parents[1]
 if str(project_root) not in sys.path:
@@ -9,6 +10,53 @@ from storage.s3_client import S3Storage as s3
 
 
 cloud = s3()
+
+
+def build_link_label(url: str, source_name: str | None = None) -> str:
+    """Create a readable label for a URL such as 'BBC | news'."""
+    if not url:
+        return "Untitled link"
+
+    parsed = urlparse(url)
+    host = (parsed.netloc or "").lower().replace("www.", "")
+
+    known_publishers = {
+        "bbc.co.uk": "BBC",
+        "bbc.com": "BBC",
+        "reuters.com": "Reuters",
+        "apnews.com": "AP News",
+        "axios.com": "Axios",
+        "techcrunch.com": "TechCrunch",
+        "theverge.com": "The Verge",
+        "wired.com": "Wired",
+        "arstechnica.com": "Ars Technica",
+        "cnn.com": "CNN",
+        "nytimes.com": "The New York Times",
+        "washingtonpost.com": "The Washington Post",
+        "forbes.com": "Forbes",
+        "bloomberg.com": "Bloomberg",
+        "ft.com": "Financial Times",
+        "theguardian.com": "The Guardian",
+        "aljazeera.com": "Al Jazeera",
+        "cnbc.com": "CNBC",
+        "theregister.com": "The Register",
+        "zdnet.com": "ZDNet",
+        "venturebeat.com": "VentureBeat",
+        "engadget.com": "Engadget",
+    }
+
+    publisher = source_name or known_publishers.get(host) or host.split(".")[0].title()
+    segments = [segment for segment in parsed.path.strip("/").split("/") if segment]
+    section = None
+    for segment in segments:
+        if segment.isdigit() or segment in {"article", "articles", "story", "stories", "video", "videos"}:
+            continue
+        section = segment.replace("-", " ").replace("_", " ").strip()
+        break
+
+    if section and section.lower() not in {"home", "index"}:
+        return f"{publisher} | {section.title()}"
+    return publisher
 
 
 def get_db_service():
@@ -37,7 +85,12 @@ def get_events() -> list[dict]:
                 article_links = []
                 for article in row.articles:
                     if article.link:
-                        article_links.append(article.link)
+                        article_links.append(
+                            {
+                                "url": article.link,
+                                "label": build_link_label(article.link, article.source.name if article.source else None),
+                            }
+                        )
 
                 result.append(
                     {
@@ -77,6 +130,7 @@ def get_sources() -> list[dict]:
                     "region": row.region,
                     "source_tags": row.source_tags or [],
                     "url": row.url,
+                    "link_label": build_link_label(row.url, row.name),
                 }
                 for row in rows
             ]

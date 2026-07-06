@@ -243,7 +243,7 @@ if page == "Database Explorer":
                 with st.container():
                     article_links = event.get("article_links") or []
                     links_html = "".join(
-                        f"<div style='margin-top:0.25rem;'><a href='{link}' target='_blank' rel='noopener noreferrer' style='color:#2563eb;text-decoration:none;'>{link}</a></div>"
+                        f"<div style='margin-top:0.25rem;'><a href='{link['url']}' target='_blank' rel='noopener noreferrer' style='color:#2563eb;text-decoration:none;'>{link.get('label', 'Open article')}</a></div>"
                         for link in article_links
                     ) or "<div style='margin-top:0.25rem;color:#64748b;'>No linked articles</div>"
                     st.markdown(
@@ -269,7 +269,8 @@ if page == "Database Explorer":
             for source in sources:
                 with st.container():
                     source_url = source.get("url", "") or ""
-                    source_url_html = f"<div style='margin-top:0.25rem;'><a href='{source_url}' target='_blank' rel='noopener noreferrer' style='color:#2563eb;text-decoration:none;'>{source_url}</a></div>" if source_url else "<div style='margin-top:0.25rem;color:#64748b;'>No URL available</div>"
+                    source_label = source.get("link_label") or source.get("name", "Source")
+                    source_url_html = f"<div style='margin-top:0.25rem;'><a href='{source_url}' target='_blank' rel='noopener noreferrer' style='color:#2563eb;text-decoration:none;'>{source_label}</a></div>" if source_url else "<div style='margin-top:0.25rem;color:#64748b;'>No URL available</div>"
                     st.markdown(
                         f"""
                         <div style="border:1px solid #e2e8f0;border-radius:16px;padding:1rem 1rem 0.8rem;margin-bottom:0.8rem;background:#ffffff;box-shadow:0 6px 18px rgba(15,23,42,0.04);">

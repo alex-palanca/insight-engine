@@ -45,7 +45,7 @@ class Event(Base):
     tags = Column(JSONB, nullable=True)
     importance = Column(String, nullable=True)
     category = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.now()) # Automatically stamps when the event was clustered
+    created_at = Column(DateTime, default=datetime.now) # Automatically stamps when the event was clustered
 
     articles = relationship("Article", back_populates="event")
 
@@ -191,8 +191,8 @@ class NeonDatabaseService:
                         collected_at=datetime.now()
                     )
                     
-                    # This tells Neon to ignore the row entirely if the URL unique constraint triggers.
-                    upsert_op = insert_op.on_conflict_do_nothing(index_elements=['link'])
+                    # This tells Neon to ignore the row entirely if the content_id unique constraint triggers.
+                    upsert_op = insert_op.on_conflict_do_nothing(index_elements=['content_id'])
                     
                     # Transmits the compiled SQL across the network wire to Neon
                     session.execute(upsert_op)

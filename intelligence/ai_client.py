@@ -23,7 +23,7 @@ FALLBACK_MODELS = [
     "gemini-3-flash"
 ]
 
-async def async_evaluate_batch(batch_text: str) -> dict:
+async def async_evaluate_batch(batch_text: str) -> BatchEvaluation | None:
     """
     Sends a batch of articles to Gemini. 
     If a model suffers a temporary 503 overload, it automatically fails over
@@ -41,7 +41,7 @@ async def async_evaluate_batch(batch_text: str) -> dict:
                     temperature=0.1
                 ),
             )
-            return json.loads(response.text)
+            return BatchEvaluation.model_validate_json(response.text)
 
         except APIError as api_err:
             # Check specifically for a 503 or transient network error
@@ -50,6 +50,11 @@ async def async_evaluate_batch(batch_text: str) -> dict:
                 # Optional: pause briefly for a half-second to let things settle
                 await asyncio.sleep(0.5)
                 continue  # Drops down to the next model in the loop
+
+            if api_err.code == 429:
+                print(f"⚠️ Rate limit exceeded for model {model_name} (429). Attempting fallback...")
+                await asyncio.sleep(0.5)
+                continue
             else:
                 print(f"❌ Critical Google API Error ({api_err.code}): {api_err.message}")
                 break
