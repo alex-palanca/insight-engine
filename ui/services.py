@@ -1,14 +1,18 @@
+import json
+import logging
 import sys
 from pathlib import Path
-import json
 from urllib.parse import urlparse
-# Ensure the project root is on sys.path so ui imports work from any cwd.
+
+
 project_root = Path(__file__).resolve().parents[1]
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
+
 from storage.s3_client import S3Storage as s3
 
 
+logger = logging.getLogger(__name__)
 cloud = s3()
 
 
@@ -64,8 +68,8 @@ def get_db_service():
     try:
         from storage.db_service import NeonDatabaseService
         return NeonDatabaseService()
-    except Exception as exc:
-        print(f"Database connection failed: {exc}")
+    except Exception:
+        logger.exception("Database connection failed.")
         return None
 
 
@@ -105,8 +109,8 @@ def get_events() -> list[dict]:
                     }
                 )
             return result
-        except Exception as exc:
-            print(f"Failed to load events: {exc}")
+        except Exception:
+            logger.exception("Failed to load events.")
             return []
 
 
@@ -134,8 +138,8 @@ def get_sources() -> list[dict]:
                 }
                 for row in rows
             ]
-        except Exception as exc:
-            print(f"Failed to load sources: {exc}")
+        except Exception:
+            logger.exception("Failed to load sources.")
             return []
 
 
@@ -157,7 +161,6 @@ def briefing_loader(key):
 
 
 def get_briefing_date(key):
-
     filename = key.split("/")[-1]
 
     return filename.replace(
@@ -168,20 +171,22 @@ def get_briefing_date(key):
         ""
     )
 
+
 def get_markdown_report(date: str) -> str:
     """Fetches the intermediate markdown context for a specific date."""
     try:
         content = cloud.get_file_content(f"markdown/{date}.md")
         return content
-    except Exception as e:
-        print(f"Error fetching markdown for {date}: {e}")
+    except Exception:
+        logger.exception("Failed to fetch markdown for %s.", date)
         return None
+
 
 def get_raw_articles(date: str) -> list | dict:
     """Fetches and parses the raw JSON articles for a specific date."""
     try:
         content = cloud.get_file_content(f"articles/{date}.json")
         return json.loads(content)
-    except Exception as e:
-        print(f"Error fetching JSON for {date}: {e}")
+    except Exception:
+        logger.exception("Failed to fetch article JSON for %s.", date)
         return None

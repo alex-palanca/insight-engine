@@ -1,3 +1,4 @@
+import config.env_ini # noqa: F401
 from storage.s3_client import S3Storage
 
 

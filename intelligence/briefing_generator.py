@@ -1,16 +1,21 @@
+import logging
 import os
-from google import genai
-from typing import Optional
-from google.genai.errors import APIError
 import time
 from pathlib import Path
+from typing import Optional
 
+from google import genai
+from google.genai.errors import APIError
+
+
+logger = logging.getLogger(__name__)
 
 FALLBACK_MODELS = [
     "gemini-3.5-flash",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite"
 ]
+
 
 def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:
     """Return a secret from Streamlit or environment variables."""
@@ -28,6 +33,7 @@ def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:
 
     return os.getenv(name, default)
 
+
 # Set up global client initialization for this module
 key = get_secret("GOOGLE_API_KEY")
 if not key:
@@ -39,12 +45,10 @@ client = genai.Client(api_key=key)
 
 
 def create_intelligence_briefing(markdown):
-
-
     daily_articles = markdown
 
     prompt = load_prompt(
-    "prompts/daily_briefing.txt"
+        "prompts/daily_briefing.txt"
     )
 
     final_prompt = build_prompt(
@@ -56,8 +60,9 @@ def create_intelligence_briefing(markdown):
         client,
         final_prompt
     )
-    
+
     return briefing
+
 
 def load_prompt(prompt_path: str) -> str:
     """
@@ -70,10 +75,10 @@ def load_prompt(prompt_path: str) -> str:
         str: The loaded prompt.
     """
     with open(
-        prompt_path, 
-        'r', 
-        encoding='utf-8'
-        ) as file:
+        prompt_path,
+        "r",
+        encoding="utf-8"
+    ) as file:
         return file.read()
 
 
@@ -100,6 +105,7 @@ Curated Daily Articles:
 {daily_articles}
 """
 
+
 def generate_briefing(
     client,
     prompt: str
@@ -115,39 +121,40 @@ def generate_briefing(
         str: The generated briefing.
     """
 
-    # Save the prompt to a temporary file for debugging if all attempts fail
     dump_path = Path("output/debug_prompt.txt")
     try:
         dump_path.write_text(prompt, encoding="utf-8")
     except Exception:
-        pass
+        logger.debug("Failed to write debug prompt to %s.", dump_path, exc_info=True)
 
     for model_name in FALLBACK_MODELS:
         try:
-            
             response = client.models.generate_content(
                 model=model_name,
                 contents=prompt,
             )
-            
+
             return response.text if getattr(response, "text", None) else "No briefing generated."
 
         except APIError as api_err:
-            # Catch transient server overloads
             if api_err.code == 503:
-                print(f"⚠️ Model {model_name} is overloaded (503). Attempting fallback...")
+                logger.warning("Model %s is overloaded (503). Trying fallback model.", model_name)
                 time.sleep(5)
                 continue
-            else:
-                print(f"Google API Error ({api_err.code}): {api_err.message}")
-                time.sleep(5)
-                continue 
 
-        except Exception as e:
-            print(f"Unexpected system failure on model {model_name}: {e}")
+            logger.error(
+                "Google API error on model %s (%s): %s",
+                model_name,
+                api_err.code,
+                api_err.message,
+            )
             time.sleep(5)
             continue
 
-    print("🚨 All fallback models exhausted. Synthesis failed.")
-    return "## Pipeline Error\n\nThe ISOLATE pipeline successfully enriched the data, but the final synthesis models were entirely unavailable due to extreme cloud demand. Please run the pipeline again later."
+        except Exception:
+            logger.exception("Unexpected briefing generation failure on model %s.", model_name)
+            time.sleep(5)
+            continue
 
+    logger.error("All fallback models were exhausted. Briefing synthesis failed.")
+    return "## Pipeline Error\n\nThe ISOLATE pipeline successfully enriched the data, but the final synthesis models were entirely unavailable due to extreme cloud demand. Please run the pipeline again later."

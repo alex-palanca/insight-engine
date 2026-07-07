@@ -1,5 +1,6 @@
 from config import env_ini, feed_loader # noqa: F401
 import asyncio
+import logging
 import sys
 import argparse
 import ingestion.rss_collector as rss_collector
@@ -10,72 +11,74 @@ from storage import storage_utils as storage
 from storage import db_service as db
 from datetime import datetime
 from processing.clustering_engine import events_clustering
+from config.logging_config import setup_logging
 
 
 today = datetime.now().strftime("%Y-%m-%d")
 neon = db.NeonDatabaseService()
+logger = logging.getLogger("isolate_pipeline")
 
 
 def run_ingestion():
-    print("Loading feeds...", flush=True)
+    logger.info("Loading feeds.")
     feeds = feed_loader.load_feeds()
 
-    print("Starting article collection...", flush=True)
+    logger.info("Starting article collection.")
     cleaned_articles = rss_collector.collect_articles(feeds,200,50)
 
-    print("Storing cleaned articles to neon...", flush=True)
+    logger.info("Saving cleaned articles to Neon.")
     db.db_save_return(cleaned_articles)
     return cleaned_articles
 
 def run_enrichment(articles):
-    print("Enriching and scoring articles (Async Pipeline)...", flush=True)
+    logger.info("Enriching and scoring articles.")
     enriched_articles = asyncio.run(enrich_articles_pipeline(articles))
 
-    print("Uploading enriched articles...", flush=True)
+    logger.info("Uploading enriched articles.")
     storage.save_articles(enriched_articles)
-    print("Storing enriched articles to neon...", flush=True)
+    logger.info("Saving enriched articles to Neon.")
     db.db_save_return(enriched_articles, stage="silver")
 
 def events_processing():
-    print("Resetting events...", flush=True)
+    logger.info("Resetting events.")
     neon.reset_events()
 
-    print("Identifying new events...", flush=True)
+    logger.info("Identifying new events.")
     events_clustering(score=50, similarity_threshold=0.45, max_df=0.8, min_df=2)
 
-    print("Enriching events...", flush=True)
+    logger.info("Enriching events.")
     event_enrichment.run_event_enrichment()
     
 def format():
     filtered_articles = db.db_save_return(stage="silver")
-    print("Formatting articles...", flush=True)
+    logger.info("Formatting articles.")
     markdown = formatter.format_context(filtered_articles)
-    print("Uploading formatted document...", flush=True)
+    logger.info("Uploading formatted document.")
     storage.upload_markdown(today,markdown)
 
-    print("Ingestion complete.", flush=True)
+    logger.info("Formatting stage complete.")
 
 def run_synthesis():
     try:
-        print("Obtaining markdown report...", flush=True)
+        logger.info("Fetching markdown report.")
         markdown = storage.obtain_markdown(today)
     except FileNotFoundError:
-        print("Error: Could not find the formatted for today", flush=True)
-        print("Did you run the ingestion stage first?")
+        logger.error("Could not find today's formatted markdown. Run the ingestion and format stages first.")
         sys.exit(1)
         
     if markdown:
-        print("Generating Intelligence Briefing...", flush=True)
+        logger.info("Generating intelligence briefing.")
         briefing = briefing_generator.create_intelligence_briefing(markdown)
-        print(briefing)
-        print("Uploading Intelligence briefing...", flush=True)
+        logger.info("Generated intelligence briefing:\n%s", briefing)
+        logger.info("Uploading intelligence briefing.")
         storage.upload_briefing(today,briefing)
-        print("Synthesis complete.", flush=True)
+        logger.info("Synthesis complete.")
     else:
-        print("Error: Could not obtain the formatted articles", flush=True)
+        logger.error("Could not obtain the formatted articles.")
 
 
 def main():
+    setup_logging()
     parser = argparse.ArgumentParser(description="ISOLATE Intelligence Pipeline")
     parser.add_argument(
         'stage', 
@@ -89,11 +92,11 @@ def main():
     articles = None
     
     if args.stage in ['ingest', 'ing','all']:
-        print("Running ingestion stage...", flush=True)
+        logger.info("Running ingestion stage.")
         articles = run_ingestion()
     
     if args.stage in ['enrich', 'enrichment','all']:
-        print("Running enrichment stage...", flush=True)
+        logger.info("Running enrichment stage.")
         # Use articles from ingestion if available, otherwise fetch from database
         if articles is None:
             articles = db.db_save_return()
@@ -101,15 +104,15 @@ def main():
             run_enrichment(articles)
     
     if args.stage in ['events_processing', 'events','all']:
-        print("Running events processing stage...", flush=True)
+        logger.info("Running events processing stage.")
         events_processing()
     
     if args.stage in ['format', 'fmt','all']:
-        print("Running format stage...", flush=True)
+        logger.info("Running format stage.")
         format()
     
     if args.stage in ['synthesize', 'syn','all']:
-        print("Running synthesis stage...", flush=True)
+        logger.info("Running synthesis stage.")
         run_synthesis()
 
 if __name__ == "__main__":

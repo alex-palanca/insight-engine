@@ -10,6 +10,7 @@ VALID_ARTICLE = {
     "source": "Reuters",
     "category": "Technology",
     "summary": "This is a sufficiently long summary. " * 5,
+    "source_url": "https://example.com/feed.xml",
 }
 
 

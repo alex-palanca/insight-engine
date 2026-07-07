@@ -1,42 +1,44 @@
-from storage.s3_client import S3Storage
-from datetime import date
 import json
+import logging
+from datetime import date
 
-# Define Today's date
+from storage.s3_client import S3Storage
+
+
 today = date.today()
-
 cloud = S3Storage()
+logger = logging.getLogger(__name__)
 
 
-def upload_articles(date: str,content):
-
+def upload_articles(date: str, content):
     cloud.upload_content(
         content,
         cloud.article_key(date)
     )
 
-def upload_briefing(date: str,file_input):
 
+def upload_briefing(date: str, file_input):
     cloud.upload_content(
         file_input,
         cloud.briefing_key(date)
     )
 
-def upload_markdown(date: str,content):
 
+def upload_markdown(date: str, content):
     cloud.upload_content(
         content,
         cloud.markdown_key(date)
     )
 
+
 def obtain_markdown(date: str):
-    markdown =cloud.get_file_content(
+    markdown = cloud.get_file_content(
         cloud.markdown_key(date)
     )
     return markdown
 
-def download_articles(date: str):
 
+def download_articles(date: str):
     cloud.download_file(
         f"output/articles/{date}.json",
         cloud.article_key(date)
@@ -44,16 +46,14 @@ def download_articles(date: str):
 
 
 def download_briefing(date: str):
-
     cloud.download_file(
         f"output/briefings/IB_{date}.md",
         cloud.briefing_key(date)
     )
 
+
 def save_articles(articles):
-    
+    json_articles = json.dumps(articles, indent=2, ensure_ascii=False)
 
-    json_articles = json.dumps(articles, indent=2, ensure_ascii=False)          
-
-    print("Uploading articles to S3...")
-    upload_articles(date.today().isoformat(),json_articles)
+    logger.info("Uploading articles to S3.")
+    upload_articles(date.today().isoformat(), json_articles)

@@ -1,12 +1,17 @@
-import feedparser
+import logging
 from datetime import datetime, timedelta, time, timezone
-from pydantic import ValidationError
-from models.article import Article
-from utils.text_utils import normalize_url,normalize_text
 
+import feedparser
+from pydantic import ValidationError
+
+from models.article import Article
+from utils.text_utils import normalize_text, normalize_url
+
+
+logger = logging.getLogger(__name__)
 
 now_utc = datetime.now(timezone.utc)
-yesterday_utc = now_utc - timedelta(days=1)    
+yesterday_utc = now_utc - timedelta(days=1)
 threshold_utc = datetime.combine(yesterday_utc.date(), time(15, 0, 0))
 
 
@@ -19,18 +24,16 @@ def collect_articles(
     raw_articles = []
     category_counts = {}
 
-    for category,category_feeds in feeds.items():
-
+    for category, category_feeds in feeds.items():
         category_counts[category] = 0
 
         if category_counts[category] >= max_per_category:
             continue
 
         for feed_info in category_feeds:
-
             if category_counts[category] >= max_per_category:
                 break
-            
+
             try:
                 feed_url = feed_info["url"]
                 parsed_feed = feedparser.parse(feed_url)
@@ -38,75 +41,61 @@ def collect_articles(
                 source_count = 0
 
                 for entry in parsed_feed.entries:
-
-                    # Respect both per-category and per-source limits
                     if category_counts[category] >= max_per_category:
                         break
                     if source_count >= max_per_source:
                         break
 
-                    # Filter outdated using feedparser's built-in parsed date tuple
-                    if not hasattr(entry, 'published_parsed') or entry.published_parsed is None:
-                        # Fallback
-                        if hasattr(entry, 'updated_parsed') and entry.updated_parsed is not None:
-                                entry.published_parsed = entry.updated_parsed
+                    if not hasattr(entry, "published_parsed") or entry.published_parsed is None:
+                        if hasattr(entry, "updated_parsed") and entry.updated_parsed is not None:
+                            entry.published_parsed = entry.updated_parsed
                         else:
                             continue
-                    
+
                     entry_utc = datetime(*entry.published_parsed[:6])
 
                     if entry_utc < threshold_utc:
-                        continue                 
+                        continue
 
                     article_date = entry_utc.date()
-
-
-                    yaml_tags = feed_info.get("source_tags",[])
+                    yaml_tags = feed_info.get("source_tags", [])
 
                     native_tags = []
-                    if hasattr(entry, 'tags'):
-                        for t in entry.tags:
-                            if hasattr(t, 'term'):
-                                # Standardize the publisher's tags: lowercase and replace spaces
-                                clean_tag = t.term.lower().replace(" ", "_")
+                    if hasattr(entry, "tags"):
+                        for tag in entry.tags:
+                            if hasattr(tag, "term"):
+                                clean_tag = tag.term.lower().replace(" ", "_")
                                 native_tags.append(clean_tag)
-    
+
                     native_tags = list(set(native_tags))
 
                     try:
-
-                        # Article model built and validated
                         article = Article(
-                                title=normalize_text(entry.get("title", "No Title")),
-                                link=normalize_url(entry.get("link", "http://invalid")),
-                                published=article_date,
-                                source=feed_info["name"],
-                                category=category,
-                                source_tags=yaml_tags, 
-                                article_tags=native_tags,
-                                summary=entry.get("summary", ""),
-                                source_url=feed_info.get("url", "")
+                            title=normalize_text(entry.get("title", "No Title")),
+                            link=normalize_url(entry.get("link", "http://invalid")),
+                            published=article_date,
+                            source=feed_info["name"],
+                            category=category,
+                            source_tags=yaml_tags,
+                            article_tags=native_tags,
+                            summary=entry.get("summary", ""),
+                            source_url=feed_info.get("url", "")
                         )
 
-                        raw_articles.append(article.model_dump(mode='json'))
+                        raw_articles.append(article.model_dump(mode="json"))
 
                         category_counts[category] += 1
                         source_count += 1
-                
-                    except ValidationError:
-                        # The data contract was violated
-                        continue
-            
-                print(f"{source_count} articles collected from {feed_info['name']}")
-            except Exception as e:
-                print(f"Error collecting articles from {feed_url}: {e}")
-       
 
-    print(f"\nCollected {len(raw_articles)} articles total\n")
+                    except ValidationError:
+                        continue
+
+                logger.info("Collected %s articles from %s.", source_count, feed_info["name"])
+            except Exception:
+                logger.exception("Failed to collect articles from %s.", feed_url)
+
+    logger.info("Collected %s articles total.", len(raw_articles))
     for category, count in category_counts.items():
-        print(f"{category}: {count}")
+        logger.info("Category %s: %s articles.", category, count)
 
     return raw_articles
-        
-            
-

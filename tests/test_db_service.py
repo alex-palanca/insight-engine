@@ -286,7 +286,7 @@ def test_get_articles_maps_rows_to_plain_dicts():
     session = FakeSession(query_overrides={db_service.Article: query})
     service = make_service(session)
 
-    result = service.get_articles(60)
+    result = service.get_articles("silver", 60)
 
     assert query.join_model is db_service.Source
     assert query.ordered is True

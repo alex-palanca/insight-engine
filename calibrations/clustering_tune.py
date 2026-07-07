@@ -1,27 +1,26 @@
+import logging
 from datetime import datetime
-from sqlalchemy import func
-from storage.db_service import NeonDatabaseService, Article
-from processing.clustering_engine import compute_clusters
-import utils.text_utils as ut
 
-# ==========================================================
-# TUNING PARAMETERS
-# ==========================================================
+from sqlalchemy import func
+
+import utils.text_utils as ut
+from config.logging_config import setup_logging
+from processing.clustering_engine import compute_clusters
+from storage.db_service import Article, NeonDatabaseService
+
+
+setup_logging()
+logger = logging.getLogger(__name__)
 
 SCORE = 60
-
 SIMILARITY_THRESHOLD = 0.42
 MAX_DF = 0.85
 MIN_DF = 2
 
-# ==========================================================
-
 today = datetime.now().date()
-
 db = NeonDatabaseService()
 
 with db._SessionMarker() as session:
-
     articles = (
         session.query(Article)
         .filter(
@@ -50,32 +49,29 @@ with db._SessionMarker() as session:
 
     clustered = set()
 
-    print("=" * 80)
-    print(
-        f"Threshold={SIMILARITY_THRESHOLD} | "
-        f"max_df={MAX_DF} | "
-        f"min_df={MIN_DF}"
+    logger.info("%s", "=" * 80)
+    logger.info(
+        "Threshold=%s | max_df=%s | min_df=%s",
+        SIMILARITY_THRESHOLD,
+        MAX_DF,
+        MIN_DF,
     )
-    print("=" * 80)
+    logger.info("%s", "=" * 80)
 
     for event_number, cluster in enumerate(clusters, start=1):
-
-        print(f"\nEVENT {event_number} ({len(cluster)} articles)")
-        print("-" * 60)
+        logger.info("EVENT %s (%s articles)", event_number, len(cluster))
+        logger.info("%s", "-" * 60)
 
         for idx in cluster:
             clustered.add(idx)
-
-            print(f"• {articles[idx].title}")
+            logger.info(" - %s", articles[idx].title)
 
             if articles[idx].article_tags:
-                print(f"    Tags: {', '.join(articles[idx].article_tags)}")
+                logger.info("   Tags: %s", ", ".join(articles[idx].article_tags))
 
-    print("\n" + "=" * 80)
-
-    print(f"Articles: {len(articles)}")
-    print(f"Events: {len(clusters)}")
-    print(f"Clustered articles: {len(clustered)}")
-    print(f"Singletons: {len(articles)-len(clustered)}")
-
-    print("=" * 80)
+    logger.info("%s", "=" * 80)
+    logger.info("Articles: %s", len(articles))
+    logger.info("Events: %s", len(clusters))
+    logger.info("Clustered articles: %s", len(clustered))
+    logger.info("Singletons: %s", len(articles) - len(clustered))
+    logger.info("%s", "=" * 80)

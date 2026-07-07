@@ -1,11 +1,16 @@
 # summarizer/ai_client.py
+import asyncio
+import logging
+
 import config.env_ini as env
-import json
 from google import genai
 from google.genai import types
 from google.genai.errors import APIError
-import asyncio
+
 from config.score_system import BatchEvaluation, SCORING_SYSTEM_PROMPT
+
+
+logger = logging.getLogger(__name__)
 
 # Set up global client initialization for this module
 key = env.get_env_var("GOOGLE_API_KEY")
@@ -23,9 +28,10 @@ FALLBACK_MODELS = [
     "gemini-3-flash"
 ]
 
+
 async def async_evaluate_batch(batch_text: str) -> BatchEvaluation | None:
     """
-    Sends a batch of articles to Gemini. 
+    Sends a batch of articles to Gemini.
     If a model suffers a temporary 503 overload, it automatically fails over
     to backup models before giving up.
     """
@@ -44,26 +50,27 @@ async def async_evaluate_batch(batch_text: str) -> BatchEvaluation | None:
             return BatchEvaluation.model_validate_json(response.text)
 
         except APIError as api_err:
-            # Check specifically for a 503 or transient network error
             if api_err.code == 503:
-                print(f"⚠️ Model {model_name} is overloaded (503). Attempting fallback...")
-                # Optional: pause briefly for a half-second to let things settle
-                await asyncio.sleep(0.5)
-                continue  # Drops down to the next model in the loop
-
-            if api_err.code == 429:
-                print(f"⚠️ Rate limit exceeded for model {model_name} (429). Attempting fallback...")
+                logger.warning("Model %s is overloaded (503). Trying fallback model.", model_name)
                 await asyncio.sleep(0.5)
                 continue
-            else:
-                print(f"❌ Critical Google API Error ({api_err.code}): {api_err.message}")
-                break
 
-        except Exception as e:
-            # Captures generic parsing, network, or unknown errors
-            print(f"💥 Unexpected system failure on model {model_name}: {e}")
+            if api_err.code == 429:
+                logger.warning("Rate limit exceeded for model %s (429). Trying fallback model.", model_name)
+                await asyncio.sleep(0.5)
+                continue
+
+            logger.error(
+                "Critical Google API error on model %s (%s): %s",
+                model_name,
+                api_err.code,
+                api_err.message,
+            )
             break
 
-    # If the loop completes and every model failed, return None to keep the pipeline moving
-    print("🚨 All fallback models exhausted. Batch skipped.")
+        except Exception:
+            logger.exception("Unexpected evaluation failure on model %s.", model_name)
+            break
+
+    logger.error("All fallback models were exhausted. Batch evaluation skipped.")
     return None

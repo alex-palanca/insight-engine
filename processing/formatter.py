@@ -1,17 +1,22 @@
 # reporter/report_generator.py
 from datetime import datetime
+import logging
+
 from config.feed_loader import load_feeds
+
 
 feeds = load_feeds()
 category_order = list(feeds.keys())
+logger = logging.getLogger(__name__)
+
 
 def format_context(articles):
     """
-    Acts as a pure data formatter. Takes enriched JSON and returns 
-    a highly-dense Markdown string for the Synthesizer LLM. 
+    Acts as a pure data formatter. Takes enriched JSON and returns
+    a highly-dense Markdown string for the Synthesizer LLM.
     """
     date = datetime.now().strftime("%Y-%m-%d")
-    print("Formatting enriched data in-memory...")
+    logger.info("Formatting enriched data in memory.")
 
     grouped_articles = {}
     for article in articles:
@@ -33,19 +38,19 @@ def format_context(articles):
             continue
 
         category_articles = grouped_articles[category]
-        category_articles.sort(key=lambda x: x.get('score', 0), reverse=True)
+        category_articles.sort(key=lambda x: x.get("score", 0), reverse=True)
 
         markdown += f"## {category.title()} ({len(category_articles)} articles)\n\n"
 
         for article in category_articles:
-            score = article.get('score', 0)
-            metrics = article.get('metrics', {})
-            
+            score = article.get("score", 0)
+            metrics = article.get("metrics", {})
+
             markdown += f"### {article.get('title', 'Untitled')} [SCORE: {score}/100]\n"
             markdown += f"- **Source:** {article.get('source', 'Unknown')} | **Link:** {article.get('link', '')}\n"
             markdown += f"- **AI Summary:**\n{article.get('ai_summary', 'N/A')}\n"
             markdown += f"- **Justification:** {article.get('justification', 'N/A')}\n"
-            
+
             if metrics:
                 markdown += (
                     f"- **Metrics:** Immediacy({metrics.get('immediacy', 0)}), "

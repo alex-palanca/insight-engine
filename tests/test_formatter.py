@@ -1,3 +1,4 @@
+import config.env_ini # noqa: F401
 from processing.formatter import format_context
 
 VALID_ENRICHED_ARTICLE = {
