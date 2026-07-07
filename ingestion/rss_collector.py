@@ -2,6 +2,7 @@ import feedparser
 from datetime import datetime, timedelta, time, timezone
 from pydantic import ValidationError
 from models.article import Article
+from utils.text_utils import normalize_url,normalize_text
 
 
 now_utc = datetime.now(timezone.utc)
@@ -76,8 +77,8 @@ def collect_articles(
 
                         # Article model built and validated
                         article = Article(
-                                title=entry.get("title", "No Title"),
-                                link=entry.get("link", "http://invalid"),
+                                title=normalize_text(entry.get("title", "No Title")),
+                                link=normalize_url(entry.get("link", "http://invalid")),
                                 published=article_date,
                                 source=feed_info["name"],
                                 category=category,

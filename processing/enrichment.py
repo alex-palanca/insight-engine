@@ -32,6 +32,12 @@ async def fetch_full_article(session: aiohttp.ClientSession, article: dict) -> d
 async def process_batch(batch: list[dict], batch_id: int) -> list[dict]:
     """Formats a batch into a prompt, calls the AI, and maps the scores back to the articles."""
     print(f"Processing LLM Batch {batch_id}...")
+
+    for article in batch:
+        article.setdefault("score", 0)
+        article.setdefault("ai_summary", "")
+        article.setdefault("justification", "")
+        article.setdefault("metrics", {})
     
     # 1. Format the text for the LLM
     batch_prompt = ""
@@ -48,15 +54,15 @@ async def process_batch(batch: list[dict], batch_id: int) -> list[dict]:
         for eval_data in evaluation_result["evaluations"]:
             idx = eval_data.get("article_index")
             if 0 <= idx < len(batch):
-                batch[idx]['score'] = eval_data.total_score
-                batch[idx]['ai_summary'] = eval_data.ai_summary
-                batch[idx]['justification'] = eval_data.justification
+                batch[idx]['score'] = eval_data.get("total_score", 0)
+                batch[idx]['ai_summary'] = eval_data.get("ai_summary", "")
+                batch[idx]['justification'] = eval_data.get("justification", "")
                 batch[idx]['metrics'] = {
-                    "immediacy": eval_data.immediacy,
-                    "scale": eval_data.scale,
-                    "permanence": eval_data.permanence,
-                    "reverberance": eval_data.reverberance,
-                    "novelty": eval_data.novelty
+                    "immediacy": eval_data.get("immediacy", 0),
+                    "scale": eval_data.get("scale", 0),
+                    "permanence": eval_data.get("permanence", 0),
+                    "reverberance": eval_data.get("reverberance", 0),
+                    "novelty": eval_data.get("novelty", 0)
                 }
     return batch
 

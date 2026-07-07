@@ -8,6 +8,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 
 
 from utils.hashing import generate_article_id
+from utils.text_utils import normalize_url, normalize_text
 
 
 # ORM SETUP & SCHEMA DEFINITIONS
@@ -173,8 +174,8 @@ class NeonDatabaseService:
                         session.flush()
 
                     # 2. Native PostgreSQL UPSERT Execution
-                    article_title = item.get('title', '')
-                    article_link = item.get('link', '')
+                    article_title = normalize_text(item.get('title', ''))
+                    article_link = normalize_url(item.get('link', ''))
                     
                     # This returns a Python UUID object
                     deterministic_uuid = generate_article_id(article_title, article_link)
@@ -191,8 +192,8 @@ class NeonDatabaseService:
                         collected_at=datetime.now()
                     )
                     
-                    # This tells Neon to ignore the row entirely if the content_id unique constraint triggers.
-                    upsert_op = insert_op.on_conflict_do_nothing(index_elements=['content_id'])
+                    # Ignore duplicates regardless of whether they collide on content_id or link.
+                    upsert_op = insert_op.on_conflict_do_nothing()
                     
                     # Transmits the compiled SQL across the network wire to Neon
                     session.execute(upsert_op)
@@ -226,18 +227,21 @@ class NeonDatabaseService:
             try:
                 for item in enriched_articles:
 
+                    article_title = normalize_text(item.get('title', ''))
+                    article_link = normalize_url(item["link"])
+                    deterministic_uuid = generate_article_id(article_title, article_link)
+
                     article = (
                     session.query(Article)
-                    .filter_by(link=item["link"])
+                    .filter_by(content_id=deterministic_uuid)
                     .first()
                 )
                  
                     if article:
-
-                        article.ai_summary = item["ai_summary"]
-                        article.score = item["score"]
-                        article.metrics = item["metrics"]
-                        article.justification = item["justification"]
+                        article.summary = item.get("ai_summary", article.ai_summary)
+                        article.score = item.get("score", article.score)
+                        article.metrics = item.get("metrics", article.metrics)
+                        article.justification = item.get("justification", article.justification)
                         article.enriched_at = datetime.now()
 
                     else:
