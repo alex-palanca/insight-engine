@@ -238,7 +238,7 @@ class NeonDatabaseService:
                 )
                  
                     if article:
-                        article.summary = item.get("ai_summary", article.ai_summary)
+                        article.ai_summary = item.get("ai_summary", article.ai_summary)
                         article.score = item.get("score", article.score)
                         article.metrics = item.get("metrics", article.metrics)
                         article.justification = item.get("justification", article.justification)
@@ -257,7 +257,7 @@ class NeonDatabaseService:
                 print(f"Database batch operation failed! Executed full transaction rollback. Error: {e}")
                 raise e
             
-    def get_articles(self,min_score: int) -> list:
+    def get_articles(self,stage: str = "bronze", min_score: int = 0) -> list:
         """
         Retrieves today's articles from the database and maps them back into 
         the dictionary format expected by the markdown report generator.
@@ -265,31 +265,47 @@ class NeonDatabaseService:
         with self._SessionMarker() as session:
             try:
                 today = datetime.now().date()
-                
-                query_results = session.query(Article).join(Source).filter(
-                    func.date(Article.collected_at) == today,
-                    Article.score >= min_score
-                ).order_by(Article.score.desc()).all()
-                
-                # Map the SQLAlchemy ORM objects back to plain dictionaries
                 articles_data = []
-                for db_article in query_results:
-                    articles_data.append({
-                        # Base / Bronze Fields
-                        "title": db_article.title,
-                        "link": db_article.link,
-                        "published": db_article.published.isoformat() if db_article.published else "Unknown",
-                        "source": db_article.source.name,
-                        "category": db_article.source.category,
-                        
-                        # Silver / Enriched Fields
-                        "ai_summary": db_article.ai_summary,
-                        "score": db_article.score,
-                        "metrics": db_article.metrics,
-                        "justification": db_article.justification   
-                    })
+
+                # Map the SQLAlchemy ORM objects back to plain dictionaries
+                if stage == "silver":
+                    query_results = session.query(Article).join(Source).filter(
+                        func.date(Article.collected_at) == today,
+                        Article.score >= min_score
+                    ).order_by(Article.score.desc()).all()  
+
+                    for db_article in query_results:
+                        articles_data.append({
+                            # Base / Bronze Fields
+                            "title": db_article.title,
+                            "link": db_article.link,
+                            "published": db_article.published.isoformat() if db_article.published else "Unknown",
+                            "source": db_article.source.name,
+                            "category": db_article.source.category,
+                            
+                            # Silver / Enriched Fields
+                            "ai_summary": db_article.ai_summary,
+                            "score": db_article.score,
+                            "metrics": db_article.metrics,
+                            "justification": db_article.justification   
+                        })
+
+                if stage == "bronze":
+                    query_results = session.query(Article).join(Source).filter(
+                    func.date(Article.collected_at) == today,
+                    ).order_by(Article.published.desc()).all()  
+
+                    for db_article in query_results:
+                        articles_data.append({
+                            "title": db_article.title,
+                            "link": db_article.link,
+                            "published": db_article.published.isoformat() if db_article.published else "Unknown",
+                            "source": db_article.source.name,
+                            "category": db_article.source.category,
+                            "summary": db_article.raw_summary
+                        })
                     
-                print(f"Retrieved {len(articles_data)} articles from the database for reporting.")
+                print(f"Retrieved {len(articles_data)} articles from the database for stage '{stage}'.")
                 return articles_data
                 
             except Exception as e:
@@ -306,11 +322,13 @@ def db_save_return(articles: list = None, stage: str = "bronze"):
         db_service = NeonDatabaseService()
         #db_service.initialize_schema()  # Ensure schema is ready before saving
         if stage == "bronze":
-            db_service.save_bronze_data(articles)
+            if articles:
+                db_service.save_bronze_data(articles)
+            return db_service.get_articles() # Return the enriched articles for further processing
         if stage == "silver":
             if articles:
                 db_service.save_silver_data(articles)
-            return db_service.get_articles(60) # Return the enriched articles for further processing
+            return db_service.get_articles("silver",50) # Return the enriched articles for further processing
         
     except Exception as e:
         print(f"Failed to save articles to the database: {e}")

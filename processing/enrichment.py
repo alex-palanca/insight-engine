@@ -3,6 +3,7 @@ import asyncio
 import aiohttp
 import trafilatura
 from intelligence.ai_client import async_evaluate_batch
+from config.score_system import BatchEvaluation
 
 BATCH_SIZE = 10
 RATE_LIMIT_DELAY = 4.5 # 60 seconds / 15 requests = 4 seconds. We use 4.5 to be safe.
@@ -50,19 +51,19 @@ async def process_batch(batch: list[dict], batch_id: int) -> list[dict]:
     evaluation_result = await async_evaluate_batch(batch_prompt)
     
     # 3. Map scores back to the original articles
-    if evaluation_result and "evaluations" in evaluation_result:
-        for eval_data in evaluation_result["evaluations"]:
-            idx = eval_data.get("article_index")
+    if evaluation_result and isinstance(evaluation_result, BatchEvaluation):
+        for eval_data in evaluation_result.evaluations:
+            idx = eval_data.article_index
             if 0 <= idx < len(batch):
-                batch[idx]['score'] = eval_data.get("total_score", 0)
-                batch[idx]['ai_summary'] = eval_data.get("ai_summary", "")
-                batch[idx]['justification'] = eval_data.get("justification", "")
+                batch[idx]['score'] = eval_data.total_score
+                batch[idx]['ai_summary'] = eval_data.ai_summary
+                batch[idx]['justification'] = eval_data.justification
                 batch[idx]['metrics'] = {
-                    "immediacy": eval_data.get("immediacy", 0),
-                    "scale": eval_data.get("scale", 0),
-                    "permanence": eval_data.get("permanence", 0),
-                    "reverberance": eval_data.get("reverberance", 0),
-                    "novelty": eval_data.get("novelty", 0)
+                    "immediacy": eval_data.immediacy,
+                    "scale": eval_data.scale,
+                    "permanence": eval_data.permanence,
+                    "reverberance": eval_data.reverberance,
+                    "novelty": eval_data.novelty
                 }
     return batch
 

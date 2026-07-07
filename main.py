@@ -41,7 +41,7 @@ def events_processing():
     neon.reset_events()
 
     print("Identifying new events...", flush=True)
-    events_clustering(score=60, similarity_threshold=0.45, max_df=0.8, min_df=2)
+    events_clustering(score=50, similarity_threshold=0.45, max_df=0.8, min_df=2)
 
     print("Enriching events...", flush=True)
     event_enrichment.run_event_enrichment()
@@ -96,7 +96,7 @@ def main():
         print("Running enrichment stage...", flush=True)
         # Use articles from ingestion if available, otherwise fetch from database
         if articles is None:
-            articles = db.db_save_return(stage="silver")
+            articles = db.db_save_return()
         if articles:
             run_enrichment(articles)
     
