@@ -67,6 +67,7 @@ async def process_batch(batch: list[dict], batch_id: int) -> list[dict]:
                     "reverberance": eval_data.reverberance,
                     "novelty": eval_data.novelty
                 }
+                batch[idx]["article_tags"] = eval_data.tags
 
     return batch
 

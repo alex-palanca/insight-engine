@@ -244,6 +244,36 @@ def test_save_silver_data_updates_matching_article_and_uses_content_id():
     assert session.committed is True
 
 
+def test_save_silver_data_updates_article_tags_when_present():
+    article = SimpleNamespace(
+        ai_summary="old",
+        score=10,
+        metrics={"old": True},
+        justification="old why",
+        article_tags=["old_tag"],
+        enriched_at=None,
+    )
+    session = FakeSession(article_lookup=article)
+    service = make_service(session)
+
+    service.save_silver_data(
+        [
+            {
+                "title": "Hello, World!",
+                "link": "https://example.com/story/?utm_source=rss&x=1",
+                "ai_summary": "new summary",
+                "score": 88,
+                "metrics": {"immediacy": 12},
+                "justification": "important",
+                "article_tags": ["ai_tag", "policy"],
+            }
+        ]
+    )
+
+    assert article.article_tags == ["ai_tag", "policy"]
+    assert session.committed is True
+
+
 def test_save_silver_data_preserves_existing_values_when_fields_are_missing():
     article = SimpleNamespace(
         ai_summary="kept summary",
@@ -281,6 +311,7 @@ def test_get_articles_maps_rows_to_plain_dicts():
         score=91,
         metrics={"immediacy": 10},
         justification="why",
+        article_tags=["ai_tag", "policy"],
     )
     query = FakeGetArticlesQuery([db_article])
     session = FakeSession(query_overrides={db_service.Article: query})
@@ -301,6 +332,7 @@ def test_get_articles_maps_rows_to_plain_dicts():
             "score": 91,
             "metrics": {"immediacy": 10},
             "justification": "why",
+            "article_tags": ["ai_tag", "policy"],
         }
     ]
 

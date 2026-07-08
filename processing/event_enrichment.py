@@ -1,9 +1,9 @@
 import asyncio
 import json
 import logging
-from pathlib import Path
 from typing import Optional
 
+from utils import prompt_loader
 import config.env_ini as env
 from google import genai
 from google.genai import types
@@ -27,16 +27,6 @@ FALLBACK_MODELS = [
     "gemini-2.5-flash",
     "gemini-3-flash"
 ]
-
-
-def load_event_enrichment_prompt() -> str:
-    """
-    Loads the event enrichment prompt template from the prompts directory.
-    """
-    prompt_path = Path(__file__).parent.parent / "prompts" / "event_enrichment.txt"
-    with open(prompt_path, "r") as file:
-        return file.read()
-
 
 def format_articles_context(articles: list) -> str:
     """
@@ -68,7 +58,7 @@ async def enrich_event_with_gemini(event_id: int, articles: list) -> Optional[Ev
         logger.warning("Event %s has no articles. Skipping enrichment.", event_id)
         return None
 
-    prompt_template = load_event_enrichment_prompt()
+    prompt_template = prompt_loader.load_prompt("event_enrichment.txt")
     articles_context = format_articles_context(articles)
     full_prompt = prompt_template.replace("{articles_context}", articles_context)
 

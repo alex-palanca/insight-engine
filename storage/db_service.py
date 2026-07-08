@@ -202,6 +202,8 @@ class NeonDatabaseService:
                         article.score = item.get("score", article.score)
                         article.metrics = item.get("metrics", article.metrics)
                         article.justification = item.get("justification", article.justification)
+                        existing_tags = getattr(article, "article_tags", None)
+                        article.article_tags = item.get("article_tags", existing_tags)
                         article.enriched_at = datetime.now()
                     else:
                         logger.warning(
@@ -243,7 +245,8 @@ class NeonDatabaseService:
                             "ai_summary": db_article.ai_summary,
                             "score": db_article.score,
                             "metrics": db_article.metrics,
-                            "justification": db_article.justification
+                            "justification": db_article.justification,
+                            "article_tags": db_article.article_tags,
                         })
 
                 if stage == "bronze":

@@ -6,10 +6,11 @@ import config.env_ini as env
 from google import genai
 from google.genai import types
 from google.genai.errors import APIError
+from utils import prompt_loader
 
-from config.score_system import BatchEvaluation, SCORING_SYSTEM_PROMPT
+from config.score_system import BatchEvaluation
 
-
+logging.getLogger("google_genai.models").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 # Set up global client initialization for this module
@@ -41,7 +42,7 @@ async def async_evaluate_batch(batch_text: str) -> BatchEvaluation | None:
                 model=model_name,
                 contents=batch_text,
                 config=types.GenerateContentConfig(
-                    system_instruction=SCORING_SYSTEM_PROMPT,
+                    system_instruction=prompt_loader.load_prompt("article_scoring.txt"),
                     response_mime_type="application/json",
                     response_schema=BatchEvaluation,
                     temperature=0.1

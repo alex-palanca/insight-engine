@@ -11,7 +11,7 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 SCORE = 50
-SIMILARITY_THRESHOLD = 0.345
+SIMILARITY_THRESHOLD = 0.375
 MAX_DF = 0.85
 MIN_DF = 2
 
@@ -23,7 +23,7 @@ with db._SessionMarker() as session:
     articles = (
         session.query(Article)
         .filter(
-            func.date(Article.collected_at) == yesterday,
+            func.date(Article.collected_at) == today,
             Article.score >= SCORE,
         )
         .all()

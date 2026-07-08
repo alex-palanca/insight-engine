@@ -44,7 +44,7 @@ def events_processing():
     neon.reset_events()
 
     logger.info("Identifying new events.")
-    events_clustering(score=50, similarity_threshold=0.35, max_df=0.8, min_df=2)
+    events_clustering(score=50, similarity_threshold=0.375, max_df=0.85, min_df=2)
 
     logger.info("Enriching events.")
     event_enrichment.run_event_enrichment()

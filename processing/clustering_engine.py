@@ -25,8 +25,8 @@ def fetch_unclustered_articles(session: Session, score: int):
 
 def compute_clusters(
         texts: list[str],
-        similarity_threshold: float = 0.35,
-        max_df: float = 0.85,
+        similarity_threshold: float = 0.375,
+        max_df: float = 0.75,
         min_df: int = 2,) -> list[list[int]]:
     """
     Takes a flat list of strings (articles) and returns a list of clusters.

@@ -14,6 +14,15 @@ class ArticleScore(BaseModel):
     justification: str = Field(description="A 1-sentence justification for the total score.")
     ai_summary: str = Field(description="A dense, 3-bullet point summary of the core facts.")
 
+    tags: list[str] = Field(
+        description=(
+            "3-6 lowercase, underscore-separated tags identifying the core "
+            "entities and topic of this article (e.g. 'nato', 'ukraine', "
+            "'interest_rates'). Prefer specific named entities over generic "
+            "category words. Always populate this field."
+        )
+    )
+
     @computed_field
     @property
     def total_score(self)->int:
@@ -23,9 +32,3 @@ class BatchEvaluation(BaseModel):
     evaluations: list[ArticleScore] = Field(
         description="A list of evaluations, one for each article provided in the prompt."
     )
-
-SCORING_SYSTEM_PROMPT = """
-You are a senior intelligence analyst. Evaluate the following batch of articles.
-For each article, extract a dense 3-bullet summary and grade it strictly using the 5x20 framework.
-Be aggressive with your filtering. Most standard news should score below 50. Only paradigm-shifting events should score above 80.
-"""
