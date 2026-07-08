@@ -178,7 +178,7 @@ def get_all_events(db_service: NeonDatabaseService) -> list:
                 event_data.append({
                     "id": event.id,
                     "name": event.name,
-                    "created_at": event.created_at
+                    "first_seen_at": event.first_seen_at
                 })
 
             return event_data

@@ -34,10 +34,12 @@ def build_event_text(event: Event) -> str:
     """
     Builds a normalized text representation of an event for similarity comparison against articles.
     """
+    entity_names = [entity.get("name", "") for entity in (event.entities or [])]
     return (
         f"{ut.normalize_text(event.name)} "
         f"{ut.normalize_text(event.summary or '')} "
-        f"{' '.join(event.tags or [])}"
+        f"{' '.join(entity_names)} "
+        f"{' '.join(event.domains or [])}"
     )
 
 
@@ -137,6 +139,20 @@ def match_articles_to_events(
     return matches
 
 
+def sync_event_counts(session: Session, event: Event) -> None:
+    """
+    Recomputes an event's article_count and source_count from its currently attached articles.
+    Requires any pending article.event_id changes to already be flushed.
+    """
+    event.article_count = session.query(Article).filter(Article.event_id == event.id).count()
+    event.source_count = (
+        session.query(Article.source_id)
+        .filter(Article.event_id == event.id)
+        .distinct()
+        .count()
+    )
+
+
 def match_and_attach_articles(score: int, **hyperparameters) -> dict:
     """
     Matches unclustered articles against currently open events and attaches the matched
@@ -173,6 +189,8 @@ def match_and_attach_articles(score: int, **hyperparameters) -> dict:
                     article.event_id = event.id
                     article.attached_at = now
 
+                session.flush()
+                sync_event_counts(session, event)
                 event.last_updated_at = now
 
                 touched_events[event.id] = [
@@ -221,15 +239,16 @@ def events_clustering(score: int, **hyperparameters):
 
             for cluster in clusters:
                 if len(cluster) > 1:
-                    new_event = Event(
-                        name="Pending AI Title and Summary",
-                        created_at=datetime.now()
-                    )
+                    new_event = Event(name="Pending AI Title and Summary")
                     session.add(new_event)
                     session.flush()
 
-                    for idx in cluster:
-                        articles[idx].event_id = new_event.id
+                    cluster_articles = [articles[idx] for idx in cluster]
+                    for article in cluster_articles:
+                        article.event_id = new_event.id
+
+                    new_event.article_count = len(cluster_articles)
+                    new_event.source_count = len({article.source_id for article in cluster_articles})
 
                     events_created += 1
 

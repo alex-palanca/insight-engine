@@ -44,10 +44,6 @@ class Event(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     summary = Column(Text, nullable=True)
-    tags = Column(JSONB, nullable=True)
-    importance = Column(String, nullable=True)
-    category = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.now)
 
     status = Column(String, nullable=False, default="open", index=True)
     merged_into_id = Column(Integer, ForeignKey("events.id"), nullable=True)

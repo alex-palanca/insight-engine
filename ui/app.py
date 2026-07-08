@@ -246,13 +246,14 @@ if page == "Database Explorer":
                         f"<div style='margin-top:0.25rem;'><a href='{link['url']}' target='_blank' rel='noopener noreferrer' style='color:#2563eb;text-decoration:none;'>{link.get('label', 'Open article')}</a></div>"
                         for link in article_links
                     ) or "<div style='margin-top:0.25rem;color:#64748b;'>No linked articles</div>"
+                    entity_names = [entity.get("name", "") for entity in (event.get("entities") or [])]
                     st.markdown(
                         f"""
                         <div style="border:1px solid #e2e8f0;border-radius:16px;padding:1rem 1rem 0.8rem;margin-bottom:0.8rem;background:#ffffff;box-shadow:0 6px 18px rgba(15,23,42,0.04);">
-                          <div style="font-size:0.9rem;color:#64748b;margin-bottom:0.3rem;">{event.get('category') or 'uncategorized'} · {event.get('importance') or 'unknown'}</div>
+                          <div style="font-size:0.9rem;color:#64748b;margin-bottom:0.3rem;">{event.get('event_type') or 'uncategorized'} · {', '.join(event.get('domains') or []) or 'unknown domain'} · {event.get('article_count') or 0} articles / {event.get('source_count') or 0} sources</div>
                           <div style="font-size:1.1rem;font-weight:700;color:#0f172a;margin-bottom:0.35rem;">{event.get('name', 'Untitled event')}</div>
                           <div style="font-size:0.95rem;color:#334155;margin-bottom:0.4rem;">{(event.get('summary') or 'No summary available')[:220]}</div>
-                          <div style="font-size:0.82rem;color:#64748b;margin-bottom:0.35rem;">Tags: {', '.join(event.get('tags') or []) if event.get('tags') else 'None'}</div>
+                          <div style="font-size:0.82rem;color:#64748b;margin-bottom:0.35rem;">Entities: {', '.join(entity_names) if entity_names else 'None'}</div>
                           <div style="font-size:0.88rem;color:#0f172a;font-weight:600;">Articles</div>
                           {links_html}
                         </div>

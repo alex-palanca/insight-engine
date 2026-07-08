@@ -22,7 +22,7 @@ def run_ingestion():
     feeds = feed_loader.load_feeds()
 
     logger.info("Starting article collection.")
-    cleaned_articles = rss_collector.collect_articles(feeds,200,50)
+    cleaned_articles = rss_collector.collect_articles(feeds,500,200)
 
     logger.info("Saving cleaned articles to Neon.")
     db.db_save_return(cleaned_articles)
