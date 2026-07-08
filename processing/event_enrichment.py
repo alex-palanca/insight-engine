@@ -1,7 +1,6 @@
 import asyncio
 import json
 import logging
-from datetime import datetime
 from typing import Optional
 
 import config.env_ini as env
@@ -232,7 +231,6 @@ def create_event_metadata(db_service: NeonDatabaseService, event_id: int, metada
             event.event_type = payload["event_type"]
             event.entities = payload["entities"]
             event.domains = payload["domains"]
-            event.last_updated_at = datetime.now()
 
             session.commit()
             logger.info("Created metadata for event %s.", event_id)
@@ -262,7 +260,6 @@ def apply_event_update(db_service: NeonDatabaseService, event_id: int, metadata:
 
             if metadata.material_change:
                 event.summary = metadata.revised_summary
-                event.last_updated_at = datetime.now()
 
             session.add(EventUpdateRecord(
                 event_id=event_id,

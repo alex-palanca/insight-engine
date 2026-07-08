@@ -83,7 +83,7 @@ def get_events() -> list[dict]:
 
     with db_service._SessionMarker() as session:
         try:
-            rows = session.query(Event).order_by(Event.first_seen_at.desc()).all()
+            rows = session.query(Event).order_by(Event.source_count.desc(),Event.last_updated_at.desc()).all()
             result = []
             for row in rows:
                 article_links = []

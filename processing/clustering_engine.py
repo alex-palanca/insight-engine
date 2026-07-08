@@ -191,7 +191,16 @@ def match_and_attach_articles(score: int, **hyperparameters) -> dict:
 
                 session.flush()
                 sync_event_counts(session, event)
-                event.last_updated_at = now
+
+                published_dates = [article.published for article in matched_articles if article.published]
+                if published_dates:
+                    latest_published = max(published_dates)
+                    if event.last_updated_at is None or latest_published > event.last_updated_at:
+                        event.last_updated_at = latest_published
+
+                    earliest_published = min(published_dates)
+                    if event.first_seen_at is None or earliest_published < event.first_seen_at:
+                        event.first_seen_at = earliest_published
 
                 touched_events[event.id] = [
                     {
@@ -249,6 +258,11 @@ def events_clustering(score: int, **hyperparameters):
 
                     new_event.article_count = len(cluster_articles)
                     new_event.source_count = len({article.source_id for article in cluster_articles})
+
+                    published_dates = [article.published for article in cluster_articles if article.published]
+                    if published_dates:
+                        new_event.first_seen_at = min(published_dates)
+                        new_event.last_updated_at = max(published_dates)
 
                     events_created += 1
 
