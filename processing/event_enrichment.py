@@ -12,7 +12,7 @@ from google.genai.errors import APIError
 from models.event_metadata import EventMetadata
 from storage.db_service import NeonDatabaseService
 
-
+RATE_LIMIT_DELAY = 4.5  # 60 seconds / 15 requests = 4 seconds. We use 4.5 to be safe.
 logger = logging.getLogger(__name__)
 
 key = env.get_env_var("GOOGLE_API_KEY")
@@ -85,6 +85,7 @@ async def enrich_event_with_gemini(event_id: int, articles: list) -> Optional[Ev
             )
 
             metadata_dict = json.loads(response.text)
+            await asyncio.sleep(RATE_LIMIT_DELAY)
             return EventMetadata(**metadata_dict)
 
         except APIError as api_err:
@@ -94,7 +95,8 @@ async def enrich_event_with_gemini(event_id: int, articles: list) -> Optional[Ev
                     model_name,
                     event_id,
                 )
-                await asyncio.sleep(0.5)
+
+                await asyncio.sleep(RATE_LIMIT_DELAY)
                 continue
 
             logger.error(

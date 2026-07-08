@@ -1,8 +1,6 @@
 import logging
-from datetime import datetime
-
+from datetime import datetime, timedelta
 from sqlalchemy import func
-
 import utils.text_utils as ut
 from config.logging_config import setup_logging
 from processing.clustering_engine import compute_clusters
@@ -12,20 +10,20 @@ from storage.db_service import Article, NeonDatabaseService
 setup_logging()
 logger = logging.getLogger(__name__)
 
-SCORE = 60
-SIMILARITY_THRESHOLD = 0.42
+SCORE = 50
+SIMILARITY_THRESHOLD = 0.345
 MAX_DF = 0.85
 MIN_DF = 2
 
 today = datetime.now().date()
+yesterday = today - timedelta(days=1)
 db = NeonDatabaseService()
 
 with db._SessionMarker() as session:
     articles = (
         session.query(Article)
         .filter(
-            func.date(Article.collected_at) == today,
-            Article.event_id == None,
+            func.date(Article.collected_at) == yesterday,
             Article.score >= SCORE,
         )
         .all()

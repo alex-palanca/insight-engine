@@ -25,7 +25,7 @@ def fetch_unclustered_articles(session: Session, score: int):
 
 def compute_clusters(
         texts: list[str],
-        similarity_threshold: float = 0.40,
+        similarity_threshold: float = 0.35,
         max_df: float = 0.85,
         min_df: int = 2,) -> list[list[int]]:
     """
@@ -64,7 +64,7 @@ def compute_clusters(
             if sim_matrix[i][j] >= similarity_threshold:
                 graph.add_edge(i, j, weight=sim_matrix[i][j])
 
-    clusters = list(nx.connected_components(graph))
+    clusters = list(nx.algorithms.community.louvain_communities(graph, weight='weight', seed=42))
     return [list(cluster) for cluster in clusters if len(cluster) > 1]
 
 
@@ -78,7 +78,11 @@ def events_clustering(score: int, **hyperparameters):
         try:
             articles = fetch_unclustered_articles(session, score)
             corpus = [
-                f"{ut.normalize_text(article.title)} {ut.normalize_text(article.ai_summary or article.raw_summary)} {article.article_tags}"
+                (
+                    f"{ut.normalize_text(article.title)} "
+                    f"{ut.normalize_text(article.ai_summary or article.raw_summary)} "
+                    f"{' '.join(article.article_tags or [])}"
+                )
                 for article in articles
             ]
 
