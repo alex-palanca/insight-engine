@@ -49,7 +49,37 @@ class Event(Base):
     category = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.now)
 
+    status = Column(String, nullable=False, default="open", index=True)
+    merged_into_id = Column(Integer, ForeignKey("events.id"), nullable=True)
+    event_type = Column(String, nullable=True)
+    entities = Column(JSONB, nullable=True)
+    domains = Column(JSONB, nullable=True)
+    first_seen_at = Column(DateTime, nullable=False, default=datetime.now)
+    last_updated_at = Column(DateTime, nullable=False, default=datetime.now, index=True)
+    closed_at = Column(DateTime, nullable=True)
+    article_count = Column(Integer, nullable=False, default=1)
+    source_count = Column(Integer, nullable=False, default=1)
+
     articles = relationship("Article", back_populates="event")
+    updates = relationship("EventUpdate", back_populates="event", cascade="all, delete-orphan")
+    merged_into = relationship("Event", remote_side=[id])
+
+
+class EventUpdate(Base):
+    """
+    Append-only delta log recording the history of changes to an Event.
+    """
+    __tablename__ = "event_updates"
+
+    id = Column(Integer, primary_key=True)
+    event_id = Column(Integer, ForeignKey("events.id", ondelete="CASCADE"), nullable=False, index=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.now)
+    update_type = Column(String, nullable=False)
+    delta_text = Column(Text, nullable=True)
+    material_change = Column(Boolean, nullable=False, default=False)
+    article_ids = Column(JSONB, nullable=True)
+
+    event = relationship("Event", back_populates="updates")
 
 
 class Article(Base):
@@ -81,6 +111,7 @@ class Article(Base):
 
     event_id = Column(Integer, ForeignKey("events.id", ondelete="SET NULL"), nullable=True)
     event = relationship("Event", back_populates="articles")
+    attached_at = Column(DateTime, nullable=True)
 
 
 class NeonDatabaseService:

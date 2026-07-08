@@ -1,15 +1,17 @@
 import asyncio
 import json
 import logging
+from datetime import datetime
 from typing import Optional
 
-from utils import prompt_loader
 import config.env_ini as env
 from google import genai
 from google.genai import types
 from google.genai.errors import APIError
+from pydantic import BaseModel
 
-from models.event_metadata import EventMetadata
+from models.event_metadata import EventCreate, EventUpdate as EventUpdatePayload, EVENT_CREATE_PROMPT, EVENT_UPDATE_PROMPT
+from processing import clustering_engine
 from storage.db_service import NeonDatabaseService
 
 RATE_LIMIT_DELAY = 4.5  # 60 seconds / 15 requests = 4 seconds. We use 4.5 to be safe.
@@ -49,34 +51,58 @@ def format_articles_context(articles: list) -> str:
     return "\n".join(context_lines)
 
 
-async def enrich_event_with_gemini(event_id: int, articles: list) -> Optional[EventMetadata]:
+async def enrich_new_event_with_gemini(event_id: int, articles: list) -> Optional[EventCreate]:
     """
-    Sends event articles to Gemini for analysis and returns EventMetadata.
-    Includes automatic fallback to backup models on 503 errors.
+    Sends a brand-new event's articles to Gemini to generate its canonical representation,
+    using new_event.txt.
     """
     if not articles:
         logger.warning("Event %s has no articles. Skipping enrichment.", event_id)
         return None
 
-    prompt_template = prompt_loader.load_prompt("event_enrichment.txt")
-    articles_context = format_articles_context(articles)
-    full_prompt = prompt_template.replace("{articles_context}", articles_context)
+    contents = f"# Articles\n\n{format_articles_context(articles)}"
 
+    return await _generate_structured_content(event_id, EVENT_CREATE_PROMPT, contents, EventCreate)
+
+
+async def update_event_with_gemini(event_id: int, existing_summary: str, articles: list) -> Optional[EventUpdatePayload]:
+    """
+    Sends an open event's existing summary plus newly attached articles to Gemini to determine
+    whether the canonical representation needs to change, using update_event.txt.
+    """
+    if not articles:
+        logger.warning("Event %s has no newly attached articles. Skipping update.", event_id)
+        return None
+
+    contents = (
+        f"# Existing Event Summary\n\n{existing_summary or 'No summary yet.'}\n\n"
+        f"# New Articles\n\n{format_articles_context(articles)}"
+    )
+
+    return await _generate_structured_content(event_id, EVENT_UPDATE_PROMPT, contents, EventUpdatePayload)
+
+
+async def _generate_structured_content(event_id: int, system_instruction: str, contents: str, response_schema: type[BaseModel]) -> Optional[BaseModel]:
+    """
+    Sends a system instruction plus dynamic contents to Gemini and parses the response into the
+    given schema. Includes automatic fallback to backup models on 503 errors.
+    """
     for model_name in FALLBACK_MODELS:
         try:
             response = await client.aio.models.generate_content(
                 model=model_name,
-                contents=full_prompt,
+                contents=contents,
                 config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
                     response_mime_type="application/json",
-                    response_schema=EventMetadata,
+                    response_schema=response_schema,
                     temperature=0.1
                 ),
             )
 
-            metadata_dict = json.loads(response.text)
+            result_dict = json.loads(response.text)
             await asyncio.sleep(RATE_LIMIT_DELAY)
-            return EventMetadata(**metadata_dict)
+            return response_schema(**result_dict)
 
         except APIError as api_err:
             if api_err.code == 503:
@@ -162,9 +188,33 @@ def get_all_events(db_service: NeonDatabaseService) -> list:
             return []
 
 
-def update_event_metadata(db_service: NeonDatabaseService, event_id: int, metadata: EventMetadata) -> bool:
+def get_event(db_service: NeonDatabaseService, event_id: int) -> Optional[dict]:
     """
-    Updates an event record with enriched metadata from Gemini.
+    Retrieves a single event record from the database.
+    """
+    from storage.db_service import Event
+
+    with db_service._SessionMarker() as session:
+        try:
+            event = session.query(Event).filter(Event.id == event_id).first()
+
+            if not event:
+                return None
+
+            return {
+                "id": event.id,
+                "name": event.name,
+                "summary": event.summary,
+            }
+
+        except Exception:
+            logger.exception("Failed to retrieve event %s.", event_id)
+            return None
+
+
+def create_event_metadata(db_service: NeonDatabaseService, event_id: int, metadata: EventCreate) -> bool:
+    """
+    Fills in a brand-new event record with its AI-generated canonical representation.
     """
     from storage.db_service import Event
 
@@ -176,40 +226,113 @@ def update_event_metadata(db_service: NeonDatabaseService, event_id: int, metada
                 logger.warning("Event %s was not found in the database.", event_id)
                 return False
 
-            event.name = metadata.title
-            event.summary = metadata.summary
-            event.tags = metadata.tags
-            event.importance = metadata.importance
-            event.category = metadata.category
+            payload = metadata.model_dump(mode="json")
+            event.name = payload["title"]
+            event.summary = payload["summary"]
+            event.event_type = payload["event_type"]
+            event.entities = payload["entities"]
+            event.domains = payload["domains"]
+            event.last_updated_at = datetime.now()
 
             session.commit()
-            logger.info("Updated event %s with generated metadata.", event_id)
+            logger.info("Created metadata for event %s.", event_id)
             return True
 
         except Exception:
             session.rollback()
-            logger.exception("Failed to update event %s.", event_id)
+            logger.exception("Failed to create metadata for event %s.", event_id)
             return False
 
 
-async def enrich_events_pipeline():
+def apply_event_update(db_service: NeonDatabaseService, event_id: int, metadata: EventUpdatePayload, article_ids: list) -> bool:
     """
-    Main orchestration function that:
-    1. Fetches all unenriched events
-    2. For each event, retrieves its articles
-    3. Sends articles to Gemini for analysis
-    4. Updates the event with enriched metadata
+    Applies an AI-judged event update: revises the summary only if the change is material, and
+    always records the delta as an append-only EventUpdate log entry.
+    """
+    from storage.db_service import Event
+    from storage.db_service import EventUpdate as EventUpdateRecord
+
+    with db_service._SessionMarker() as session:
+        try:
+            event = session.query(Event).filter(Event.id == event_id).first()
+
+            if not event:
+                logger.warning("Event %s was not found in the database.", event_id)
+                return False
+
+            if metadata.material_change:
+                event.summary = metadata.revised_summary
+                event.last_updated_at = datetime.now()
+
+            session.add(EventUpdateRecord(
+                event_id=event_id,
+                update_type="article_match",
+                delta_text=metadata.delta_text,
+                material_change=metadata.material_change,
+                article_ids=article_ids,
+            ))
+
+            session.commit()
+            logger.info(
+                "Recorded event update for %s (material_change=%s).",
+                event_id, metadata.material_change,
+            )
+            return True
+
+        except Exception:
+            session.rollback()
+            logger.exception("Failed to apply update for event %s.", event_id)
+            return False
+
+
+async def update_open_events_pipeline(score: int = 50, **hyperparameters):
+    """
+    Phase 1: matches unclustered articles against currently open events (skipped entirely if
+    there are none), attaches the matched articles to their event, and asks Gemini whether the
+    event's canonical representation needs to change given the new information (update_event.txt).
     """
     db_service = NeonDatabaseService()
 
-    logger.info("Fetching unenriched events from the database.")
-    events = get_all_events(db_service)
+    logger.info("Matching unclustered articles against open events.")
+    touched_events = clustering_engine.match_and_attach_articles(score, **hyperparameters)
 
-    if not events:
-        logger.info("No unenriched events found. Skipping event enrichment.")
+    if not touched_events:
+        logger.info("No open events matched new articles. Skipping event updates.")
         return
 
-    logger.info("Found %s events to enrich.", len(events))
+    logger.info("Updating %s open events with newly attached articles.", len(touched_events))
+
+    for event_id, articles in touched_events.items():
+        existing_event = get_event(db_service, event_id)
+        if not existing_event:
+            logger.warning("Event %s was not found. Skipping update.", event_id)
+            continue
+
+        metadata = await update_event_with_gemini(event_id, existing_event["summary"], articles)
+
+        if metadata:
+            article_ids = [article["id"] for article in articles]
+            apply_event_update(db_service, event_id, metadata, article_ids)
+        else:
+            logger.warning("Failed to update event %s. Keeping previous metadata.", event_id)
+
+
+async def create_new_events_pipeline(score: int = 50, **hyperparameters):
+    """
+    Phase 2: clusters remaining unclustered articles into brand-new events, then fills in each
+    new event's canonical representation with Gemini (new_event.txt).
+    """
+    db_service = NeonDatabaseService()
+
+    logger.info("Clustering remaining unclustered articles into new events.")
+    clustering_engine.events_clustering(score, **hyperparameters)
+
+    events = get_all_events(db_service)
+    if not events:
+        logger.info("No new events to enrich.")
+        return
+
+    logger.info("Found %s new events to enrich.", len(events))
 
     for event_data in events:
         event_id = event_data["id"]
@@ -218,12 +341,25 @@ async def enrich_events_pipeline():
         articles = get_event_articles(db_service, event_id)
         logger.info("Retrieved %s articles for event %s.", len(articles), event_id)
 
-        metadata = await enrich_event_with_gemini(event_id, articles)
+        metadata = await enrich_new_event_with_gemini(event_id, articles)
 
         if metadata:
-            update_event_metadata(db_service, event_id, metadata)
+            create_event_metadata(db_service, event_id, metadata)
         else:
             logger.warning("Failed to enrich event %s. Skipping update.", event_id)
+
+
+async def enrich_events_pipeline(score: int = 50, **hyperparameters):
+    """
+    Main orchestration function, run sequentially:
+    1. Match articles to open events and update them (update_event.txt).
+    2. Cluster whatever is left into new events and enrich them (new_event.txt).
+    """
+    logger.info("Phase 1: matching articles to open events.")
+    await update_open_events_pipeline(score, **hyperparameters)
+
+    logger.info("Phase 2: clustering remaining articles into new events.")
+    await create_new_events_pipeline(score, **hyperparameters)
 
     logger.info("Event enrichment pipeline complete.")
 
@@ -232,4 +368,4 @@ def run_event_enrichment():
     """
     Wrapper to run the async event enrichment pipeline.
     """
-    asyncio.run(enrich_events_pipeline())
+    asyncio.run(enrich_events_pipeline(similarity_threshold=0.375, max_df=0.85, min_df=2))

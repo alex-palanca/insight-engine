@@ -83,7 +83,7 @@ def get_events() -> list[dict]:
 
     with db_service._SessionMarker() as session:
         try:
-            rows = session.query(Event).order_by(Event.importance.asc(), Event.created_at.desc()).all()
+            rows = session.query(Event).order_by(Event.first_seen_at.desc()).all()
             result = []
             for row in rows:
                 article_links = []
@@ -104,7 +104,7 @@ def get_events() -> list[dict]:
                         "tags": row.tags or [],
                         "importance": row.importance,
                         "category": row.category,
-                        "created_at": row.created_at.isoformat() if row.created_at else None,
+                        "first_seen_at": row.first_seen_at.isoformat() if row.first_seen_at else None,
                         "article_links": article_links,
                     }
                 )

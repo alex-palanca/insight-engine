@@ -10,12 +10,10 @@ from intelligence import briefing_generator
 from storage import storage_utils as storage
 from storage import db_service as db
 from datetime import datetime
-from processing.clustering_engine import events_clustering
 from config.logging_config import setup_logging
 
 
 today = datetime.now().strftime("%Y-%m-%d")
-neon = db.NeonDatabaseService()
 logger = logging.getLogger("isolate_pipeline")
 
 
@@ -40,12 +38,6 @@ def run_enrichment(articles):
     db.db_save_return(enriched_articles, stage="silver")
 
 def events_processing():
-    logger.info("Resetting events.")
-    neon.reset_events()
-
-    logger.info("Identifying new events.")
-    events_clustering(score=50, similarity_threshold=0.375, max_df=0.85, min_df=2)
-
     logger.info("Enriching events.")
     event_enrichment.run_event_enrichment()
     
