@@ -51,6 +51,51 @@ def download_briefing(date: str):
         cloud.briefing_key(date)
     )
 
+def get_recent_briefings(limit: int = 2, before: str | None = None) -> list[str]:
+    """
+    Fetch the text of the most recent briefings, newest first.
+
+    Lists and sorts existing keys rather than computing calendar dates
+    backwards: a failed or skipped run leaves a gap, and date arithmetic
+    would fetch a 404 for that day instead of the real previous briefing.
+    IB_YYYY-MM-DD.md sorts lexicographically in chronological order, so a
+    reverse sort gives newest-first directly.
+
+    Args:
+        limit: How many briefings to return.
+        before: Optional ISO date. Excludes this date and later. Defaults to
+            today, so today's own briefing can never be fed back as "what the
+            reader already saw" on a re-run, even if the caller forgets to
+            pass it explicitly.
+
+    Returns:
+        Briefing markdown, newest first. Missing or unreadable briefings are
+        skipped with a warning: partial history weakens repetition checking
+        but must never fail the synthesis run.
+    """
+    try:
+        keys = sorted(cloud.list_files("briefings"), reverse=True)
+    except Exception:
+        logger.warning("Could not list briefings in storage.", exc_info=True)
+        return []
+
+    # briefing_key() builds the same 'briefings/IB_<date>.md' shape, so
+    # comparing against it keeps the key format in one place.
+    cutoff = cloud.briefing_key(before or today.isoformat())
+    keys = [k for k in keys if k < cutoff]
+
+    briefings = []
+    for key in keys[:limit]:
+        try:
+            content = cloud.get_file_content(key)
+            if content:
+                briefings.append(content)
+        except Exception:
+            logger.warning("Could not read briefing %s; skipping.", key, exc_info=True)
+
+    logger.info("Loaded %d recent briefing(s).", len(briefings))
+    return briefings
+
 
 def save_articles(articles):
     json_articles = json.dumps(articles, indent=2, ensure_ascii=False)

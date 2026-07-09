@@ -54,22 +54,56 @@ def format():
     logger.info("Formatting stage complete.")
 
 def run_synthesis():
-    try:
-        logger.info("Fetching markdown report.")
-        markdown = storage.obtain_markdown(today)
-    except FileNotFoundError:
-        logger.error("Could not find today's formatted markdown. Run the ingestion and format stages first.")
+    """
+    Synthesizes the daily intelligence briefing from today's events and articles.
+ 
+    Deliberately does NOT catch BriefingGenerationError: if synthesis fails on
+    every model, this function must raise so the process exits non-zero and the
+    scheduled workflow reports failure. Publishing an error notice as if it were
+    a briefing would leave the pipeline silently broken for as long as nobody
+    checks S3 by hand.
+    """
+    logger.info("Fetching today's events and articles.")
+ 
+    db_service = db.NeonDatabaseService()
+    events = db_service.get_delta_events(today)
+ 
+    articles = db_service.get_articles_briefing(
+        date=today,
+        min_score=60,
+    )
+ 
+    if not articles and not events:
+        logger.error("No articles or events available for %s. Nothing to synthesize.", today)
         sys.exit(1)
-        
-    if markdown:
-        logger.info("Generating intelligence briefing.")
-        briefing = briefing_generator.create_intelligence_briefing(markdown)
-        logger.info("Generated intelligence briefing:\n%s", briefing)
-        logger.info("Uploading intelligence briefing.")
-        storage.upload_briefing(today,briefing)
-        logger.info("Synthesis complete.")
-    else:
-        logger.error("Could not obtain the formatted articles.")
+ 
+    logger.info("Assembled %d articles and %d events for synthesis.", len(articles), len(events))
+ 
+    try:
+        recent_briefings = storage.get_recent_briefings(limit=2)
+        logger.info("Loaded %d recent briefing(s) for repetition checking.", len(recent_briefings))
+    except Exception:
+        logger.warning(
+            "Could not load recent briefings; proceeding without repetition checking.",
+            exc_info=True,
+        )
+        recent_briefings = []
+ 
+    logger.info("Generating intelligence briefing.")
+    briefing, prompt = briefing_generator.create_intelligence_briefing(
+        articles=articles,
+        events=events,
+        briefings=recent_briefings,
+    )
+ 
+    try:
+        storage.upload_markdown(today, prompt)
+    except Exception:
+        logger.warning("Failed to archive the briefing prompt.", exc_info=True)
+ 
+    logger.info("Uploading intelligence briefing.")
+    storage.upload_briefing(today, briefing)
+    logger.info("Synthesis complete.")
 
 
 def main():

@@ -1,15 +1,9 @@
-import sys
 import textwrap
-from pathlib import Path
-
+import env_ini as env# noqa: F401
 import streamlit as st
-
-# Ensure the project root is on sys.path so `services` imports work from any cwd.
-project_root = Path(__file__).resolve().parents[1]
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
 import services
+
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Page config
@@ -17,7 +11,7 @@ import services
 st.set_page_config(
     page_title="ISOLATE · Intelligence Briefing",
     page_icon="📰",
-    layout="wide",
+    layout="centered",
     initial_sidebar_state="collapsed",
 )
 

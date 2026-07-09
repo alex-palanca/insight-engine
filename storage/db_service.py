@@ -1,7 +1,7 @@
 import logging
-from datetime import datetime
+from datetime import datetime,date, time as dt_time
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, create_engine, func
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, create_engine, func, or_
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.dialects.postgresql import insert
@@ -14,8 +14,25 @@ from utils.text_utils import normalize_text, normalize_url
 
 logger = logging.getLogger(__name__)
 
-Base = declarative_base()
+def _day_bounds(day) -> tuple[datetime, datetime]:
+    """
+    Half-open [start, end] bounds for a day.
 
+    Accepts a date, a datetime, or an ISO 'YYYY-MM-DD' string, because `today`
+    is carried through the pipeline as a string for S3 key construction. We
+    normalize here rather than forcing every caller to convert.
+    """
+    if isinstance(day, str):
+        day = date.fromisoformat(day)      # 'YYYY-MM-DD' -> date
+    elif isinstance(day, datetime):
+        day = day.date()                   # datetime -> date (drop time)
+
+    return (
+        datetime.combine(day, dt_time.min),
+        datetime.combine(day, dt_time.max),
+    )
+
+Base = declarative_base()
 
 class Source(Base):
     """
@@ -150,6 +167,109 @@ class NeonDatabaseService:
 
             except Exception:
                 session.rollback()
+                raise
+
+    def get_delta_events(self, day) -> list[dict]:
+        """
+        Events with at least one article collected today. Both new and developing
+        events feed the briefing (the former as NEW, the latter as DEVELOPING);
+        classification happens in build_prompt from the event's timestamps, so we
+        return both in one set rather than two queries.
+
+        Only open events are eligible -- a closed event by definition received no
+        new articles and cannot be part of today's briefing.
+        """
+        start, end = _day_bounds(day)
+    
+        with self._SessionMarker() as session:
+            try:
+                rows = (
+                    session.query(Event)
+                    .filter(Event.status == "open")
+                    .filter(Event.articles.any(Article.collected_at.between(start, end)))
+                    .order_by(Event.last_updated_at.desc())
+                    .all()
+                )
+    
+                result = []
+                for row in rows:
+                    # The most recent delta IS today's delta, because this event was
+                    # updated today. Older deltas belong to briefings already sent.
+                    latest = row.updates[-1] if row.updates else None
+    
+                    result.append({
+                        "id": row.id,
+                        "name": row.name,
+                        "summary": row.summary,
+                        "event_type": row.event_type,
+                        "domains": row.domains or [],
+                        "entities": row.entities or [],
+                        "first_seen_at": row.first_seen_at,
+                        "last_updated_at": row.last_updated_at,
+                        "source_count": row.source_count,
+                        "delta_text": latest.delta_text if latest else None,
+                        "material_change": latest.material_change if latest else None,
+                        "article_links": [
+                            {"url": a.link} for a in row.articles if a.link
+                        ],
+                    })
+    
+                logger.info("Fetched %d events touched on %s.", len(result), day)
+                return result
+    
+            except Exception:
+                logger.exception("Failed to fetch events touched today.")
+                raise
+
+    def get_articles_briefing(self, date, min_score: int) -> list[dict]:
+        """
+        Articles for the briefing prompt. The OR is the important part:
+    
+        score >= min_score        -- the day's signal, incl. uncorroborated
+                                    singletons that never joined an event.
+        OR attached_at is today   -- an article that updated an event today,
+                                    even if it scored below the threshold.
+    
+        The second clause exists so a DEVELOPING event can always cite the article
+        that triggered its update. Without it, build_prompt would emit an event
+        referencing an [A#] id that never appears in the articles block, and the
+        reader would get an unresolvable citation.
+        """
+        start, end = _day_bounds(date)
+    
+        with self._SessionMarker() as session:
+            try:
+                rows = (
+                    session.query(Article)
+                    .filter(
+                        or_(
+                            # Today's high-signal articles.
+                            (Article.collected_at.between(start, end))
+                            & (Article.score >= min_score),
+                            # Any article that joined an event today, at any score.
+                            Article.attached_at.between(start, end),
+                        )
+                    )
+                    .order_by(Article.score.desc())
+                    .all()
+                )
+    
+                result = [{
+                    "link": r.link,
+                    "title": r.title,
+                    "ai_summary": r.ai_summary,
+                    "raw_summary": r.raw_summary,
+                    "score": r.score,
+                } for r in rows]
+    
+                logger.info(
+                    "Fetched %d articles for briefing on %s (min_score=%d).",
+                    len(result), date, min_score,
+                )
+                return result
+    
+            except Exception:
+                logger.exception("Failed to fetch articles for briefing.")
                 raise
 
     def sync_sources_from_feeds(self, feeds: dict) -> None:
