@@ -43,8 +43,9 @@ def collect_articles(
                 for entry in parsed_feed.entries:
                     if category_counts[category] >= max_per_category:
                         break
-                    if source_count >= max_per_source:
-                        break
+                    if feed_info["tier"] != 1:
+                        if source_count >= max_per_source:
+                            break
 
                     if not hasattr(entry, "published_parsed") or entry.published_parsed is None:
                         if hasattr(entry, "updated_parsed") and entry.updated_parsed is not None:

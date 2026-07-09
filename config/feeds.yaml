@@ -53,24 +53,31 @@ artificial_intelligence:
     region: global
     source_tags: ["inference", "llm", "open_source"]
 
+  - name: arXiv (cs.AI)
+    url: https://rss.arxiv.org/rss/cs.AI
+    tier: 2
+    region: global
+    source_tags: ["academic", "preprints", "research"]
+
 cybersecurity:
+  # Region changed global -> us: US-based investigative/casework focus.
   - name: Krebs on Security
     url: https://krebsonsecurity.com/feed/
     tier: 1
-    region: global
+    region: us
     source_tags: ["cybercrime", "investigation", "threat_intelligence"]
 
   - name: Schneier on Security
     url: https://www.schneier.com/feed/atom/
     tier: 1
-    region: global
+    region: us
     source_tags: ["cryptography", "policy", "security"]
 
   - name: CISA Cybersecurity Advisories
     url: https://www.cisa.gov/cybersecurity-advisories/all.xml
     tier: 1
     region: us
-    source_tags: ["government", "threat_intelligence", "vulnerabilities"]
+    source_tags: ["government", "primary_source", "vulnerabilities"]
 
   - name: BleepingComputer
     url: https://www.bleepingcomputer.com/feed/
@@ -118,7 +125,7 @@ science:
   - name: Quanta Magazine
     url: https://api.quantamagazine.org/feed/
     tier: 1
-    region: global
+    region: us
     source_tags: ["mathematics", "physics", "research"]
 
   - name: NASA Breaking News
@@ -178,7 +185,7 @@ geopolitics:
 
   - name: Foreign Affairs
     url: https://www.foreignaffairs.com/rss.xml
-    tier: 1
+    tier: 2
     region: us
     source_tags: ["diplomacy", "foreign_policy", "international_relations"]
 
@@ -193,12 +200,6 @@ geopolitics:
     tier: 1
     region: us
     source_tags: ["policy", "public_policy", "think_tank"]
-
-  - name: The Wall Street Journal - Politics
-    url: https://feeds.content.dowjones.io/public/rss/RSSWSJD
-    tier: 1
-    region: us
-    source_tags: ["politics", "policy", "us"]
 
   - name: Chatham House
     url: https://www.chathamhouse.org/rss.xml
@@ -224,12 +225,25 @@ geopolitics:
     region: us
     source_tags: ["foreign_policy", "international_relations", "think_tank"]
 
-technology:
-  - name: arXiv (Computer Science)
-    url: https://rss.arxiv.org/rss/cs
+  - name: European Council on Foreign Relations
+    url: https://ecfr.eu/feed/
     tier: 1
-    region: global
-    source_tags: ["computer_science", "engineering", "research"]
+    region: europe
+    source_tags: ["europe", "foreign_policy", "think_tank"]
+
+  - name: Bellingcat
+    url: https://www.bellingcat.com/feed/
+    tier: 1
+    region: europe
+    source_tags: ["osint", "investigation", "conflict_tracking"]
+
+  - name: The Diplomat
+    url: https://thediplomat.com/feed/
+    tier: 1
+    region: asia
+    source_tags: ["asia_pacific", "foreign_policy", "security"]
+
+technology:
 
   - name: Ars Technica
     url: https://feeds.arstechnica.com/arstechnica/index
@@ -239,9 +253,9 @@ technology:
 
   - name: Hacker News
     url: https://hnrss.org/frontpage
-    tier: 2
+    tier: 1
     region: global
-    source_tags: ["open_source", "software", "startups"]
+    source_tags: ["aggregator", "open_source", "startups"]
 
   - name: InfoQ
     url: https://www.infoq.com/feed/
@@ -261,12 +275,6 @@ technology:
     region: us
     source_tags: ["business", "consumer_tech", "technology_news"]
 
-  - name: The Wall Street Journal - Tech
-    url: https://feeds.content.dowjones.io/public/rss/RSSWSJD
-    tier: 1
-    region: us
-    source_tags: ["business", "corporate", "technology_news"]
-
   - name: TechCrunch
     url: https://techcrunch.com/feed/
     tier: 1
@@ -285,15 +293,9 @@ technology:
     region: global
     source_tags: ["electronics", "engineering", "research"]
 
-  - name: AnandTech
-    url: https://www.anandtech.com/rss/
-    tier: 1
-    region: global
-    source_tags: ["consumer_tech", "hardware", "semiconductors"]
-
   - name: Semafor Tech
     url: https://www.semafor.com/feed
-    tier: 2
+    tier: 1
     region: us
     source_tags: ["business", "startups", "technology_news"]
 
@@ -301,7 +303,7 @@ economics:
   - name: The Economist
     url: https://www.economist.com/finance-and-economics/rss.xml
     tier: 1
-    region: global
+    region: europe
     source_tags: ["macroeconomics", "markets", "policy"]
 
   - name: Financial Times
@@ -332,25 +334,55 @@ economics:
     url: https://www.federalreserve.gov/feeds/press_all.xml
     tier: 1
     region: us
-    source_tags: ["central_bank", "macroeconomics", "monetary_policy"]
+    source_tags: ["central_bank", "monetary_policy", "primary_source"]
 
   - name: European Central Bank
     url: https://www.ecb.europa.eu/rss/press.html
     tier: 1
     region: europe
-    source_tags: ["central_bank", "europe", "monetary_policy"]
+    source_tags: ["central_bank", "monetary_policy", "primary_source"]
 
   - name: Bank for International Settlements
     url: https://www.bis.org/rss/index.xml
     tier: 1
     region: global
-    source_tags: ["banking", "central_bank", "finance"]
+    source_tags: ["banking", "central_bank", "primary_source"]
 
   - name: FRED Blog
     url: https://fredblog.stlouisfed.org/feed/
     tier: 1
     region: us
-    source_tags: ["economic_data", "macroeconomics", "statistics"]
+    source_tags: ["economic_data", "primary_source", "statistics"]
+
+  - name: Bruegel
+    url: https://www.bruegel.org/rss.xml
+    tier: 1
+    region: europe
+    source_tags: ["europe", "macroeconomics", "think_tank"]
+
+  - name: Peterson Institute (PIIE)
+    url: https://www.piie.com/rss.xml
+    tier: 1
+    region: us
+    source_tags: ["trade", "macroeconomics", "think_tank"]
+
+  - name: Bank of England
+    url: https://www.bankofengland.co.uk/rss/news
+    tier: 1
+    region: europe
+    source_tags: ["central_bank", "primary_source", "monetary_policy"]
+
+  - name: VoxEU / CEPR
+    url: https://cepr.org/rss/vox-content
+    tier: 1
+    region: europe
+    source_tags: ["academic", "macroeconomics", "research"]
+
+  - name: Nikkei Asia
+    url: https://asia.nikkei.com/rss/feed/nar
+    tier: 1
+    region: asia
+    source_tags: ["asia", "business", "markets"]
 
 business:
   - name: The Wall Street Journal - Business
@@ -365,12 +397,6 @@ business:
     region: europe
     source_tags: ["business", "finance", "markets"]
 
-  - name: Harvard Business Review
-    url: https://feeds.feedburner.com/harvardbusiness
-    tier: 1
-    region: global
-    source_tags: ["leadership", "management", "strategy"]
-
   - name: Sifted
     url: https://sifted.eu/feed/
     tier: 1
@@ -379,7 +405,7 @@ business:
 
   - name: Fortune
     url: https://fortune.com/feed/
-    tier: 1
+    tier: 2
     region: us
     source_tags: ["business", "corporate", "leadership"]
 
@@ -391,46 +417,47 @@ business:
 
   - name: Crunchbase News
     url: https://news.crunchbase.com/feed/
-    tier: 1
+    tier: 2
     region: global
     source_tags: ["fundraising", "startups", "venture_capital"]
 
   - name: McKinsey Insights
     url: https://www.mckinsey.com/rss
-    tier: 1
+    tier: 2
     region: global
     source_tags: ["consulting", "management", "strategy"]
 
 world:
+
   - name: BBC News - World
     url: http://feeds.bbci.co.uk/news/world/rss.xml
     tier: 1
     region: europe
-    source_tags: ["global_news", "politics", "world"]
+    source_tags: ["general_news", "politics", "world"]
 
   - name: El Mundo
     url: https://e00-elmundo.uecdn.es/elmundo/rss/portada.xml
     tier: 1
     region: europe
-    source_tags: ["politics", "spain", "world"]
+    source_tags: ["general_news", "politics", "spain"]
 
   - name: The New York Times - World
     url: https://rss.nytimes.com/services/xml/rss/nyt/World.xml
     tier: 1
     region: us
-    source_tags: ["global_news", "politics", "world"]
+    source_tags: ["general_news", "politics", "world"]
 
   - name: Yahoo News - World
     url: https://yahoo.com/news/rss/world
     tier: 2
     region: us
-    source_tags: ["aggregator", "global_news", "world"]
+    source_tags: ["aggregator", "general_news", "world"]
 
   - name: Deutsche Welle
     url: https://rss.dw.com/rdf/rss-en-all
     tier: 1
     region: europe
-    source_tags: ["europe", "global_news", "politics"]
+    source_tags: ["europe", "general_news", "politics"]
 
   - name: Politico Europe
     url: https://www.politico.eu/feed/
@@ -442,62 +469,81 @@ world:
     url: https://www.france24.com/en/europe/rss
     tier: 1
     region: europe
-    source_tags: ["europe", "global_news", "politics"]
+    source_tags: ["europe", "general_news", "politics"]
 
   - name: Euronews
     url: https://www.euronews.com/rss
     tier: 1
     region: europe
-    source_tags: ["europe", "global_news", "politics"]
-
-  - name: Reuters World
-    url: https://feeds.reuters.com/Reuters/worldNews
-    tier: 1
-    region: global
-    source_tags: ["breaking_news", "global_news", "wire_service"]
+    source_tags: ["europe", "general_news", "politics"]
 
   - name: AP News
     url: https://apnews.com/rss
     tier: 1
     region: global
-    source_tags: ["breaking_news", "global_news", "wire_service"]
+    source_tags: ["breaking_news", "general_news", "wire_service"]
 
   - name: The Guardian World
     url: https://www.theguardian.com/world/rss
     tier: 1
     region: europe
-    source_tags: ["global_news", "politics", "world"]
+    source_tags: ["general_news", "politics", "world"]
 
   - name: Al Jazeera
     url: https://www.aljazeera.com/xml/rss/all.xml
     tier: 1
     region: middle_east
-    source_tags: ["geopolitics", "global_news", "middle_east"]
+    source_tags: ["general_news", "geopolitics", "middle_east"]
 
-  - name: Nikkei Asia
-    url: https://asia.nikkei.com/rss/feed/nar
+  - name: South China Morning Post
+    url: https://www.scmp.com/rss/91/feed
     tier: 1
     region: asia
-    source_tags: ["asia", "business", "markets"]
+    source_tags: ["asia", "china", "general_news"]
+
+  - name: El País
+    url: https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada
+    tier: 1
+    region: europe
+    source_tags: ["general_news", "politics", "spain"]
+
+  - name: Yonhap News
+    url: https://en.yna.co.kr/RSS/news.xml
+    tier: 1
+    region: asia
+    source_tags: ["asia", "general_news", "wire_service"]
 
 energy:
+
   - name: International Energy Agency
     url: https://www.iea.org/rss
     tier: 1
     region: global
-    source_tags: ["energy", "markets", "policy"]
+    source_tags: ["energy", "policy", "primary_source"]
 
   - name: OilPrice
     url: https://oilprice.com/rss/main
     tier: 2
     region: global
-    source_tags: ["energy", "markets", "oil"]
+    source_tags: ["commentary", "energy", "markets"]
 
   - name: Energy Monitor
     url: https://www.energymonitor.ai/feed/
     tier: 1
     region: global
     source_tags: ["energy", "policy", "renewables"]
+
+  - name: Carbon Brief
+    url: https://www.carbonbrief.org/feed/
+    tier: 1
+    region: europe
+    source_tags: ["climate", "policy", "data_journalism"]
+
+  - name: Ember
+    url: https://ember-climate.org/feed/
+    tier: 1
+    region: global
+    source_tags: ["electricity", "renewables", "data"]
 
 semiconductors:
   - name: SemiEngineering
@@ -509,7 +555,7 @@ semiconductors:
   - name: Tom's Hardware
     url: https://www.tomshardware.com/feeds/all
     tier: 2
-    region: global
+    region: us
     source_tags: ["consumer_tech", "hardware", "processors"]
 
   - name: EE Times
@@ -520,6 +566,6 @@ semiconductors:
 
   - name: DigiTimes
     url: https://www.digitimes.com/rss.xml
-    tier: 1
+    tier: 2
     region: asia
-    source_tags: ["manufacturing", "semiconductors", "supply_chain"]
+    source_tags: ["manufacturing", "rumor_prone", "supply_chain"]

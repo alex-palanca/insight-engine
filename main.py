@@ -21,8 +21,11 @@ def run_ingestion():
     logger.info("Loading feeds.")
     feeds = feed_loader.load_feeds()
 
+    logger.info("Syncing sources from feeds.yaml.")
+    db.sync_sources(feeds)
+
     logger.info("Starting article collection.")
-    cleaned_articles = rss_collector.collect_articles(feeds,500,200)
+    cleaned_articles = rss_collector.collect_articles(feeds,300,50)
 
     logger.info("Saving cleaned articles to Neon.")
     db.db_save_return(cleaned_articles)

@@ -152,6 +152,48 @@ class NeonDatabaseService:
                 session.rollback()
                 raise
 
+    def sync_sources_from_feeds(self, feeds: dict) -> None:
+        """
+        Upserts the sources table from feeds.yaml: creates any source not yet in the DB,
+        and updates category/tier/region/source_tags/url on existing sources whose
+        feeds.yaml entry has changed since, preserving the source's id.
+        """
+        with self._SessionMarker() as session:
+            try:
+                created = 0
+                updated = 0
+
+                for category, category_feeds in feeds.items():
+                    for feed_info in category_feeds:
+                        name = feed_info["name"]
+                        fields = {
+                            "category": category,
+                            "tier": str(feed_info["tier"]) if feed_info.get("tier") is not None else None,
+                            "region": feed_info.get("region"),
+                            "source_tags": feed_info.get("source_tags", []),
+                            "url": feed_info["url"],
+                        }
+
+                        source_obj = session.query(Source).filter(Source.name == name).first()
+
+                        if not source_obj:
+                            session.add(Source(name=name, **fields))
+                            created += 1
+                            continue
+
+                        if any(getattr(source_obj, field) != value for field, value in fields.items()):
+                            for field, value in fields.items():
+                                setattr(source_obj, field, value)
+                            updated += 1
+
+                session.commit()
+                logger.info("Synced sources from feeds.yaml: %s created, %s updated.", created, updated)
+
+            except Exception:
+                session.rollback()
+                logger.exception("Failed to sync sources from feeds.yaml.")
+                raise
+
     def save_bronze_data(self, articles_data: list):
         """
         Takes a list of raw article dictionaries from rss_collector.py, extracts/upserts sources,
@@ -297,6 +339,18 @@ class NeonDatabaseService:
             except Exception as exc:
                 logger.exception("Failed to retrieve articles for stage '%s'.", stage)
                 raise exc
+
+
+def sync_sources(feeds: dict) -> None:
+    """
+    Public-facing function to upsert the sources table from a loaded feeds.yaml dict.
+    """
+    try:
+        db_service = NeonDatabaseService()
+        db_service.sync_sources_from_feeds(feeds)
+    except Exception:
+        logger.exception("Failed to sync sources from feeds.")
+        raise
 
 
 def db_save_return(articles: list = None, stage: str = "bronze"):
