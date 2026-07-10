@@ -70,7 +70,7 @@ def run_synthesis():
  
     articles = db_service.get_articles_briefing(
         date=today,
-        min_score=60,
+        min_score=50,
     )
  
     if not articles and not events:

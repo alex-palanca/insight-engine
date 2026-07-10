@@ -282,7 +282,7 @@ def apply_event_update(db_service: NeonDatabaseService, event_id: int, metadata:
             return False
 
 
-async def update_open_events_pipeline(score: int = 50, **hyperparameters):
+async def update_open_events_pipeline(score: int = 30, **hyperparameters):
     """
     Phase 1: matches unclustered articles against currently open events (skipped entirely if
     there are none), attaches the matched articles to their event, and asks Gemini whether the
@@ -314,7 +314,7 @@ async def update_open_events_pipeline(score: int = 50, **hyperparameters):
             logger.warning("Failed to update event %s. Keeping previous metadata.", event_id)
 
 
-async def create_new_events_pipeline(score: int = 50, **hyperparameters):
+async def create_new_events_pipeline(score: int = 30, **hyperparameters):
     """
     Phase 2: clusters remaining unclustered articles into brand-new events, then fills in each
     new event's canonical representation with Gemini (new_event.txt).
@@ -346,7 +346,7 @@ async def create_new_events_pipeline(score: int = 50, **hyperparameters):
             logger.warning("Failed to enrich event %s. Skipping update.", event_id)
 
 
-async def enrich_events_pipeline(score: int = 50, **hyperparameters):
+async def enrich_events_pipeline(score: int = 30, **hyperparameters):
     """
     Main orchestration function, run sequentially:
     1. Match articles to open events and update them (update_event.txt).
