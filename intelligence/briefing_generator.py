@@ -1,5 +1,6 @@
 import logging
 import time
+from datetime import datetime
 from typing import Optional
 
 from config import env_ini as env# noqa: F401
@@ -56,13 +57,15 @@ client = genai.Client(api_key=key)
 
 
 def create_intelligence_briefing(
-        articles: list[dict], 
+        date: str,
+        articles: list[dict],
         events: list[dict],
         briefings: list[str] | None = None)-> str:
     """Assemble the prompt, synthesize the briefing, and resolve its citations."""
 
     prompt, id_to_url = build_prompt(
         load_prompt("daily_briefing.txt"),
+        date,
         articles,
         events,
         briefings,
@@ -71,25 +74,38 @@ def create_intelligence_briefing(
 
 def build_prompt(
     prompt: str,
+    date: str,
     articles: list[dict],
     events: list[dict],
     recent_briefings: list[str] | None = None,
 ) -> tuple[str, dict[str, str]]:
     """
     Builds the briefing prompt from structured data.
- 
+
     Articles get stable [A#] reference ids. The model cites only those ids —
     never URLs — so it cannot invent a link; real links are substituted after
     generation. Events reference the same ids, giving both blocks one id space.
- 
+
     Events with material_change=False are routed to a separate "unchanged" list
     here, in code, rather than asking the prompt to re-decide suppression.
- 
+
+    The model has no built-in notion of "today" -- left ungrounded, it must
+    guess a date for the "# Daily Intelligence Briefing — {today's date}"
+    header and reliably hallucinates the wrong one. `date` (the pipeline's
+    run date, 'YYYY-MM-DD') fills that placeholder AND is restated as an
+    explicit fact in the context block, so the model never has to infer it.
+
     Returns:
         (prompt_text, id_to_url) — the map is required by generate_briefing().
     """
 
     recent_briefings = recent_briefings or []
+
+    # %-d (no leading zero) isn't portable to Windows' strftime, so build the
+    # "Month D, Year" string from parts instead of a single format string.
+    dt = datetime.strptime(date, "%Y-%m-%d")
+    formatted_date = f"{dt:%B} {dt.day}, {dt:%Y}"
+    prompt = prompt.replace("{today's date}", formatted_date)
 
     # Articles: assign ids, build both lookups in one pass.
     id_to_url, url_to_id, article_lines = {}, {}, []
@@ -134,10 +150,13 @@ def build_prompt(
         featured.append("\n".join(block))
  
     prompt_text = f"""{prompt}
- 
+
+------------------------------------
+TODAY'S DATE: {formatted_date}
+
 ------------------------------------
 TODAY'S ARTICLES
- 
+
 {chr(10).join(article_lines) or "(none)"}
  
 ------------------------------------

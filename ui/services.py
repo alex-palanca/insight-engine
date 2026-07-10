@@ -96,6 +96,45 @@ def get_events() -> list[dict]:
                             }
                         )
 
+                # Timeline: a synthesized "created" point (no EventUpdate row exists
+                # for creation -- create_event_metadata never inserts one) followed by
+                # one entry per EventUpdate round. attached_at is NULL exactly for an
+                # event's creation-batch articles (clustering_engine only sets it when
+                # matching articles to an ALREADY-open event later), and each
+                # EventUpdate.article_ids is the exact set attached that round, so
+                # grouping is exact -- no timestamp-fuzzy matching needed. Each article
+                # is attached exactly once (clustering only matches unclustered
+                # articles), so rounds never overlap.
+                creation_articles = [a for a in row.articles if a.attached_at is None]
+                articles_by_id = {a.id: a for a in row.articles}
+                seen_source_ids = {a.source_id for a in creation_articles}
+
+                timeline = [{
+                    "type": "created",
+                    "timestamp": row.first_seen_at.isoformat() if row.first_seen_at else None,
+                    "delta_text": None,
+                    "articles_added": len(creation_articles),
+                    "sources_added": len(seen_source_ids),
+                    "source_names": sorted({a.source.name for a in creation_articles if a.source}),
+                }]
+
+                for u in sorted(row.updates, key=lambda u: u.created_at):
+                    round_articles = [articles_by_id[aid] for aid in (u.article_ids or []) if aid in articles_by_id]
+                    round_source_ids = {a.source_id for a in round_articles}
+                    new_source_ids = round_source_ids - seen_source_ids
+                    seen_source_ids |= round_source_ids
+
+                    timeline.append({
+                        "type": "update",
+                        "timestamp": u.created_at.isoformat() if u.created_at else None,
+                        "delta_text": u.delta_text,
+                        "articles_added": len(round_articles),
+                        "sources_added": len(new_source_ids),
+                        "source_names": sorted({a.source.name for a in round_articles if a.source_id in new_source_ids and a.source}),
+                    })
+
+                latest_update = timeline[-1]
+
                 result.append(
                     {
                         "id": row.id,
@@ -104,9 +143,13 @@ def get_events() -> list[dict]:
                         "event_type": row.event_type,
                         "domains": row.domains or [],
                         "entities": row.entities or [],
+                        "status": row.status,
                         "article_count": row.article_count,
                         "source_count": row.source_count,
                         "first_seen_at": row.first_seen_at.isoformat() if row.first_seen_at else None,
+                        "last_updated_at": row.last_updated_at.isoformat() if row.last_updated_at else None,
+                        "delta_text": latest_update["delta_text"],
+                        "timeline": timeline,
                         "article_links": article_links,
                     }
                 )
@@ -114,6 +157,33 @@ def get_events() -> list[dict]:
         except Exception:
             logger.exception("Failed to load events.")
             return []
+
+
+def get_live_events() -> list[dict]:
+    """Open events only, most recently active first -- the working set for Live Monitor."""
+    events = [e for e in get_events() if e.get("status") == "open"]
+    return sorted(events, key=lambda e: e.get("last_updated_at") or "", reverse=True)
+
+
+def get_event_stats_for_date(date_str: str) -> tuple[int | None, int | None]:
+    """
+    (new_count, developing_count) for the events touched on date_str, using the
+    same event set and NEW/DEVELOPING split the daily briefing itself draws
+    from (see briefing_generator.build_prompt), so the metric strip always
+    agrees with what that edition's briefing text says.
+    """
+    db_service = get_db_service()
+    if not db_service:
+        return None, None
+
+    try:
+        events = db_service.get_delta_events(date_str)
+    except Exception:
+        logger.exception("Failed to compute event stats for %s.", date_str)
+        return None, None
+
+    new_count = sum(1 for e in events if e["first_seen_at"] == e["last_updated_at"])
+    return new_count, len(events) - new_count
 
 
 def get_sources() -> list[dict]:
@@ -143,14 +213,6 @@ def get_sources() -> list[dict]:
         except Exception:
             logger.exception("Failed to load sources.")
             return []
-
-
-def get_database_tables() -> dict[str, list[dict]]:
-    """Return the current events and sources tables for dashboard display."""
-    return {
-        "events": get_events(),
-        "sources": get_sources(),
-    }
 
 
 def get_briefing_files():

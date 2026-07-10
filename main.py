@@ -91,6 +91,7 @@ def run_synthesis():
  
     logger.info("Generating intelligence briefing.")
     briefing, prompt = briefing_generator.create_intelligence_briefing(
+        date=today,
         articles=articles,
         events=events,
         briefings=recent_briefings,

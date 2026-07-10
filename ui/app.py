@@ -210,6 +210,28 @@ st.markdown(
     .pill.developing { background: var(--developing-soft); color: var(--developing); }
     .pill.signal     { background: var(--signal-soft);     color: var(--muted); }
     .pill.wip        { background: var(--wip-soft); color: var(--wip); border: 1px dashed var(--wip); }
+    .pill.score-low  { background: var(--signal-soft);     color: var(--muted); }
+    .pill.score-mid  { background: var(--developing-soft); color: var(--developing); }
+    .pill.score-high { background: var(--accent-soft);     color: var(--accent); }
+
+    .metrics-row { display: flex; flex-direction: column; gap: 0.32rem; margin: 0.6rem 0; }
+    .metric-meter { display: flex; align-items: center; gap: 0.5rem; }
+    .metric-label {
+        width: 92px; flex-shrink: 0;
+        font-size: 0.64rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+        color: var(--muted);
+    }
+    .metric-track { flex: 1; height: 6px; border-radius: 999px; overflow: hidden; background: var(--signal-soft); }
+    .metric-track.tier-mid  { background: var(--developing-soft); }
+    .metric-track.tier-high { background: var(--accent-soft); }
+    .metric-fill { height: 100%; border-radius: 999px; background: var(--signal); }
+    .metric-fill.tier-mid  { background: var(--developing); }
+    .metric-fill.tier-high { background: var(--accent); }
+    .metric-value {
+        width: 22px; text-align: right; flex-shrink: 0;
+        font-size: 0.72rem; font-weight: 700; color: var(--ink);
+        font-variant-numeric: tabular-nums;
+    }
 
     .card-title { font-size: 1.14rem; font-weight: 700; color: var(--ink); line-height: 1.25; margin-bottom: 0.3rem; }
     .card-summary { font-size: 0.98rem; line-height: 1.55; color: var(--body); margin-bottom: 0.5rem; }
@@ -329,6 +351,82 @@ def classify_event(event: dict):
     return "k-developing", "developing"
 
 
+SORT_FIELDS = {"Last updated": "last_updated_at", "Article count": "article_count"}
+
+
+def sort_events(events: list[dict], field: str, descending: bool) -> list[dict]:
+    def key_fn(e: dict):
+        return e.get("article_count") or 0 if field == "article_count" else e.get("last_updated_at") or ""
+
+    return sorted(events, key=key_fn, reverse=descending)
+
+
+def render_sort_controls(key_prefix: str) -> tuple[str, bool]:
+    st.markdown('<div class="sec-label">Sort by</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        label = st.selectbox(
+            "Sort by",
+            list(SORT_FIELDS),
+            label_visibility="collapsed",
+            key=f"{key_prefix}_sort_field",
+        )
+    with col2:
+        dir_key = f"{key_prefix}_sort_dir"
+        descending = st.toggle(
+            "⬇ Desc" if st.session_state.get(dir_key, True) else "⬆ Asc",
+            value=True,
+            key=dir_key,
+        )
+    return SORT_FIELDS[label], descending
+
+
+def event_matches_query(event: dict, query: str) -> bool:
+    """True if every whitespace-separated word in query appears somewhere in
+    the event's name, summary, entity names, or domains (case-insensitive)."""
+    words = query.lower().split()
+    if not words:
+        return True
+
+    entities = event.get("entities") or []
+    haystack = " ".join([
+        event.get("name") or "",
+        event.get("summary") or "",
+        " ".join(e.get("name", "") for e in entities if isinstance(e, dict)),
+        " ".join(event.get("domains") or []),
+    ]).lower()
+
+    return all(word in haystack for word in words)
+
+
+def render_event_timeline(timeline: list[dict]):
+    for entry in reversed(timeline):  # most recent first, matches rest of the app
+        ts = (entry.get("timestamp") or "").replace("T", " ")[:16] or "Unknown time"
+        articles_added = entry.get("articles_added") or 0
+        sources_added = entry.get("sources_added") or 0
+        names = entry.get("source_names") or []
+
+        if entry["type"] == "created":
+            marker, headline = "🟢", (
+                f"Event created · {articles_added} article{'s' if articles_added != 1 else ''}"
+                f" · {sources_added} source{'s' if sources_added != 1 else ''}"
+            )
+        else:
+            bits = []
+            if articles_added:
+                bits.append(f"+{articles_added} article{'s' if articles_added != 1 else ''}")
+            if sources_added:
+                bits.append(
+                    f"+{sources_added} source{'s' if sources_added != 1 else ''}"
+                    + (f" ({', '.join(names[:3])})" if names else "")
+                )
+            marker, headline = "🔵", (" · ".join(bits) or "Matched, no new corroboration")
+
+        st.markdown(f"**{marker} {ts}** — {headline}")
+        if entry.get("delta_text"):
+            st.markdown(f"> {esc(entry['delta_text'])}")
+
+
 def render_event_card(event: dict):
     css_class, label = classify_event(event)
     pill_map = {
@@ -346,10 +444,14 @@ def render_event_card(event: dict):
     # New-schema fields, shown as WIP when absent.
     entities = event.get("entities")
     source_count = event.get("source_count")
+    article_count = event.get("article_count")
     delta = event.get("delta_text")
 
-    if isinstance(source_count, int):
-        corro = f'<span class="corro">{source_count} sources</span>'
+    if isinstance(source_count, int) and isinstance(article_count, int):
+        corro = (
+            f'<span class="corro">{source_count} source{"s" if source_count != 1 else ""}'
+            f' · {article_count} article{"s" if article_count != 1 else ""}</span>'
+        )
     else:
         corro = f'<span class="corro wip">🚧 {len(links)} link{"s" if len(links) != 1 else ""}</span>'
 
@@ -367,9 +469,11 @@ def render_event_card(event: dict):
         for l in links
     ) or '<div class="none">No linked articles</div>'
 
+    kicker_html = " · ".join(part for part in [pill, corro] if part)
+
     st.markdown(
         f'<div class="card {css_class}">'
-        f'<div class="kicker">{pill}· {corro}</div>'
+        f'<div class="kicker">{kicker_html}</div>'
         f'<div class="card-title">{name}</div>'
         f'<div class="card-summary">{summary}</div>'
         f"{delta_html}"
@@ -378,6 +482,12 @@ def render_event_card(event: dict):
         "</div>",
         unsafe_allow_html=True,
     )
+
+    timeline = event.get("timeline") or []
+    if timeline:
+        update_count = sum(1 for e in timeline if e["type"] == "update")
+        with st.expander(f"📈 Timeline ({update_count} update{'s' if update_count != 1 else ''})"):
+            render_event_timeline(timeline)
 
 
 def render_source_card(source: dict):
@@ -407,18 +517,95 @@ def render_source_card(source: dict):
     )
 
 
+METRIC_LABELS = {
+    "immediacy": "Immediacy",
+    "scale": "Scale",
+    "permanence": "Permanence",
+    "reverberance": "Reverberance",
+    "novelty": "Novelty",
+}
+ARTICLE_SORT_OPTIONS = ["Total"] + list(METRIC_LABELS.values())
+ARTICLE_SORT_KEYS = {"Total": None, **{label: key for key, label in METRIC_LABELS.items()}}
+
+
+def score_tier(value: int, max_value: int) -> str:
+    """Bands mirror the scoring rubric's own guidance (prompts/article_scoring.txt):
+    most standard news scores below 50/100, only paradigm-shifting events above 80/100."""
+    ratio = value / max_value if max_value else 0
+    if ratio > 0.8:
+        return "high"
+    if ratio >= 0.5:
+        return "mid"
+    return "low"
+
+
+def sort_articles(articles: list[dict], metric: str | None) -> list[dict]:
+    def key_fn(a: dict):
+        if metric is None:
+            return a.get("score") or 0
+        return (a.get("metrics") or {}).get(metric) or 0
+
+    return sorted(articles, key=key_fn, reverse=True)
+
+
+def render_article_card(article: dict):
+    title = esc(article.get("title") or "Untitled article")
+    ai_summary = esc(article.get("ai_summary") or "No AI summary available")
+    source = esc(article.get("source") or "Unknown source")
+    category = esc(article.get("category") or "")
+    link = article.get("link") or ""
+    score = article.get("score") or 0
+    metrics = article.get("metrics") or {}
+    tags = article.get("article_tags") or []
+
+    meta = f"{source} · {category}" if category else source
+    score_pill = f'<span class="pill score-{score_tier(score, 100)}">{score}/100</span>'
+
+    meters_html = "".join(
+        f'<div class="metric-meter">'
+        f'<span class="metric-label">{label}</span>'
+        f'<div class="metric-track tier-{score_tier(metrics.get(key) or 0, 20)}">'
+        f'<div class="metric-fill tier-{score_tier(metrics.get(key) or 0, 20)}" '
+        f'style="width:{round((metrics.get(key) or 0) / 20 * 100)}%"></div>'
+        f"</div>"
+        f'<span class="metric-value">{metrics.get(key) or 0}</span>'
+        f"</div>"
+        for key, label in METRIC_LABELS.items()
+    )
+
+    tags_html = ('<div class="tags">' + "".join(f'<span class="tag">{esc(t)}</span>' for t in tags) + "</div>") if tags else ""
+
+    link_html = (
+        f'<div class="links"><a href="{esc(link)}" target="_blank" rel="noopener noreferrer">↗ Read article</a></div>'
+        if link else '<div class="links"><span class="none">No link available</span></div>'
+    )
+
+    st.markdown(
+        '<div class="card">'
+        f'<div class="kicker"><span>{meta}</span>{score_pill}</div>'
+        f'<div class="card-title">{title}</div>'
+        f'<div class="card-summary">{ai_summary}</div>'
+        f'<div class="metrics-row">{meters_html}</div>'
+        f"{tags_html}"
+        f"{link_html}"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
+
 def render_artifacts(date_str: str, briefing_content: str):
     raw = services.get_raw_articles(date_str)
     article_count = len(raw) if isinstance(raw, (list, dict)) else None
+    new_count, developing_count = services.get_event_stats_for_date(date_str)
 
     metric_strip([
         ("Edition", date_str, False),
         ("Articles", str(article_count) if article_count is not None else "—", False),
-        ("New today", "🚧 wip", True),
-        ("Developing", "🚧 wip", True),
+        ("New events", str(new_count) if new_count is not None else "—", False),
+        ("Developing events", str(developing_count) if developing_count is not None else "—", False),
     ])
 
-    tab_brief, tab_md, tab_json = st.tabs(["🧠 Briefing", "📑 Context", "💾 Raw"])
+    tab_brief, tab_md, tab_articles = st.tabs(["🧠 Briefing", "📑 Context", "📰 Articles"])
     with tab_brief:
         if briefing_content:
             st.markdown(briefing_content)
@@ -430,9 +617,18 @@ def render_artifacts(date_str: str, briefing_content: str):
             st.markdown(md)
         else:
             st.markdown(f'<div class="empty">No intermediate context stored for {esc(date_str)}.</div>', unsafe_allow_html=True)
-    with tab_json:
-        if raw:
-            st.json(raw, expanded=False)
+    with tab_articles:
+        articles = raw if isinstance(raw, list) else []
+        if articles:
+            st.markdown('<div class="sec-label">Sort by</div>', unsafe_allow_html=True)
+            sort_label = st.segmented_control(
+                "Sort by",
+                ARTICLE_SORT_OPTIONS,
+                default="Total",
+                label_visibility="collapsed",
+            ) or "Total"
+            for article in sort_articles(articles, ARTICLE_SORT_KEYS[sort_label]):
+                render_article_card(article)
         else:
             st.markdown(f'<div class="empty">No raw article data stored for {esc(date_str)}.</div>', unsafe_allow_html=True)
 
@@ -444,66 +640,68 @@ hero()
 
 page = st.segmented_control(
     "Navigation",
-    ["Today", "Archive", "Live Monitor", "Explorer"],
-    default="Today",
+    ["Briefings", "Live Monitor", "Explorer"],
+    default="Briefings",
     label_visibility="collapsed",
 )
 
-# ── Today ────────────────────────────────────────────────────────────────────
-if page == "Today":
+# ── Briefings ────────────────────────────────────────────────────────────────
+if page == "Briefings":
     files = services.get_briefing_files()
     if not files:
         st.markdown('<div class="empty">No briefings published yet. The pipeline writes one after each scheduled run.</div>', unsafe_allow_html=True)
-    else:
-        latest = files[0]
-        date = services.get_briefing_date(latest)
-        render_artifacts(date, services.briefing_loader(latest))
-
-# ── Archive ──────────────────────────────────────────────────────────────────
-elif page == "Archive":
-    files = services.get_briefing_files()
-    if not files:
-        st.markdown('<div class="empty">No archived briefings yet.</div>', unsafe_allow_html=True)
     else:
         selected = st.selectbox("Select a briefing", files, format_func=services.get_briefing_date)
         if selected:
             date = services.get_briefing_date(selected)
             render_artifacts(date, services.briefing_loader(selected))
 
-# ── Live Monitor (NEW feature — depends on unbuilt event schema) ─────────────
+# ── Live Monitor — tracks open events as they develop across runs ────────────
 elif page == "Live Monitor":
-    st.markdown(
-        '<div class="wip-note">⚙ Work in progress — the Live Monitor tracks open events as they '
-        'develop across runs (New · Developing · Signal), with each story\'s momentum and latest '
-        'delta. It activates once event persistence (status, timestamps, deltas) lands in the '
-        'database. Showing current events below with provisional classification.</div>',
-        unsafe_allow_html=True,
+    all_events = services.get_live_events()
+    # From the full open set, not the search/domain-filtered one, so the
+    # button row itself doesn't shift around as the user filters.
+    domain_options = sorted({d for ev in all_events for d in (ev.get("domains") or [])})
+
+    query = st.text_input(
+        "Search live events",
+        placeholder="🔎 Search by name, summary, entity, or domain…",
+        label_visibility="collapsed",
     )
-    events = services.get_database_tables().get("events", [])
+    events = [ev for ev in all_events if event_matches_query(ev, query)] if query else all_events
+
+    selected_domains = domain_options
+    if domain_options:
+        st.markdown('<div class="sec-label">Filter by domain</div>', unsafe_allow_html=True)
+        selected_domains = st.segmented_control(
+            "Filter by domain",
+            domain_options,
+            selection_mode="multi",
+            default=None,
+            label_visibility="collapsed",
+        ) or domain_options
+        # Nothing pressed (or everything pressed) both mean "no filter" —
+        # only a genuine proper subset narrows the list.
+        if selected_domains and len(selected_domains) < len(domain_options):
+            events = [ev for ev in events if any(d in selected_domains for d in (ev.get("domains") or []))]
+
+    sort_field, sort_desc = render_sort_controls("live_monitor")
+    events = sort_events(events, sort_field, sort_desc)
+
     if not events:
-        st.markdown('<div class="empty">No events available yet.</div>', unsafe_allow_html=True)
+        filtered = bool(query) or (selected_domains and len(selected_domains) < len(domain_options))
+        empty_msg = "No open events match your filters." if filtered else "No open events being tracked right now."
+        st.markdown(f'<div class="empty">{esc(empty_msg)}</div>', unsafe_allow_html=True)
     else:
         for ev in events:
             render_event_card(ev)
 
 # ── Explorer ─────────────────────────────────────────────────────────────────
 elif page == "Explorer":
-    view = st.radio("Explorer", ["Events", "Sources"], horizontal=True, label_visibility="collapsed")
-    tables = services.get_database_tables()
-
-    if view == "Events":
-        events = tables.get("events", [])
-        st.markdown('<div class="sec-label">Events · lifecycle &amp; corroboration</div>', unsafe_allow_html=True)
-        if events:
-            for ev in events:
-                render_event_card(ev)
-        else:
-            st.markdown('<div class="empty">No events found, or the database is unavailable.</div>', unsafe_allow_html=True)
+    sources = services.get_sources()
+    st.markdown('<div class="sec-label">Sources · feed registry</div>', unsafe_allow_html=True)
+    if sources:
+        for s in sources:
+            render_source_card(s)
     else:
-        sources = tables.get("sources", [])
-        st.markdown('<div class="sec-label">Sources · feed registry</div>', unsafe_allow_html=True)
-        if sources:
-            for s in sources:
-                render_source_card(s)
-        else:
-            st.markdown('<div class="empty">No sources found, or the database is unavailable.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="empty">No sources found, or the database is unavailable.</div>', unsafe_allow_html=True)
