@@ -5,7 +5,7 @@ from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, T
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker, selectinload
 
 from config import env_ini as env
 from utils.hashing import generate_article_id
@@ -185,6 +185,7 @@ class NeonDatabaseService:
             try:
                 rows = (
                     session.query(Event)
+                    .options(selectinload(Event.articles),selectinload(Event.updates))
                     .filter(Event.status == "open")
                     .filter(Event.articles.any(Article.collected_at.between(start, end)))
                     .order_by(Event.last_updated_at.desc())

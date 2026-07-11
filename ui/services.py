@@ -1,15 +1,9 @@
 import json
 import logging
-import sys
-from pathlib import Path
+import streamlit as st
 from urllib.parse import urlparse
-
-
-project_root = Path(__file__).resolve().parents[1]
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
 from storage.s3_client import S3Storage as s3
+from sqlalchemy.orm import selectinload
 
 
 logger = logging.getLogger(__name__)
@@ -73,6 +67,7 @@ def get_db_service():
         return None
 
 
+@st.cache_data(ttl=3600,show_spinner="Loading events...")
 def get_events() -> list[dict]:
     """Fetch all events from the PostgreSQL events table, including linked article URLs."""
     db_service = get_db_service()
@@ -83,7 +78,7 @@ def get_events() -> list[dict]:
 
     with db_service._SessionMarker() as session:
         try:
-            rows = session.query(Event).order_by(Event.source_count.desc(),Event.last_updated_at.desc()).all()
+            rows = session.query(Event).options(selectinload(Event.articles),selectinload(Event.updates)).order_by(Event.source_count.desc(),Event.last_updated_at.desc()).all()
             result = []
             for row in rows:
                 article_links = []
@@ -158,13 +153,13 @@ def get_events() -> list[dict]:
             logger.exception("Failed to load events.")
             return []
 
-
+@st.cache_data(ttl=3600,show_spinner="Loading events...")
 def get_live_events() -> list[dict]:
     """Open events only, most recently active first -- the working set for Live Monitor."""
     events = [e for e in get_events() if e.get("status") == "open"]
     return sorted(events, key=lambda e: e.get("last_updated_at") or "", reverse=True)
 
-
+@st.cache_data(ttl=3600,show_spinner="Loading events...")
 def get_event_stats_for_date(date_str: str) -> tuple[int | None, int | None]:
     """
     (new_count, developing_count) for the events touched on date_str, using the
@@ -185,7 +180,7 @@ def get_event_stats_for_date(date_str: str) -> tuple[int | None, int | None]:
     new_count = sum(1 for e in events if e["first_seen_at"] == e["last_updated_at"])
     return new_count, len(events) - new_count
 
-
+@st.cache_data(ttl=86400,show_spinner="Loading sources...")
 def get_sources() -> list[dict]:
     """Fetch all sources from the PostgreSQL sources table, ordered by category and name."""
     db_service = get_db_service()
@@ -214,7 +209,7 @@ def get_sources() -> list[dict]:
             logger.exception("Failed to load sources.")
             return []
 
-
+@st.cache_data(ttl=3600,show_spinner="Loading briefings...")
 def get_briefing_files():
     files = cloud.list_files("briefings")
     return sorted(files, reverse=True)
@@ -235,7 +230,7 @@ def get_briefing_date(key):
         ""
     )
 
-
+@st.cache_data(ttl=3600,show_spinner="Fetching context...")
 def get_markdown_report(date: str) -> str:
     """Fetches the intermediate markdown context for a specific date."""
     try:
@@ -245,7 +240,7 @@ def get_markdown_report(date: str) -> str:
         logger.exception("Failed to fetch markdown for %s.", date)
         return None
 
-
+@st.cache_data(ttl=3600,show_spinner="Fetching articles...")
 def get_raw_articles(date: str) -> list | dict:
     """Fetches and parses the raw JSON articles for a specific date."""
     try:

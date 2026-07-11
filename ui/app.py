@@ -1,7 +1,12 @@
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import textwrap
-import env_ini as env# noqa: F401
 import streamlit as st
 import services
+
 
 
 
@@ -592,7 +597,6 @@ def render_article_card(article: dict):
         unsafe_allow_html=True,
     )
 
-
 def render_artifacts(date_str: str, briefing_content: str):
     raw = services.get_raw_articles(date_str)
     article_count = len(raw) if isinstance(raw, (list, dict)) else None
@@ -642,6 +646,7 @@ page = st.segmented_control(
     "Navigation",
     ["Briefings", "Live Monitor", "Explorer"],
     default="Briefings",
+    required=True,
     label_visibility="collapsed",
 )
 
