@@ -64,3 +64,7 @@ class S3Storage:
     @staticmethod
     def markdown_key(date: str):
         return f"markdown/{date}.md"
+
+    @staticmethod
+    def id_to_url_key(date: str):
+        return f"id_to_url/{date}.json"

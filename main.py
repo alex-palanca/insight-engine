@@ -6,6 +6,7 @@ from config.logging_config import setup_logging
 from pipeline.ingest import ingest
 from pipeline.enrich import enrich
 from pipeline.cluster import cluster
+from pipeline.assemble import assemble
 from pipeline.synthesize import synthesize
 
 logger = logging.getLogger("isolate_pipeline")
@@ -15,7 +16,7 @@ def main():
     parser = argparse.ArgumentParser(description="ISOLATE Intelligence Pipeline")
     parser.add_argument(
         'stage', 
-        choices=['ingest','ing','enrich','enrichment','events_processing','events','format','fmt','synthesize','syn', 'all'], 
+        choices=['ingest','ing','enrich','enrichment','cluster','cluster','assemble','synthesize','syn', 'all'], 
         nargs='?', 
         default='all',
         help="Pipeline stage to execute (default: all)"
@@ -30,9 +31,13 @@ def main():
         logger.info("Running enrichment stage.")
         enrich()
     
-    if args.stage in ['events_processing', 'events','all']:
+    if args.stage in ['cluster', 'events','all']:
         logger.info("Running events processing stage.")
         cluster()
+
+    if args.stage in ['assemble','all']:
+        logger.info("Running assemble stage.")
+        assemble()
     
     if args.stage in ['synthesize', 'syn','all']:
         logger.info("Running synthesis stage.")

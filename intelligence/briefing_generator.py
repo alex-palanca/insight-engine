@@ -55,51 +55,21 @@ if not key:
 
 client = genai.Client(api_key=key)
 
-
-def create_intelligence_briefing(
-        date: str,
-        articles: list[dict],
-        events: list[dict],
-        briefings: list[str] | None = None)-> str:
-    """Assemble the prompt, synthesize the briefing, and resolve its citations."""
-
-    prompt, id_to_url = build_prompt(
-        load_prompt("daily_briefing.txt"),
-        date,
-        articles,
-        events,
-        briefings,
-    )
-    return generate_briefing(client, prompt, id_to_url),prompt
-
 def build_prompt(
     prompt: str,
     date: str,
     articles: list[dict],
     events: list[dict],
-    recent_briefings: list[str] | None = None,
+    briefings: list[str] | None = None,
 ) -> tuple[str, dict[str, str]]:
     """
     Builds the briefing prompt from structured data.
-
-    Articles get stable [A#] reference ids. The model cites only those ids —
-    never URLs — so it cannot invent a link; real links are substituted after
-    generation. Events reference the same ids, giving both blocks one id space.
-
-    Events with material_change=False are routed to a separate "unchanged" list
-    here, in code, rather than asking the prompt to re-decide suppression.
-
-    The model has no built-in notion of "today" -- left ungrounded, it must
-    guess a date for the "# Daily Intelligence Briefing — {today's date}"
-    header and reliably hallucinates the wrong one. `date` (the pipeline's
-    run date, 'YYYY-MM-DD') fills that placeholder AND is restated as an
-    explicit fact in the context block, so the model never has to infer it.
 
     Returns:
         (prompt_text, id_to_url) — the map is required by generate_briefing().
     """
 
-    recent_briefings = recent_briefings or []
+    briefings = briefings or []
 
     # %-d (no leading zero) isn't portable to Windows' strftime, so build the
     # "Month D, Year" string from parts instead of a single format string.
@@ -172,9 +142,10 @@ UNCHANGED EVENTS (one-line "Still Developing" mentions only)
 ------------------------------------
 RECENT BRIEFINGS (avoid repeating these — do not copy their wording)
  
-{(chr(10) + chr(10)).join(b[:6000] for b in recent_briefings[:2]) or "(none)"}
+{(chr(10) + chr(10)).join(b[:10000] for b in briefings[:2]) or "(none)"}
 """
     return prompt_text, id_to_url
+
 
 def resolve_citations(briefing: str, id_to_url: dict[str, str]) -> str:
     """
@@ -206,7 +177,8 @@ def resolve_citations(briefing: str, id_to_url: dict[str, str]) -> str:
         logger.warning("Model cited unknown reference ids %s; removed.", sorted(set(unknown)))
     return resolved
 
-def generate_briefing(client, prompt: str, id_to_url: dict[str, str],
+def generate_briefing(prompt: str, 
+                      id_to_url: dict[str, str],
                       temperature: float = 0.35) -> str:
     """
     Generates the briefing, retrying each model with backoff before falling back.
