@@ -359,10 +359,3 @@ async def enrich_events_pipeline(score: int = 30, **hyperparameters):
     await create_new_events_pipeline(score, **hyperparameters)
 
     logger.info("Event enrichment pipeline complete.")
-
-
-def run_event_enrichment():
-    """
-    Wrapper to run the async event enrichment pipeline.
-    """
-    asyncio.run(enrich_events_pipeline(similarity_threshold=0.375, max_df=0.85, min_df=2))
