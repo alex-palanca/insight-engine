@@ -2,7 +2,7 @@ import logging
 from config import feed_loader
 import ingestion.rss_collector as rss_collector
 from storage import db_service as db
-
+import storage.storage_utils as bucket
 
 logger = logging.getLogger(__name__) 
 
@@ -18,3 +18,7 @@ def ingest():
 
     logger.info("Saving cleaned articles to Neon.")
     db.db_save_return(cleaned_articles)
+    logger.info("Saving cleaned articles to AWS.")
+    bucket.upload_articles(date="today",content=cleaned_articles)
+
+

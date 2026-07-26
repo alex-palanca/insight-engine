@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 def upload_articles(date: str, content):
+    if date == "today":
+        date = str(today)
     cloud.upload_content(
         content,
         cloud.article_key(date)

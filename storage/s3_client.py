@@ -1,5 +1,6 @@
 import boto3
 from config import env_ini as env
+import json
 
 
 # S3Storage class for interacting with AWS S3
@@ -17,13 +18,21 @@ class S3Storage:
         )
 
     def upload_content(self, content, s3_key: str):
-        """Upload a file to S3.
-        
+        """Upload content to S3. Serializes non-string content to JSON.
+
         Args:
-            content: Body of the file.
+            content: Body of the file — str/bytes uploaded as-is, anything else
+                    (list/dict) serialized to JSON text.
             s3_key: The S3 key (destination path).
         """
-        self.client.put_object(Bucket=self.bucket_name, Key=s3_key, Body=content)
+        if isinstance(content, str):
+            body = content.encode("utf-8")
+        elif isinstance(content, bytes):
+            body = content
+        else:
+            body = json.dumps(content, ensure_ascii=False, default=str).encode("utf-8")
+
+        self.client.put_object(Bucket=self.bucket_name, Key=s3_key, Body=body)
 
     def download_file(self, s3_key: str, local_path: str):
         # Download a file from the S3 bucket

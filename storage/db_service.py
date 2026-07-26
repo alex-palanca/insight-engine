@@ -488,7 +488,7 @@ class NeonDatabaseService:
                 logger.exception("Silver batch operation failed. Transaction rolled back.")
                 raise exc
 
-    def get_articles(self, stage: str = "bronze", min_score: int = 0) -> list:
+    def obtain_articles(self, stage: str = "bronze", min_score: int = 0) -> list:
         """
         Retrieves today's articles from the database and maps them back into
         the dictionary format expected by the markdown report generator.
@@ -576,7 +576,7 @@ def get_articles(stage: str = "bronze", min_score: int = 0) -> list:
     """
     try:
         db_service = NeonDatabaseService()
-        return db_service.get_articles(stage, min_score)
+        return db_service.obtain_articles(stage, min_score)
     except Exception as exc:
         logger.exception("Failed to retrieve articles from the database for stage '%s'.", stage)
         raise exc
