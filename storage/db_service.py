@@ -518,6 +518,7 @@ class NeonDatabaseService:
 
                 if stage == "bronze":
                     query_results = session.query(Article).join(Source).filter(
+                        Article.enriched_at.is_(None),
                         func.date(Article.collected_at) == today,
                     ).order_by(Article.published.desc()).all()
 
@@ -551,7 +552,7 @@ def sync_sources(feeds: dict) -> None:
         raise
 
 
-def db_save_return(articles: list = None, stage: str = "bronze"):
+def save_articles(articles: list = None, stage: str = "bronze"):
     """
     Public-facing function to save a batch of articles to the database.
     Options : raw (bronze) or enriched (silver) data. Defaults to bronze.
@@ -559,13 +560,21 @@ def db_save_return(articles: list = None, stage: str = "bronze"):
     try:
         db_service = NeonDatabaseService()
         if stage == "bronze":
-            if articles:
-                db_service.save_bronze_data(articles)
-            return db_service.get_articles()
+            db_service.save_bronze_data(articles)
         if stage == "silver":
-            if articles:
-                db_service.save_silver_data(articles)
-            return db_service.get_articles("silver", 50)
+            db_service.save_silver_data(articles)
     except Exception as exc:
         logger.exception("Failed to save articles to the database for stage '%s'.", stage)
+        raise exc
+
+def get_articles(stage: str = "bronze", min_score: int = 0) -> list:
+    """
+    Public-facing function to retrieve articles from the database.
+    Options : raw (bronze) or enriched (silver) data. Defaults to bronze.
+    """
+    try:
+        db_service = NeonDatabaseService()
+        return db_service.get_articles(stage, min_score)
+    except Exception as exc:
+        logger.exception("Failed to retrieve articles from the database for stage '%s'.", stage)
         raise exc
