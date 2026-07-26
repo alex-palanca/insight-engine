@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import date, datetime, timedelta
 
 import networkx as nx
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -13,14 +13,27 @@ from storage.db_service import Article, Event, NeonDatabaseService
 logger = logging.getLogger(__name__)
 
 
-def fetch_unclustered_articles(session: Session, score: int):
+def fetch_unclustered_articles(session: Session, score: int, since: date | datetime | None = None):
     """
-    Fetches articles that haven't been assigned to an event yet and have a score above the given threshold.
+    Fetches articles that haven't been assigned to an event yet, have a score above the given
+    threshold, and optionally were collected since the supplied date/datetime.
     """
-    return session.query(Article).filter(
-        Article.event_id == None,
-        Article.score >= score
-    ).all()
+    query = session.query(Article).filter(
+        Article.event_id.is_(None),
+        Article.score >= score,
+    )
+
+    if since is not None:
+        if isinstance(since, datetime):
+            cutoff = since
+        elif isinstance(since, date):
+            cutoff = datetime.combine(since, datetime.min.time())
+        else:
+            raise TypeError("since must be a date, datetime, or None")
+
+        query = query.filter(Article.collected_at >= cutoff)
+
+    return query.all()
 
 
 def fetch_open_events(session: Session):
@@ -161,7 +174,6 @@ def match_and_attach_articles(score: int, **hyperparameters) -> dict:
     AI-driven event updates.
     """
     db_service = NeonDatabaseService()
-    touched_events: dict[int, list[dict]] = {}
 
     with db_service._SessionMarker() as session:
         try:
@@ -210,12 +222,7 @@ def match_and_attach_articles(score: int, **hyperparameters) -> dict:
                 )
 
             session.commit()
-            logger.info(
-                "Matched %s articles to %s open events.",
-                sum(len(articles) for articles in touched_events.values()),
-                len(touched_events),
-            )
-            return touched_events
+            logger.info("Successfully attached %s articles to open events.",len(matched_articles))
 
         except Exception as exc:
             session.rollback()
@@ -231,7 +238,12 @@ def events_clustering(score: int, **hyperparameters):
 
     with db_service._SessionMarker() as session:
         try:
-            articles = fetch_unclustered_articles(session, score)
+            articles = fetch_unclustered_articles(
+                session,
+                score,
+                since=datetime.now() - timedelta(days=7),
+            )
+            logger.info("Fetched %s unclustered articles for clustering.", len(articles))
             corpus = [build_article_text(article) for article in articles]
 
             clusters = compute_clusters(corpus, **hyperparameters)

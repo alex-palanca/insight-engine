@@ -19,7 +19,7 @@ def main():
     parser = argparse.ArgumentParser(description="ISOLATE Intelligence Pipeline")
     parser.add_argument(
         'stage', 
-        choices=['ingest','ing','enrich','enrichment','cluster','cluster','assemble','synthesize','syn', 'all'], 
+        choices=['ingest','ing','enrich','enrichment','cluster','cluster','describe','assemble','synthesize','synth', 'all'], 
         nargs='?', 
         default='all',
         help="Pipeline stage to execute (default: all)"

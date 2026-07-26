@@ -228,18 +228,15 @@ class NeonDatabaseService:
     def fetch_pending_event_updates(self) -> dict[int, dict]:
         """
         Describe-stage work queue: the bare EventUpdate rows the cluster stage left
-        (material_change IS NULL), rebuilt with the article payload describe needs.
+        (delta_change IS NULL), rebuilt with the article payload describe needs.
         Keyed by EventUpdate.id. Empty dict when nothing is pending.
         """
 
         with self._SessionMarker() as session:
             pending = (
                 session.query(EventUpdateRecord)
-                .options(
-                    selectinload(EventUpdateRecord.event),
-                    selectinload(EventUpdateRecord.articles).selectinload(Article.source),
-                )
-                .filter(EventUpdateRecord.material_change.is_(None))
+                .options(selectinload(EventUpdateRecord.event))
+                .filter(EventUpdateRecord.delta_text.is_(None))
                 .order_by(EventUpdateRecord.created_at.asc())
                 .all()
             )
@@ -259,7 +256,12 @@ class NeonDatabaseService:
                             "score": a.score,
                             "article_tags": a.article_tags or [],
                         }
-                        for a in row.articles
+                        for a in (
+                            session.query(Article)
+                            .filter(Article.id.in_(row.article_ids or []))
+                            .options(selectinload(Article.source))
+                            .all()
+                        )
                     ],
                 }
                 for row in pending
