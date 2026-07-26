@@ -1,11 +1,11 @@
-name: Isolate_ingestion
+name: ingestion
 
 on:
     workflow_dispatch:
 
 jobs:
   ingest:
-    name: Article Ingestion & Enrichment
+    name: Article Ingestion & Cleaning
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

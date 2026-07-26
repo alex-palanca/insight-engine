@@ -95,6 +95,9 @@ class EventUpdate(Base):
     event = relationship("Event", back_populates="updates")
 
 
+EventUpdateRecord = EventUpdate
+
+
 class Article(Base):
     """
     Represents an individual collected piece of intelligence.
@@ -221,6 +224,82 @@ class NeonDatabaseService:
             except Exception:
                 logger.exception("Failed to fetch events touched today.")
                 raise
+
+    def fetch_pending_event_updates(self) -> dict[int, dict]:
+        """
+        Describe-stage work queue: the bare EventUpdate rows the cluster stage left
+        (delta_change IS NULL), rebuilt with the article payload describe needs.
+        Keyed by EventUpdate.id. Empty dict when nothing is pending.
+        """
+
+        with self._SessionMarker() as session:
+            pending = (
+                session.query(EventUpdateRecord)
+                .options(selectinload(EventUpdateRecord.event))
+                .filter(EventUpdateRecord.delta_text.is_(None))
+                .order_by(EventUpdateRecord.created_at.asc())
+                .all()
+            )
+
+            return {
+                row.id: {
+                    "event_id": row.event_id,
+                    "event_summary": row.event.summary if row.event else None,
+                    "articles": [
+                        {
+                            "id": a.id,
+                            "title": a.title,
+                            "link": a.link,
+                            "source": a.source.name if a.source else "Unknown",
+                            "category": a.source.category if a.source else "Unknown",
+                            "ai_summary": a.ai_summary,
+                            "score": a.score,
+                            "article_tags": a.article_tags or [],
+                        }
+                        for a in (
+                            session.query(Article)
+                            .filter(Article.id.in_(row.article_ids or []))
+                            .options(selectinload(Article.source))
+                            .all()
+                        )
+                    ],
+                }
+                for row in pending
+            }
+
+    def record_event_update(
+        self,
+        session,                      # the CALLER's session — joins their transaction
+        event_id: int,
+        article_ids: list,
+        metadata=None,                # None at cluster stage; EventUpdate schema at describe
+    ):
+        """
+        Records an EventUpdate row within the caller's transaction.
+
+        Cluster stage (metadata=None): writes a bare attachment row with
+        material_change=None ("pending"), delta_text=None. Does NOT commit —
+        the caller owns the transaction.
+
+        Describe stage (metadata set): applies the revised summary and fills
+        delta_text / material_change. See apply_event_description below for the
+        stage that ENRICHES an existing row rather than creating one.
+        """
+        event = session.query(Event).filter(Event.id == event_id).first()
+        if not event:
+            logger.warning("Event %s not found; skipping update.", event_id)
+            return False
+
+        if metadata is not None and metadata.material_change:
+            event.summary = metadata.revised_summary
+
+        session.add(EventUpdate(
+            event_id=event_id,
+            update_type="article_match",
+            delta_text=metadata.delta_text if metadata else None,
+            material_change=metadata.material_change if metadata else None,  # None = pending
+            article_ids=article_ids,
+        ))
 
     def get_articles_briefing(self, date, min_score: int) -> list[dict]:
         """
@@ -409,7 +488,7 @@ class NeonDatabaseService:
                 logger.exception("Silver batch operation failed. Transaction rolled back.")
                 raise exc
 
-    def get_articles(self, stage: str = "bronze", min_score: int = 0) -> list:
+    def obtain_articles(self, stage: str = "bronze", min_score: int = 0) -> list:
         """
         Retrieves today's articles from the database and maps them back into
         the dictionary format expected by the markdown report generator.
@@ -441,6 +520,7 @@ class NeonDatabaseService:
 
                 if stage == "bronze":
                     query_results = session.query(Article).join(Source).filter(
+                        Article.enriched_at.is_(None),
                         func.date(Article.collected_at) == today,
                     ).order_by(Article.published.desc()).all()
 
@@ -474,7 +554,7 @@ def sync_sources(feeds: dict) -> None:
         raise
 
 
-def db_save_return(articles: list = None, stage: str = "bronze"):
+def save_articles(articles: list = None, stage: str = "bronze"):
     """
     Public-facing function to save a batch of articles to the database.
     Options : raw (bronze) or enriched (silver) data. Defaults to bronze.
@@ -482,13 +562,21 @@ def db_save_return(articles: list = None, stage: str = "bronze"):
     try:
         db_service = NeonDatabaseService()
         if stage == "bronze":
-            if articles:
-                db_service.save_bronze_data(articles)
-            return db_service.get_articles()
+            db_service.save_bronze_data(articles)
         if stage == "silver":
-            if articles:
-                db_service.save_silver_data(articles)
-            return db_service.get_articles("silver", 50)
+            db_service.save_silver_data(articles)
     except Exception as exc:
         logger.exception("Failed to save articles to the database for stage '%s'.", stage)
+        raise exc
+
+def get_articles(stage: str = "bronze", min_score: int = 0) -> list:
+    """
+    Public-facing function to retrieve articles from the database.
+    Options : raw (bronze) or enriched (silver) data. Defaults to bronze.
+    """
+    try:
+        db_service = NeonDatabaseService()
+        return db_service.obtain_articles(stage, min_score)
+    except Exception as exc:
+        logger.exception("Failed to retrieve articles from the database for stage '%s'.", stage)
         raise exc

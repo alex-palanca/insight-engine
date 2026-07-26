@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 def upload_articles(date: str, content):
+    if date == "today":
+        date = str(today)
     cloud.upload_content(
         content,
         cloud.article_key(date)
@@ -31,11 +33,25 @@ def upload_markdown(date: str, content):
     )
 
 
+def upload_id_to_url(date: str, id_to_url: dict[str, str]):
+    cloud.upload_content(
+        json.dumps(id_to_url, indent=2, ensure_ascii=False),
+        cloud.id_to_url_key(date)
+    )
+
+
 def obtain_markdown(date: str):
     markdown = cloud.get_file_content(
         cloud.markdown_key(date)
     )
     return markdown
+
+
+def download_id_to_url(date: str) -> dict[str, str]:
+    content = cloud.get_file_content(
+        cloud.id_to_url_key(date)
+    )
+    return json.loads(content)
 
 
 def download_articles(date: str):

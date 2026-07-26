@@ -1,12 +1,12 @@
-name: Isolate_synthesize
+name: describe
 
 on:
     workflow_dispatch:
 
 jobs:
 
-  synthesize:
-    name: AI Intelligence Synthesis
+  describe:
+    name: Event Description Generation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run synthesis phase
+      - name: Run description phase
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           
@@ -31,4 +31,4 @@ jobs:
 
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-        run: python main.py synthesize
+        run: python main.py describe
