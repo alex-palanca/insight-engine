@@ -10,7 +10,7 @@ from google.genai.errors import APIError
 from pydantic import BaseModel
 
 from models.event_metadata import EventCreate, EventUpdate as EventUpdatePayload, EVENT_CREATE_PROMPT, EVENT_UPDATE_PROMPT
-from processing import clustering_engine
+from storage.db_service import Event, EventUpdate as EventUpdateRecord
 from storage.db_service import NeonDatabaseService
 
 RATE_LIMIT_DELAY = 4.5  # 60 seconds / 15 requests = 4 seconds. We use 4.5 to be safe.
@@ -162,7 +162,7 @@ def get_event_articles(db_service: NeonDatabaseService, event_id: int) -> list:
             return []
 
 
-def get_all_events(db_service: NeonDatabaseService) -> list:
+def get_new_unprocessed_events(db_service: NeonDatabaseService) -> list:
     """
     Retrieves all events from the database that don't have metadata yet.
     """
@@ -170,7 +170,7 @@ def get_all_events(db_service: NeonDatabaseService) -> list:
 
     with db_service._SessionMarker() as session:
         try:
-            events = session.query(Event).filter(Event.summary == None).all()
+            events = session.query(Event).filter(Event.summary == None).all()   # noqa: E711
 
             event_data = []
             for event in events:
@@ -242,120 +242,50 @@ def create_event_metadata(db_service: NeonDatabaseService, event_id: int, metada
             return False
 
 
-def apply_event_update(db_service: NeonDatabaseService, event_id: int, metadata: EventUpdatePayload, article_ids: list) -> bool:
+def describe_event_update(
+    db_service: NeonDatabaseService, update_id: int, metadata: EventUpdatePayload
+) -> bool:
     """
-    Applies an AI-judged event update: revises the summary only if the change is material, and
-    always records the delta as an append-only EventUpdate log entry.
+    Fills in an AI-judged description on an EXISTING pending EventUpdate row
+    (the bare row the cluster stage created), rather than inserting a new one.
+
+    Sets delta_text and material_change on the row, and revises the parent
+    event's summary only if the change is material. Once material_change is no
+    longer NULL, the row leaves the describe queue.
     """
-    from storage.db_service import Event
-    from storage.db_service import EventUpdate as EventUpdateRecord
 
     with db_service._SessionMarker() as session:
         try:
-            event = session.query(Event).filter(Event.id == event_id).first()
+            update = (
+                session.query(EventUpdateRecord)
+                .filter(EventUpdateRecord.id == update_id)
+                .first()
+            )
 
-            if not event:
-                logger.warning("Event %s was not found in the database.", event_id)
+            if not update:
+                logger.warning(
+                    "EventUpdate %s was not found in the database.", update_id
+                )
                 return False
 
-            if metadata.material_change:
-                event.summary = metadata.revised_summary
+            update.delta_text = metadata.delta_text
+            update.material_change = metadata.material_change
 
-            session.add(EventUpdateRecord(
-                event_id=event_id,
-                update_type="article_match",
-                delta_text=metadata.delta_text,
-                material_change=metadata.material_change,
-                article_ids=article_ids,
-            ))
+            if metadata.material_change:
+                event = session.query(Event).filter(Event.id == update.event_id).first()
+                if event:
+                    event.summary = metadata.revised_summary
 
             session.commit()
             logger.info(
-                "Recorded event update for %s (material_change=%s).",
-                event_id, metadata.material_change,
+                "Described event update %s (event=%s, material_change=%s).",
+                update_id,
+                update.event_id,
+                metadata.material_change,
             )
             return True
 
         except Exception:
             session.rollback()
-            logger.exception("Failed to apply update for event %s.", event_id)
+            logger.exception("Failed to describe event update %s.", update_id)
             return False
-
-
-async def update_open_events_pipeline(score: int = 30, **hyperparameters):
-    """
-    Phase 1: matches unclustered articles against currently open events (skipped entirely if
-    there are none), attaches the matched articles to their event, and asks Gemini whether the
-    event's canonical representation needs to change given the new information (update_event.txt).
-    """
-    db_service = NeonDatabaseService()
-
-    logger.info("Matching unclustered articles against open events.")
-    touched_events = clustering_engine.match_and_attach_articles(score, **hyperparameters)
-
-    if not touched_events:
-        logger.info("No open events matched new articles. Skipping event updates.")
-        return
-
-    logger.info("Updating %s open events with newly attached articles.", len(touched_events))
-
-    for event_id, articles in touched_events.items():
-        existing_event = get_event(db_service, event_id)
-        if not existing_event:
-            logger.warning("Event %s was not found. Skipping update.", event_id)
-            continue
-
-        metadata = await update_event_with_gemini(event_id, existing_event["summary"], articles)
-
-        if metadata:
-            article_ids = [article["id"] for article in articles]
-            apply_event_update(db_service, event_id, metadata, article_ids)
-        else:
-            logger.warning("Failed to update event %s. Keeping previous metadata.", event_id)
-
-
-async def create_new_events_pipeline(score: int = 30, **hyperparameters):
-    """
-    Phase 2: clusters remaining unclustered articles into brand-new events, then fills in each
-    new event's canonical representation with Gemini (new_event.txt).
-    """
-    db_service = NeonDatabaseService()
-
-    logger.info("Clustering remaining unclustered articles into new events.")
-    clustering_engine.events_clustering(score, **hyperparameters)
-
-    events = get_all_events(db_service)
-    if not events:
-        logger.info("No new events to enrich.")
-        return
-
-    logger.info("Found %s new events to enrich.", len(events))
-
-    for event_data in events:
-        event_id = event_data["id"]
-        logger.info("Enriching event %s: %s", event_id, event_data["name"])
-
-        articles = get_event_articles(db_service, event_id)
-        logger.info("Retrieved %s articles for event %s.", len(articles), event_id)
-
-        metadata = await enrich_new_event_with_gemini(event_id, articles)
-
-        if metadata:
-            create_event_metadata(db_service, event_id, metadata)
-        else:
-            logger.warning("Failed to enrich event %s. Skipping update.", event_id)
-
-
-async def enrich_events_pipeline(score: int = 30, **hyperparameters):
-    """
-    Main orchestration function, run sequentially:
-    1. Match articles to open events and update them (update_event.txt).
-    2. Cluster whatever is left into new events and enrich them (new_event.txt).
-    """
-    logger.info("Phase 1: matching articles to open events.")
-    await update_open_events_pipeline(score, **hyperparameters)
-
-    logger.info("Phase 2: clustering remaining articles into new events.")
-    await create_new_events_pipeline(score, **hyperparameters)
-
-    logger.info("Event enrichment pipeline complete.")

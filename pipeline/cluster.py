@@ -1,5 +1,12 @@
-from processing import event_enrichment
-import asyncio
+import logging
+from processing import clustering_engine
 
-def cluster():
-    asyncio.run(event_enrichment.enrich_events_pipeline(similarity_threshold=0.375, max_df=0.85, min_df=2))
+logger = logging.getLogger(__name__)
+
+def cluster(score = 30,**hyperparameters):
+
+    logger.info("Phase 1 - Matching unclustered articles against open events.")
+    clustering_engine.match_and_attach_articles(score, **hyperparameters)
+
+    logger.info("Phase 2 - Clustering remaining unclustered articles into new events.")
+    clustering_engine.events_clustering(score, **hyperparameters)

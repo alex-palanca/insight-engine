@@ -161,7 +161,7 @@ def match_and_attach_articles(score: int, **hyperparameters) -> dict:
     AI-driven event updates.
     """
     db_service = NeonDatabaseService()
-    touched_events: dict = {}
+    touched_events: dict[int, list[dict]] = {}
 
     with db_service._SessionMarker() as session:
         try:
@@ -179,6 +179,7 @@ def match_and_attach_articles(score: int, **hyperparameters) -> dict:
             article_texts = [build_article_text(article) for article in articles]
 
             matches = match_articles_to_events(event_texts, article_texts, **hyperparameters)
+            logger.info("%s articles matched open events.",len(matches))
             now = datetime.now()
 
             for event_idx, article_indices in matches.items():
@@ -202,21 +203,11 @@ def match_and_attach_articles(score: int, **hyperparameters) -> dict:
                     if event.first_seen_at is None or earliest_published < event.first_seen_at:
                         event.first_seen_at = earliest_published
 
-                touched_events[event.id] = [
-                    {
-                        "id": article.id,
-                        "title": article.title,
-                        "link": article.link,
-                        "published": article.published.isoformat() if article.published else "Unknown",
-                        "source": article.source.name if article.source else "Unknown",
-                        "category": article.source.category if article.source else "Unknown",
-                        "raw_summary": article.raw_summary,
-                        "ai_summary": article.ai_summary,
-                        "score": article.score,
-                        "article_tags": article.article_tags or [],
-                    }
-                    for article in matched_articles
-                ]
+                db_service.record_event_update(
+                    session,
+                    event_id=event.id,
+                    article_ids=[article.id for article in matched_articles],
+                )
 
             session.commit()
             logger.info(

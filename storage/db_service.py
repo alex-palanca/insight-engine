@@ -95,6 +95,9 @@ class EventUpdate(Base):
     event = relationship("Event", back_populates="updates")
 
 
+EventUpdateRecord = EventUpdate
+
+
 class Article(Base):
     """
     Represents an individual collected piece of intelligence.
@@ -221,6 +224,80 @@ class NeonDatabaseService:
             except Exception:
                 logger.exception("Failed to fetch events touched today.")
                 raise
+
+    def fetch_pending_event_updates(self) -> dict[int, dict]:
+        """
+        Describe-stage work queue: the bare EventUpdate rows the cluster stage left
+        (material_change IS NULL), rebuilt with the article payload describe needs.
+        Keyed by EventUpdate.id. Empty dict when nothing is pending.
+        """
+
+        with self._SessionMarker() as session:
+            pending = (
+                session.query(EventUpdateRecord)
+                .options(
+                    selectinload(EventUpdateRecord.event),
+                    selectinload(EventUpdateRecord.articles).selectinload(Article.source),
+                )
+                .filter(EventUpdateRecord.material_change.is_(None))
+                .order_by(EventUpdateRecord.created_at.asc())
+                .all()
+            )
+
+            return {
+                row.id: {
+                    "event_id": row.event_id,
+                    "event_summary": row.event.summary if row.event else None,
+                    "articles": [
+                        {
+                            "id": a.id,
+                            "title": a.title,
+                            "link": a.link,
+                            "source": a.source.name if a.source else "Unknown",
+                            "category": a.source.category if a.source else "Unknown",
+                            "ai_summary": a.ai_summary,
+                            "score": a.score,
+                            "article_tags": a.article_tags or [],
+                        }
+                        for a in row.articles
+                    ],
+                }
+                for row in pending
+            }
+
+    def record_event_update(
+        self,
+        session,                      # the CALLER's session — joins their transaction
+        event_id: int,
+        article_ids: list,
+        metadata=None,                # None at cluster stage; EventUpdate schema at describe
+    ):
+        """
+        Records an EventUpdate row within the caller's transaction.
+
+        Cluster stage (metadata=None): writes a bare attachment row with
+        material_change=None ("pending"), delta_text=None. Does NOT commit —
+        the caller owns the transaction.
+
+        Describe stage (metadata set): applies the revised summary and fills
+        delta_text / material_change. See apply_event_description below for the
+        stage that ENRICHES an existing row rather than creating one.
+        """
+        event = session.query(Event).filter(Event.id == event_id).first()
+        if not event:
+            logger.warning("Event %s not found; skipping update.", event_id)
+            return False
+
+        if metadata is not None and metadata.material_change:
+            event.summary = metadata.revised_summary
+
+        session.add(EventUpdate(
+            event_id=event_id,
+            update_type="article_match",
+            delta_text=metadata.delta_text if metadata else None,
+            material_change=metadata.material_change if metadata else None,  # None = pending
+            article_ids=article_ids,
+        ))
 
     def get_articles_briefing(self, date, min_score: int) -> list[dict]:
         """

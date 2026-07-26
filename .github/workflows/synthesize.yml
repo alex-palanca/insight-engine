@@ -1,12 +1,12 @@
-name: Isolate_assemble
+name: synthesize
 
 on:
     workflow_dispatch:
 
 jobs:
 
-  assemble:
-    name: Briefing prompt assemble
+  synthesize:
+    name: AI Intelligence Synthesis
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -31,4 +31,4 @@ jobs:
 
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-        run: python main.py assemble
+        run: python main.py synthesize

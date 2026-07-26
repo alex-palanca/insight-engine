@@ -1,3 +1,5 @@
+import asyncio
+
 from config import env_ini # noqa: F401
 import logging
 import argparse
@@ -6,6 +8,7 @@ from config.logging_config import setup_logging
 from pipeline.ingest import ingest
 from pipeline.enrich import enrich
 from pipeline.cluster import cluster
+from pipeline.describe import describe
 from pipeline.assemble import assemble
 from pipeline.synthesize import synthesize
 
@@ -32,14 +35,18 @@ def main():
         enrich()
     
     if args.stage in ['cluster', 'events','all']:
+        logger.info("Running clustering and linking stage.")
+        cluster(similarity_threshold=0.375, max_df=0.85, min_df=2)
+
+    if args.stage in ['describe','all']:
         logger.info("Running events processing stage.")
-        cluster()
+        asyncio.run(describe())
 
     if args.stage in ['assemble','all']:
         logger.info("Running assemble stage.")
         assemble()
     
-    if args.stage in ['synthesize', 'syn','all']:
+    if args.stage in ['synthesize', 'synth','all']:
         logger.info("Running synthesis stage.")
         synthesize()
 
