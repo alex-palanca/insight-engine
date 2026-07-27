@@ -1,6 +1,3 @@
-import logging
-from datetime import datetime,date, time as dt_time
-
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, create_engine, func, or_
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
@@ -10,6 +7,8 @@ from sqlalchemy.orm import declarative_base, relationship, sessionmaker, selecti
 from config import env_ini as env
 from utils.hashing import generate_article_id
 from utils.text_utils import normalize_text, normalize_url
+import logging
+from datetime import datetime, timedelta, date, time as dt_time
 
 
 logger = logging.getLogger(__name__)
@@ -170,6 +169,40 @@ class NeonDatabaseService:
 
             except Exception:
                 session.rollback()
+                raise
+
+    def update_stale_events_status(self, days_old: int = 7) -> int:
+        """
+        Close open events that have not been updated for the provided number of days.
+        This helps prevent stale, dormant events from remaining active.
+        """
+        if days_old < 0:
+            raise ValueError("days_old must be non-negative")
+
+        cutoff = datetime.now() - timedelta(days=days_old)
+
+        with self._SessionMarker() as session:
+            try:
+                updated_count = (
+                    session.query(Event)
+                    .filter(Event.status == "open")
+                    .filter(Event.last_updated_at < cutoff)
+                    .update({
+                        Event.status: "closed",
+                        Event.closed_at: datetime.now(),
+                    })
+                )
+                session.commit()
+                logger.info(
+                    "Closed %s stale events with last_updated_at older than %s days.",
+                    updated_count,
+                    days_old,
+                )
+                return updated_count
+
+            except Exception:
+                session.rollback()
+                logger.exception("Failed to close stale events.")
                 raise
 
     def get_delta_events(self, day) -> list[dict]:
@@ -551,6 +584,18 @@ def sync_sources(feeds: dict) -> None:
         db_service.sync_sources_from_feeds(feeds)
     except Exception:
         logger.exception("Failed to sync sources from feeds.")
+        raise
+
+
+def update_stale_events(days_old: int = 7) -> int:
+    """
+    Public-facing helper to close open events whose last_updated_at is older than the threshold.
+    """
+    try:
+        db_service = NeonDatabaseService()
+        return db_service.update_stale_events_status(days_old=days_old)
+    except Exception:
+        logger.exception("Failed to update stale event statuses.")
         raise
 
 

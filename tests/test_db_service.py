@@ -90,6 +90,21 @@ class FakeResetQuery:
         self.deleted = True
 
 
+class FakeEventQuery:
+    def __init__(self):
+        self.filter_calls = []
+        self.update_payload = None
+        self.update_result = 2
+
+    def filter(self, *expressions):
+        self.filter_calls.append(expressions)
+        return self
+
+    def update(self, payload):
+        self.update_payload = payload
+        return self.update_result
+
+
 class FakeSession:
     def __init__(self, source_results=None, article_lookup=None, query_overrides=None, execute_error=None):
         self.source_query = FakeSourceQuery(source_results or [])
@@ -352,4 +367,18 @@ def test_reset_events_clears_article_event_ids_and_deletes_events():
 
     assert article_query.updated_with == {db_service.Article.event_id: None}
     assert event_query.deleted is True
+    assert session.committed is True
+
+
+def test_update_stale_events_status_closes_old_open_events():
+    event_query = FakeEventQuery()
+    session = FakeSession(query_overrides={db_service.Event: event_query})
+    service = make_service(session)
+
+    result = service.update_stale_events_status(days_old=7)
+
+    assert result == 2
+    assert len(event_query.filter_calls) == 2
+    assert event_query.update_payload[db_service.Event.status] == "closed"
+    assert isinstance(event_query.update_payload[db_service.Event.closed_at], datetime)
     assert session.committed is True
