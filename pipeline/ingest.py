@@ -17,7 +17,7 @@ def ingest():
     cleaned_articles = rss_collector.collect_articles(feeds,300,50)
 
     logger.info("Saving cleaned articles to Neon.")
-    db.db_save_return(cleaned_articles)
+    db.save_articles(cleaned_articles)
     logger.info("Saving cleaned articles to AWS.")
     bucket.upload_articles(date="today",content=cleaned_articles)
 
