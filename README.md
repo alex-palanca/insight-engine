@@ -1,5 +1,6 @@
 # ISOLATE
 
+
 ISOLATE is a lightweight intelligence pipeline that collects news from RSS feeds, enriches articles with AI, clusters related stories into events, and produces daily briefing outputs.
 
 ## What it does
