@@ -609,18 +609,12 @@ def render_artifacts(date_str: str, briefing_content: str):
         ("Developing events", str(developing_count) if developing_count is not None else "—", False),
     ])
 
-    tab_brief, tab_md, tab_articles = st.tabs(["🧠 Briefing", "📑 Context", "📰 Articles"])
+    tab_brief, tab_articles = st.tabs(["🧠 Briefing","📰 Articles"])
     with tab_brief:
         if briefing_content:
             st.markdown(briefing_content)
         else:
             st.markdown('<div class="empty">This briefing is empty.</div>', unsafe_allow_html=True)
-    with tab_md:
-        md = services.get_markdown_report(date_str)
-        if md:
-            st.markdown(md)
-        else:
-            st.markdown(f'<div class="empty">No intermediate context stored for {esc(date_str)}.</div>', unsafe_allow_html=True)
     with tab_articles:
         articles = raw if isinstance(raw, list) else []
         if articles:
