@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime,timezone, timedelta
-from ingest import ingest
+from pipeline.ingest import ingest
 
 logger = logging.getLogger(__name__)
 
