@@ -12,13 +12,15 @@ logger = logging.getLogger(__name__)
 
 now_utc = datetime.now(timezone.utc)
 yesterday_utc = now_utc - timedelta(days=1)
-threshold_utc = datetime.combine(yesterday_utc.date(), time(15, 0, 0))
+threshold_utc = datetime.combine(yesterday_utc.date(), time(15, 0, 0), tzinfo=timezone.utc)
 
 
 def collect_articles(
         feeds: dict,
         max_per_category: int,
-        max_per_source: int
+        max_per_source: int,
+        min_date: datetime = threshold_utc,
+        max_date: datetime = now_utc
 ) -> list:
 
     raw_articles = []
@@ -53,9 +55,9 @@ def collect_articles(
                         else:
                             continue
 
-                    entry_utc = datetime(*entry.published_parsed[:6])
+                    entry_utc = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc)
 
-                    if entry_utc < threshold_utc:
+                    if entry_utc < min_date or entry_utc > max_date:
                         continue
 
                     article_date = entry_utc.date()
