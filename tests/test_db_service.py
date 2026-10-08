@@ -105,19 +105,6 @@ class FakeEventQuery:
         return self.update_result
 
 
-class FakeEventArticleQuery:
-    def __init__(self, events):
-        self.events = events
-        self.options_called = False
-
-    def options(self, *args):
-        self.options_called = True
-        return self
-
-    def all(self):
-        return self.events
-
-
 class FakeSession:
     def __init__(self, source_results=None, article_lookup=None, query_overrides=None, execute_error=None):
         self.source_query = FakeSourceQuery(source_results or [])
@@ -391,21 +378,7 @@ def test_update_stale_events_status_closes_old_open_events():
     result = service.update_stale_events_status(days_old=7)
 
     assert result == 2
-
-
-def test_backfill_event_scores_from_highest_rated_article():
-    event = SimpleNamespace(id=7, articles=[
-        SimpleNamespace(score=10),
-        SimpleNamespace(score=None),
-        SimpleNamespace(score=None),
-    ])
-    query = FakeEventArticleQuery([event])
-    session = FakeSession(query_overrides={db_service.Event: query})
-    service = make_service(session)
-
-    result = service.backfill_event_scores_from_highest_article()
-
-    assert result == 2
-    assert event.articles[1].score == 10
-    assert event.articles[2].score == 10
+    assert len(event_query.filter_calls) == 2
+    assert event_query.update_payload[db_service.Event.status] == "closed"
+    assert isinstance(event_query.update_payload[db_service.Event.closed_at], datetime)
     assert session.committed is True

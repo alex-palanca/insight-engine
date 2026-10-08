@@ -205,48 +205,6 @@ class NeonDatabaseService:
                 logger.exception("Failed to close stale events.")
                 raise
 
-    def backfill_event_scores_from_highest_article(self) -> int:
-        """
-        Fill in null article scores for an event using the highest-rated article
-        already attached to that event.
-        """
-        with self._SessionMarker() as session:
-            try:
-                events = (
-                    session.query(Event)
-                    .options(selectinload(Event.articles))
-                    .all()
-                )
-
-                updated_count = 0
-                for event in events:
-                    if not event.articles:
-                        continue
-
-                    highest_score = max(
-                        (article.score for article in event.articles if article.score is not None),
-                        default=None,
-                    )
-                    if highest_score is None:
-                        continue
-
-                    for article in event.articles:
-                        if Event.score is None:
-                            Event.score = highest_score
-                            updated_count += 1
-
-                session.commit()
-                logger.info(
-                    "Backfilled scores for %s articles using the highest-rated article in each event.",
-                    updated_count,
-                )
-                return updated_count
-
-            except Exception:
-                session.rollback()
-                logger.exception("Failed to backfill event article scores.")
-                raise
-
     def get_delta_events(self, day) -> list[dict]:
         """
         Events with at least one article collected today. Both new and developing
@@ -667,16 +625,3 @@ def get_articles(stage: str = "bronze", min_score: int = 0) -> list:
     except Exception as exc:
         logger.exception("Failed to retrieve articles from the database for stage '%s'.", stage)
         raise exc
-
-
-def update_events_score() -> int:
-    """
-    Public-facing helper to backfill null article scores with the highest-rated
-    article already attached to each event.
-    """
-    try:
-        db_service = NeonDatabaseService()
-        return db_service.backfill_event_scores_from_highest_article()
-    except Exception:
-        logger.exception("Failed to backfill event article scores.")
-        raise
