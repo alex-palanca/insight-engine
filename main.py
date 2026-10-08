@@ -11,6 +11,7 @@ from pipeline.cluster import cluster
 from pipeline.describe import describe
 from pipeline.assemble import assemble
 from pipeline.synthesize import synthesize
+from pipeline.backfill import backfill
 
 logger = logging.getLogger("isolate_pipeline")
 
@@ -19,13 +20,23 @@ def main():
     parser = argparse.ArgumentParser(description="ISOLATE Intelligence Pipeline")
     parser.add_argument(
         'stage', 
-        choices=['ingest','ing','enrich','enrichment','cluster','cluster','describe','assemble','synthesize','synth', 'all'], 
+        choices=['ingest','ing','enrich','enrichment','cluster','cluster','describe','assemble','synthesize','synth', 'backfill', 'all'], 
         nargs='?', 
         default='all',
         help="Pipeline stage to execute (default: all)"
     )
+    parser.add_argument(
+    "--min-date",
+    help="Backfill start date, inclusive, in YYYY-MM-DD format.",
+    )
+
+    parser.add_argument(
+        "--max-date",
+        help="Backfill end date, inclusive, in YYYY-MM-DD format.",
+    )
     args = parser.parse_args()
-    
+
+    # Core pipeline jobs
     if args.stage in ['ingest', 'ing','all']:
         logger.info("Running ingestion stage.")
         ingest()
@@ -49,6 +60,12 @@ def main():
     if args.stage in ['synthesize', 'synth','all']:
         logger.info("Running synthesis stage.")
         synthesize()
+
+    # Adittional jobs
+    if args.stage == 'backfill':
+        logger.info("Running backfill for selected dates.")
+        backfill(args.min_date,args.max_date)
+
 
 if __name__ == "__main__":
   
