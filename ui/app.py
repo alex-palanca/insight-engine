@@ -6,1300 +6,521 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import textwrap
 import streamlit as st
 import services
-import html
-import logging
-from typing import Any
 
 
-logger = logging.getLogger(__name__)
 
 
-# =============================================================================
-# Page configuration
-# =============================================================================
-
+# ─────────────────────────────────────────────────────────────────────────────
+# Page config
+# ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="ISOLATE · Intelligence Briefing",
-    page_icon="◈",
-    layout="wide",
-    initial_sidebar_state="expanded",
+    page_icon="📰",
+    layout="centered",
+    initial_sidebar_state="collapsed",
 )
 
-
-# =============================================================================
-# Theme and layout
-# =============================================================================
-
+# ─────────────────────────────────────────────────────────────────────────────
+# Styling — keeps the ORIGINAL colorway (blue accent, white cards, soft-blue
+# page, rounded cards) and adapts to Streamlit's light/dark theme via CSS
+# variables rather than forcing light like the original did.
+# Novelty tiers are shades of the existing blue accent + slate, so they stay
+# inside the original palette instead of introducing new hues.
+# ─────────────────────────────────────────────────────────────────────────────
 st.markdown(
     textwrap.dedent(
-        """
-        <style>
-        @import url(
-            'https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap'
-        );
-
-        :root {
-            --bg: #080b10;
-            --bg-raised: #0d1118;
-            --surface: #111720;
-            --surface-2: #151c27;
-            --surface-3: #1a2330;
-
-            --border: #263140;
-            --border-soft: #1b2430;
-
-            --text: #eef3f8;
-            --text-2: #c1ccd8;
-            --muted: #7f8c9d;
-            --muted-2: #596677;
-
-            --blue: #5ba7ff;
-            --blue-soft: rgba(91, 167, 255, 0.12);
-
-            --cyan: #55d6c2;
-            --cyan-soft: rgba(85, 214, 194, 0.12);
-
-            --amber: #e7b55b;
-            --amber-soft: rgba(231, 181, 91, 0.12);
-
-            --green: #70d39a;
-            --green-soft: rgba(112, 211, 154, 0.12);
-        }
-
-        html,
-        body,
-        [data-testid="stAppViewContainer"],
-        [data-testid="stAppViewContainer"] > .main {
-            background: var(--bg) !important;
-        }
-
-        .stApp {
-            min-width: 0;
-            background:
-                radial-gradient(
-                    circle at 70% -10%,
-                    rgba(47, 131, 230, 0.11),
-                    transparent 36rem
-                ),
-                var(--bg) !important;
-            color: var(--text) !important;
-            font-family: "Inter", system-ui, sans-serif;
-        }
-
-        /*
-         * Do not alter Streamlit's internal header/main offsets.
-         * The previous version used internal selectors here, which caused
-         * the custom topbar to collide with Streamlit's own header.
-         */
-        [data-testid="stHeader"] {
-            background: #080b10 !important;
-            border-bottom: 1px solid var(--border-soft) !important;
-        }
-
-        .block-container {
-            width: 100%;
-            max-width: 1500px;
-            margin: 0 auto;
-            padding: 5rem 2.4rem 3rem;
-        }
-
-        @media (max-width: 900px) {
-            .block-container {
-                padding: 1.25rem 1rem 2rem;
-            }
-        }
-
-        #MainMenu,
-        footer {
-            visibility: hidden;
-        }
-
-        /* ------------------------------------------------------------------ */
-        /* Sidebar                                                             */
-        /* ------------------------------------------------------------------ */
-
-        [data-testid="stSidebar"] {
-            width: 245px !important;
-            border-right: 1px solid var(--border-soft) !important;
-            background: #0a0e14 !important;
-        }
-
-        [data-testid="stSidebar"] > div:first-child {
-            padding: 1.25rem 0.9rem;
-        }
-
-        [data-testid="stSidebar"] * {
-            color: var(--text-2);
-        }
-
-        [data-testid="stSidebar"] hr {
-            margin: 1.4rem 0;
-            border-color: var(--border-soft);
-        }
-
-        [data-testid="stSidebar"] .stButton button {
-            width: 100%;
-            min-height: 2.35rem;
-            justify-content: flex-start;
-            border: 1px solid transparent;
-            border-radius: 7px;
-            background: transparent;
-            color: var(--muted);
-            text-align: left;
-        }
-
-        [data-testid="stSidebar"] .stButton button:hover {
-            border-color: var(--border);
-            background: var(--surface);
-            color: var(--text);
-        }
-
-        [data-testid="stSidebar"] .stButton button[kind="primary"] {
-            border-color: rgba(91, 167, 255, 0.32);
-            background: var(--blue-soft);
-            color: var(--blue);
-        }
-
-
-        /* ------------------------------------------------------------------ */
-        /* Native Streamlit widgets                                            */
-        /* ------------------------------------------------------------------ */
-
-        [data-testid="stTextInput"] input,
-        [data-testid="stSelectbox"] div[data-baseweb="select"] > div,
-        [data-testid="stMultiSelect"] div[data-baseweb="select"] > div {
-            min-height: 2.55rem;
-            border: 1px solid var(--border) !important;
-            border-radius: 8px !important;
-            background: var(--surface) !important;
-            color: var(--text) !important;
-        }
-
-        [data-testid="stTextInput"] input:focus,
-        [data-testid="stSelectbox"] div[data-baseweb="select"] > div:focus-within,
-        [data-testid="stMultiSelect"] div[data-baseweb="select"] > div:focus-within {
-            border-color: var(--blue) !important;
-            box-shadow: 0 0 0 1px var(--blue) !important;
-        }
-
-        [data-testid="stTextInput"] input::placeholder {
-            color: var(--muted-2) !important;
-        }
-
-        [data-baseweb="popover"],
-        [data-baseweb="menu"] {
-            background: var(--surface-2) !important;
-            border: 1px solid var(--border) !important;
-        }
-
-        [role="option"] {
-            color: var(--text-2) !important;
-        }
-
-        [role="option"]:hover {
-            background: var(--surface-3) !important;
-        }
-
-        [data-testid="stExpander"] {
-            overflow: hidden;
-            border: 1px solid var(--border-soft) !important;
-            border-radius: 8px !important;
-            background: var(--bg-raised) !important;
-        }
-
-        [data-testid="stExpander"] summary {
-            color: var(--text-2) !important;
-        }
-
-        [data-testid="stExpander"] summary:hover {
-            color: var(--text) !important;
-        }
-
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 0.25rem;
-            padding: 0.25rem;
-            border-bottom: 1px solid var(--border);
-            background: transparent;
-        }
-
-        .stTabs [data-baseweb="tab"] {
-            height: 2.25rem;
-            padding: 0.35rem 0.85rem;
-            border-radius: 6px 6px 0 0;
-            color: var(--muted);
-            font-size: 0.82rem;
-            font-weight: 600;
-        }
-
-        .stTabs [aria-selected="true"] {
-            background: var(--blue-soft) !important;
-            color: var(--blue) !important;
-        }
-
-        .stTabs [data-baseweb="tab-highlight"] {
-            background: var(--blue) !important;
-        }
-
-        .stMarkdown p,
-        .stMarkdown li {
-            color: var(--text-2);
-            line-height: 1.7;
-        }
-
-        .stMarkdown h1,
-        .stMarkdown h2,
-        .stMarkdown h3,
-        .stMarkdown h4 {
-            color: var(--text);
-        }
-
-        .stMarkdown h2 {
-            padding-bottom: 0.45rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        /* ------------------------------------------------------------------ */
-        /* Header                                                              */
-        /* ------------------------------------------------------------------ */
-
-        .topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            min-height: 3rem;
-            margin: 0 0 1.8rem;
-            padding: 0 0 0.9rem;
-            border-bottom: 1px solid var(--border-soft);
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-        }
-
-        .brand-mark {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 2rem;
-            height: 2rem;
-            border: 1px solid rgba(91, 167, 255, 0.5);
-            border-radius: 7px;
-            background: var(--blue-soft);
-            color: var(--blue);
-            font-family: "DM Mono", monospace;
-            font-size: 1.1rem;
-        }
-
-        .brand-name {
-            color: var(--text);
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: 0.13em;
-        }
-
-        .brand-subtitle {
-            margin-top: 0.12rem;
-            color: var(--muted);
-            font-family: "DM Mono", monospace;
-            font-size: 0.68rem;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-        }
-
-        .topbar-context {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--muted);
-            font-family: "DM Mono", monospace;
-            font-size: 0.66rem;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-        }
-
-        .topbar-page {
-            color: var(--text-2);
-        }
-
-        .topbar-divider {
-            color: var(--muted-2);
-        }
-
-        .topbar-status {
-            color: var(--green);
-        }
-
-        .status-dot {
-            width: 0.48rem;
-            height: 0.48rem;
-            border-radius: 50%;
-            background: var(--green);
-            box-shadow: 0 0 10px rgba(112, 211, 154, 0.7);
-        }
-
-        .eyebrow {
-            margin-bottom: 0.35rem;
-            color: var(--blue);
-            font-family: "DM Mono", monospace;
-            font-size: 0.68rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-        }
-
-        .section-heading {
-            display: flex;
-            align-items: end;
-            justify-content: space-between;
-            gap: 1rem;
-            margin: 0.3rem 0 1rem;
-        }
-
-        .page-title {
-            margin: 0;
-            color: var(--text);
-            font-size: clamp(1.7rem, 3vw, 2.45rem);
-            font-weight: 700;
-            letter-spacing: -0.04em;
-            line-height: 1.05;
-        }
-
-        .page-description {
-            max-width: 650px;
-            margin-top: 0.55rem;
-            color: var(--muted);
-            font-size: 0.9rem;
-            line-height: 1.55;
-        }
-
-        .mono {
-            color: var(--muted);
-            font-family: "DM Mono", monospace;
-            font-size: 0.72rem;
-        }
-
-        /* ------------------------------------------------------------------ */
-        /* Metrics                                                             */
-        /* ------------------------------------------------------------------ */
-
-        .metric-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 0.65rem;
-            margin: 1.25rem 0 1.5rem;
-        }
-
-        @media (max-width: 800px) {
-            .metric-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-
-        .metric-tile {
-            min-height: 5.8rem;
-            padding: 0.9rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 9px;
-            background: var(--surface);
-        }
-
-        .metric-label {
-            color: var(--muted);
-            font-family: "DM Mono", monospace;
-            font-size: 0.63rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .metric-value {
-            margin-top: 0.45rem;
-            color: var(--text);
-            font-size: 1.55rem;
-            font-weight: 700;
-            letter-spacing: -0.04em;
-        }
-
-        .metric-value.blue {
-            color: var(--blue);
-        }
-
-        .metric-value.cyan {
-            color: var(--cyan);
-        }
-
-        .metric-value.amber {
-            color: var(--amber);
-        }
-
-        .metric-foot {
-            margin-top: 0.3rem;
-            color: var(--muted-2);
-            font-family: "DM Mono", monospace;
-            font-size: 0.62rem;
-        }
-
-        /* ------------------------------------------------------------------ */
-        /* Loading skeletons                                                   */
-        /* ------------------------------------------------------------------ */
-
-        .loading-label {
-            display: flex;
-            align-items: center;
-            gap: 0.55rem;
-            margin: 0.5rem 0 0.9rem;
-            color: var(--muted);
-            font-family: "DM Mono", monospace;
-            font-size: 0.68rem;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-        }
-
-        .loading-spinner {
-            width: 0.7rem;
-            height: 0.7rem;
-            border: 2px solid var(--border);
-            border-top-color: var(--blue);
-            border-radius: 50%;
-            animation: isolate-spin 0.8s linear infinite;
-        }
-
-        @keyframes isolate-spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .skeleton {
-            position: relative;
-            overflow: hidden;
-            border: 1px solid var(--border);
-            border-radius: 9px;
-            background: var(--surface);
-        }
-
-        .skeleton::after {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(
-                90deg,
-                transparent 0%,
-                rgba(255, 255, 255, 0.025) 35%,
-                rgba(255, 255, 255, 0.08) 50%,
-                rgba(255, 255, 255, 0.025) 65%,
-                transparent 100%
-            );
-            content: "";
-            transform: translateX(-100%);
-            animation: isolate-shimmer 1.45s ease-in-out infinite;
-        }
-
-        @keyframes isolate-shimmer {
-            to {
-                transform: translateX(100%);
-            }
-        }
-
-        .skeleton-metrics {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 0.65rem;
-            margin: 1.25rem 0 1.5rem;
-        }
-
-        .skeleton-metric {
-            height: 5.8rem;
-        }
-
-        .skeleton-card {
-            height: 11rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .skeleton-source-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.7rem;
-        }
-
-        .skeleton-source {
-            height: 8rem;
-        }
-
-        @media (max-width: 800px) {
-            .skeleton-metrics,
-            .skeleton-source-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ------------------------------------------------------------------ */
-        /* Intelligence cards                                                  */
-        /* ------------------------------------------------------------------ */
-
-        .intel-card {
-            position: relative;
-            margin-bottom: 0.75rem;
-            padding: 1rem 1.05rem 0.95rem 1.15rem;
-            border: 1px solid var(--border);
-            border-radius: 9px;
-            background: var(--surface);
-        }
-
-        .intel-card:hover {
-            border-color: #344256;
-            background: var(--surface-2);
-        }
-
-        .intel-card::before {
-            position: absolute;
-            top: 0.85rem;
-            bottom: 0.85rem;
-            left: 0;
-            width: 3px;
-            border-radius: 0 4px 4px 0;
-            background: var(--muted-2);
-            content: "";
-        }
-
-        .intel-card.new::before {
-            background: var(--blue);
-            box-shadow: 0 0 13px rgba(91, 167, 255, 0.35);
-        }
-
-        .intel-card.developing::before {
-            background: var(--cyan);
-            box-shadow: 0 0 13px rgba(85, 214, 194, 0.3);
-        }
-
-        .card-topline,
-        .score-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            margin-bottom: 0.55rem;
-        }
-
-        .card-meta {
-            color: var(--muted);
-            font-family: "DM Mono", monospace;
-            font-size: 0.66rem;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-
-        .status-chip,
-        .tag-chip,
-        .score-chip {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.2rem 0.48rem;
-            border-radius: 5px;
-            font-family: "DM Mono", monospace;
-            font-size: 0.62rem;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-
-        .status-chip.new,
-        .score-chip.high {
-            background: var(--blue-soft);
-            color: var(--blue);
-        }
-
-        .status-chip.developing,
-        .score-chip.mid {
-            background: var(--cyan-soft);
-            color: var(--cyan);
-        }
-
-        .status-chip.signal,
-        .score-chip.low {
-            background: rgba(127, 140, 157, 0.12);
-            color: var(--muted);
-        }
-
-        .status-chip.wip {
-            background: var(--amber-soft);
-            color: var(--amber);
-        }
-
-        .card-title {
-            margin-bottom: 0.35rem;
-            color: var(--text);
-            font-size: 1.04rem;
-            font-weight: 600;
-            line-height: 1.3;
-        }
-
-        .card-summary {
-            margin-bottom: 0.65rem;
-            color: var(--text-2);
-            font-size: 0.87rem;
-            line-height: 1.55;
-        }
-
-        .card-delta {
-            margin: 0.7rem 0;
-            padding: 0.55rem 0.7rem;
-            border-left: 2px solid var(--cyan);
-            border-radius: 0 5px 5px 0;
-            background: var(--cyan-soft);
-            color: var(--text-2);
-            font-size: 0.83rem;
-            line-height: 1.5;
-        }
-
-        .card-delta strong {
-            color: var(--cyan);
-        }
-
-        .chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.35rem;
-            margin: 0.55rem 0;
-        }
-
-        .tag-chip {
-            border: 1px solid var(--border);
-            background: var(--bg-raised);
-            color: var(--muted);
-            text-transform: none;
-        }
-
-        .entity-chip {
-            padding: 0.2rem 0.48rem;
-            border-radius: 5px;
-            background: var(--blue-soft);
-            color: var(--blue);
-            font-size: 0.67rem;
-            font-weight: 600;
-        }
-
-        .card-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            margin-top: 0.75rem;
-            padding-top: 0.65rem;
-            border-top: 1px solid var(--border-soft);
-        }
-
-        .source-count {
-            color: var(--muted);
-            font-family: "DM Mono", monospace;
-            font-size: 0.66rem;
-        }
-
-        .article-link {
-            color: var(--blue);
-            font-family: "DM Mono", monospace;
-            font-size: 0.68rem;
-            text-decoration: none;
-        }
-
-        .article-link:hover {
-            color: var(--text);
-            text-decoration: underline;
-        }
-
-        /* ------------------------------------------------------------------ */
-        /* Score meters                                                        */
-        /* ------------------------------------------------------------------ */
-
-        .score-meter {
-            display: grid;
-            grid-template-columns: 92px 1fr 24px;
-            align-items: center;
-            gap: 0.55rem;
-            margin: 0.32rem 0;
-        }
-
-        .score-label,
-        .score-number {
-            color: var(--muted);
-            font-family: "DM Mono", monospace;
-            font-size: 0.62rem;
-            text-transform: uppercase;
-        }
-
-        .score-number {
-            color: var(--text-2);
-            text-align: right;
-        }
-
-        .score-track {
-            height: 5px;
-            overflow: hidden;
-            border-radius: 999px;
-            background: var(--surface-3);
-        }
-
-        .score-fill {
-            height: 100%;
-            border-radius: inherit;
-            background: var(--muted-2);
-        }
-
-        .score-fill.mid {
-            background: var(--cyan);
-        }
-
-        .score-fill.high {
-            background: var(--blue);
-            box-shadow: 0 0 9px rgba(91, 167, 255, 0.45);
-        }
-
-        /* ------------------------------------------------------------------ */
-        /* Empty and source states                                             */
-        /* ------------------------------------------------------------------ */
-
-        .empty-state {
-            padding: 2.5rem 1.25rem;
-            border: 1px dashed var(--border);
-            border-radius: 9px;
-            background: var(--bg-raised);
-            color: var(--muted);
-            font-family: "DM Mono", monospace;
-            font-size: 0.75rem;
-            text-align: center;
-        }
-
-        .warning-state {
-            margin: 0.75rem 0 1rem;
-            padding: 0.75rem 0.9rem;
-            border: 1px solid rgba(231, 181, 91, 0.35);
-            border-radius: 7px;
-            background: var(--amber-soft);
-            color: var(--amber);
-            font-size: 0.8rem;
-            line-height: 1.45;
-        }
-
-        .source-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.7rem;
-        }
-
-        @media (max-width: 800px) {
-            .source-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .source-card {
-            padding: 0.95rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--surface);
-        }
-
-        .source-card:hover {
-            border-color: #344256;
-            background: var(--surface-2);
-        }
-
-        .source-name {
-            margin: 0.4rem 0;
-            color: var(--text);
-            font-size: 0.94rem;
-            font-weight: 600;
-        }
-
-        .source-meta {
-            color: var(--muted);
-            font-family: "DM Mono", monospace;
-            font-size: 0.64rem;
-            line-height: 1.5;
-            text-transform: uppercase;
-        }
-
-        .source-card a {
-            display: inline-block;
-            margin-top: 0.65rem;
-            color: var(--blue);
-            font-family: "DM Mono", monospace;
-            font-size: 0.67rem;
-            text-decoration: none;
-        }
-
-        .source-card a:hover {
-            text-decoration: underline;
-        }
-        </style>
-        """
+        """\
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+        --accent:      #1d4ed8;   /* primary blue (badges, selected, NEW)     */
+        --accent-2:    #2563eb;   /* link blue                                */
+        --accent-soft: #eff6ff;   /* badge / NEW tint                          */
+        --developing:  #3b82f6;   /* lighter blue = DEVELOPING                 */
+        --developing-soft:#e8f0fe;
+        --signal:      #94a3b8;   /* slate = SIGNAL / uncorroborated           */
+        --signal-soft: #f1f5f9;
+        --wip:         #b0771f;   /* amber, reserved ONLY for WIP flags        */
+        --wip-soft:    #fdf4e3;
+
+        --ink:    #0f172a;        /* headings          */
+        --body:   #334155;        /* paragraph text    */
+        --muted:  #64748b;        /* meta text         */
+        --hair:   #e2e8f0;        /* hairlines         */
+        --card:   #ffffff;
+        --page-1: #f4f7ff;
+        --page-2: #eef2ff;
+    }
+
+    /* Dark-mode overrides — respects Streamlit's theme instead of forcing light */
+    [data-theme="dark"] {
+        --accent-soft: #16233f;
+        --developing-soft: #172136;
+        --signal-soft: #1e293b;
+        --wip-soft: #2a2113;
+        --ink:   #f1f5f9;
+        --body:  #cbd5e1;
+        --muted: #94a3b8;
+        --hair:  #2a3444;
+        --card:  #0f172a;
+        --page-1:#0b1220;
+        --page-2:#0d1526;
+    }
+
+    .stApp {
+        background: linear-gradient(180deg, var(--page-1) 0%, var(--page-2) 100%);
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+    .block-container {
+        padding: 1.5rem 1.1rem 3rem;
+        max-width: 1080px;
+        margin: 0 auto;
+    }
+    @media (min-width: 768px) {
+        .block-container { padding: 2rem 2rem 3rem; }
+    }
+
+    /* ── Hero (original centered hero-card, made theme-adaptive) ── */
+    .hero-card {
+        width: 100%;
+        max-width: 1080px;
+        margin: 0 auto 1.5rem;
+        border-radius: 28px;
+        padding: 1.8rem 2rem;
+        background: var(--card);
+        box-shadow: 0 22px 60px rgba(15, 23, 42, 0.08);
+        border: 1px solid var(--hair);
+    }
+    .hero-header-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-size: 0.82rem;
+    }
+    .hero-card h1 {
+        margin: 0;
+        font-size: clamp(2rem, 5vw, 2.8rem);
+        color: var(--ink);
+        text-align: center;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+    @media (max-width: 768px) {
+        .hero-card { padding: 1.3rem 1.2rem; margin-bottom: 1.2rem; }
+        .hero-card h1 { font-size: 2rem; }
+    }
+
+    /* ── Metric strip ─────────────────────────────────────────── */
+    .metrics {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.6rem;
+        margin-bottom: 1.4rem;
+    }
+    @media (min-width: 620px) { .metrics { grid-template-columns: repeat(4, 1fr); } }
+    .metric {
+        background: var(--card);
+        border: 1px solid var(--hair);
+        border-radius: 16px;
+        padding: 0.8rem 1rem;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+    }
+    .metric-k {
+        font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase;
+        color: var(--muted); font-weight: 600;
+    }
+    .metric-v { font-size: 1.5rem; font-weight: 700; color: var(--ink); margin-top: 0.15rem; line-height: 1.1; }
+    .metric-v.wip { color: var(--wip); font-size: 1rem; }
+
+    /* ── Segmented nav ────────────────────────────────────────── */
+    div[data-testid="stSegmentedControl"] { margin-bottom: 1.2rem; }
+    div[data-testid="stSegmentedControl"] button {
+        border-radius: 999px !important;
+        font-weight: 600 !important;
+        padding: 0.6rem 1.1rem !important;
+    }
+
+    /* ── Tabs ─────────────────────────────────────────────────── */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0.4rem; padding: 0.35rem;
+        background: var(--card);
+        border: 1px solid var(--hair);
+        border-radius: 14px;
+        margin-bottom: 0.4rem;
+    }
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 10px; padding: 0.55rem 1rem; height: auto;
+        color: var(--muted); font-weight: 600; font-size: 0.9rem;
+    }
+    .stTabs [aria-selected="true"] { background: var(--accent-soft) !important; color: var(--accent) !important; }
+    .stTabs [data-baseweb="tab-highlight"] { background: transparent; }
+    [data-testid="stTab"] {
+        background: var(--card);
+        border: 1px solid var(--hair);
+        border-radius: 22px;
+        padding: 1.8rem 1.9rem;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+        margin-top: 0.4rem;
+    }
+    @media (max-width: 640px) { [data-testid="stTab"] { padding: 1.2rem 1.1rem; } }
+
+    /* ── Briefing prose ───────────────────────────────────────── */
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 { color: var(--ink); letter-spacing: -0.01em; }
+    .stMarkdown h2 { border-bottom: 1px solid var(--hair); padding-bottom: 0.3rem; margin-top: 1.5rem; }
+    .stMarkdown p, .stMarkdown li { line-height: 1.75; color: var(--body); font-size: 1.04rem; }
+    .stMarkdown a { color: var(--accent-2); text-decoration: none; border-bottom: 1px solid transparent; }
+    .stMarkdown a:hover { border-bottom-color: var(--accent-2); }
+
+    /* ── Intel cards ──────────────────────────────────────────── */
+    .card {
+        position: relative;
+        background: var(--card);
+        border: 1px solid var(--hair);
+        border-left: 4px solid var(--signal);
+        border-radius: 16px;
+        padding: 1rem 1.15rem 0.9rem;
+        margin-bottom: 0.8rem;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+    }
+    .card.k-new        { border-left-color: var(--accent); }
+    .card.k-developing { border-left-color: var(--developing); }
+    .card.k-signal     { border-left-color: var(--signal); }
+
+    .kicker {
+        display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+        font-size: 0.72rem; color: var(--muted); font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.05em;
+        margin-bottom: 0.4rem;
+    }
+    .pill {
+        font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em;
+        text-transform: uppercase; padding: 0.14rem 0.5rem; border-radius: 999px;
+    }
+    .pill.new        { background: var(--accent-soft);     color: var(--accent); }
+    .pill.developing { background: var(--developing-soft); color: var(--developing); }
+    .pill.signal     { background: var(--signal-soft);     color: var(--muted); }
+    .pill.wip        { background: var(--wip-soft); color: var(--wip); border: 1px dashed var(--wip); }
+    .pill.score-low  { background: var(--signal-soft);     color: var(--muted); }
+    .pill.score-mid  { background: var(--developing-soft); color: var(--developing); }
+    .pill.score-high { background: var(--accent-soft);     color: var(--accent); }
+
+    .metrics-row { display: flex; flex-direction: column; gap: 0.32rem; margin: 0.6rem 0; }
+    .metric-meter { display: flex; align-items: center; gap: 0.5rem; }
+    .metric-label {
+        width: 92px; flex-shrink: 0;
+        font-size: 0.64rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+        color: var(--muted);
+    }
+    .metric-track { flex: 1; height: 6px; border-radius: 999px; overflow: hidden; background: var(--signal-soft); }
+    .metric-track.tier-mid  { background: var(--developing-soft); }
+    .metric-track.tier-high { background: var(--accent-soft); }
+    .metric-fill { height: 100%; border-radius: 999px; background: var(--signal); }
+    .metric-fill.tier-mid  { background: var(--developing); }
+    .metric-fill.tier-high { background: var(--accent); }
+    .metric-value {
+        width: 22px; text-align: right; flex-shrink: 0;
+        font-size: 0.72rem; font-weight: 700; color: var(--ink);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .card-title { font-size: 1.14rem; font-weight: 700; color: var(--ink); line-height: 1.25; margin-bottom: 0.3rem; }
+    .card-summary { font-size: 0.98rem; line-height: 1.55; color: var(--body); margin-bottom: 0.5rem; }
+    .card-delta { font-size: 0.94rem; color: var(--body); margin: 0.3rem 0 0.5rem; padding-left: 0.7rem; border-left: 2px solid var(--developing); }
+    .card-delta strong { color: var(--ink); }
+
+    .tags { display: flex; gap: 0.32rem; flex-wrap: wrap; margin: 0.4rem 0; }
+    .tag { font-size: 0.68rem; background: var(--signal-soft); border: 1px solid var(--hair); color: var(--muted); padding: 0.1rem 0.45rem; border-radius: 6px; }
+    .entities { display: flex; gap: 0.32rem; flex-wrap: wrap; margin: 0.3rem 0; }
+    .ent { font-size: 0.68rem; font-weight: 600; background: var(--accent-soft); color: var(--accent); padding: 0.1rem 0.45rem; border-radius: 6px; }
+
+    .links a { display: inline-block; font-size: 0.82rem; color: var(--accent-2); text-decoration: none; margin-top: 0.24rem; border-bottom: 1px solid transparent; }
+    .links a:hover { border-bottom-color: var(--accent-2); }
+    .links .none { font-size: 0.8rem; color: var(--muted); }
+    .corro { color: var(--muted); }
+    .corro.wip { color: var(--wip); }
+
+    .sec-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 1.6rem 0 0.9rem; }
+
+    .wip-note {
+        background: var(--wip-soft);
+        border: 1px dashed var(--wip);
+        border-radius: 12px;
+        padding: 0.75rem 0.95rem;
+        color: var(--wip);
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+    .empty {
+        background: var(--card); border: 1px dashed var(--hair); border-radius: 12px;
+        padding: 1.4rem; text-align: center; color: var(--muted); font-size: 0.9rem;
+    }
+
+    div[data-testid="stJson"] { border-radius: 12px; border: 1px solid var(--hair); }
+    .stSelectbox label, .stRadio label { color: var(--muted); font-weight: 600; font-size: 0.8rem; }
+    #MainMenu, footer { visibility: hidden; }
+    </style>
+    """
     ),
     unsafe_allow_html=True,
 )
 
 
-# =============================================================================
-# Generic helpers
-# =============================================================================
-
-def esc(value: Any) -> str:
-    if value is None:
+# ─────────────────────────────────────────────────────────────────────────────
+# Helpers
+# ─────────────────────────────────────────────────────────────────────────────
+def esc(text) -> str:
+    if text is None:
         return ""
-
-    normalized = " ".join(str(value).split())
-    return html.escape(normalized, quote=True)
-
-
-def safe_dict(value: Any) -> dict:
-    return value if isinstance(value, dict) else {}
-
-
-def safe_list(value: Any) -> list:
-    return value if isinstance(value, list) else []
+    # Collapse embedded newlines/whitespace runs (common in LLM-generated summaries
+    # and deltas) — a raw "\n" here would land at column 0 inside the indented
+    # f-string templates below, poisoning textwrap.dedent's common-prefix
+    # calculation and causing the whole card to render as a literal code block.
+    normalized = " ".join(str(text).split())
+    return normalized.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def safe_int(value: Any, default: int = 0) -> int:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return default
-
-
-def render_empty(message: str) -> None:
+def hero(dateline: str = ""):
+    # Single-line HTML: a multi-line template mixing flush-left open/close tags
+    # with indented inner content defeats textwrap.dedent (the common prefix
+    # across all lines is 0) and, if any interpolated piece is ever empty, the
+    # resulting blank line ends the HTML block and the leftover indentation on
+    # the next line gets swallowed into an indented code block (shown as raw
+    # text). Keeping it on one line sidesteps that entirely.
     st.markdown(
-        f'<div class="empty-state">{esc(message)}</div>',
+        '<div class="hero-card">'
+        '<div class="hero-header-row"><span class="hero-badge">ISOLATE</span></div>'
+        "<h1>Intelligence Briefing Hub</h1>"
+        "</div>",
         unsafe_allow_html=True,
     )
 
 
-def render_warning(message: str) -> None:
-    st.markdown(
-        f'<div class="warning-state">{esc(message)}</div>',
-        unsafe_allow_html=True,
-    )
-
-
-def format_timestamp(value: Any) -> str:
-    if not value:
-        return "unknown time"
-
-    return (
-        str(value)
-        .replace("T", " ")
-        .replace("Z", "")
-        .replace("+00:00", "")[:16]
-    )
-
-
-# =============================================================================
-# Loading states
-# =============================================================================
-
-def render_loading_label(label: str) -> None:
-    st.markdown(
-        '<div class="loading-label">'
-        '<span class="loading-spinner"></span>'
-        f'<span>{esc(label)}</span>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-
-
-def render_event_loading_state() -> None:
-    st.markdown(
-        '<div class="loading-label">'
-        '<span class="loading-spinner"></span>'
-        '<span>Loading live event stream</span>'
-        '</div>'
-        '<div class="skeleton-metrics">'
-        '<div class="skeleton skeleton-metric"></div>'
-        '<div class="skeleton skeleton-metric"></div>'
-        '<div class="skeleton skeleton-metric"></div>'
-        '<div class="skeleton skeleton-metric"></div>'
-        '</div>'
-        '<div class="skeleton skeleton-card"></div>'
-        '<div class="skeleton skeleton-card"></div>'
-        '<div class="skeleton skeleton-card"></div>',
-        unsafe_allow_html=True,
-    )
-
-
-def render_briefing_loading_state() -> None:
-    st.markdown(
-        '<div class="loading-label">'
-        '<span class="loading-spinner"></span>'
-        '<span>Loading briefing index</span>'
-        '</div>'
-        '<div class="skeleton-metrics">'
-        '<div class="skeleton skeleton-metric"></div>'
-        '<div class="skeleton skeleton-metric"></div>'
-        '<div class="skeleton skeleton-metric"></div>'
-        '<div class="skeleton skeleton-metric"></div>'
-        '</div>'
-        '<div class="skeleton skeleton-card"></div>',
-        unsafe_allow_html=True,
-    )
-
-
-def render_source_loading_state() -> None:
-    st.markdown(
-        '<div class="loading-label">'
-        '<span class="loading-spinner"></span>'
-        '<span>Loading source registry</span>'
-        '</div>'
-        '<div class="skeleton-source-grid">'
-        '<div class="skeleton skeleton-source"></div>'
-        '<div class="skeleton skeleton-source"></div>'
-        '<div class="skeleton skeleton-source"></div>'
-        '<div class="skeleton skeleton-source"></div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-
-
-def load_with_placeholder(
-    placeholder_renderer,
-    loader,
-):
-    slot = st.empty()
-
-    with slot.container():
-        placeholder_renderer()
-
-    try:
-        return loader()
-    finally:
-        slot.empty()
-
-
-# =============================================================================
-# Header and metrics
-# =============================================================================
-
-def render_topbar(page_name: str) -> None:
-    st.markdown(
-        '<div class="topbar">'
-        '<div class="brand">'
-        '<div class="brand-mark">◈</div>'
-        '<div>'
-        '<div class="brand-name">ISOLATE</div>'
-        '<div class="brand-subtitle">intelligence briefing system</div>'
-        '</div>'
-        '</div>'
-        '<div class="topbar-context">'
-        f'<span class="topbar-page">{esc(page_name)}</span>'
-        '<span class="topbar-divider">/</span>'
-        '<span class="status-dot"></span>'
-        '<span class="topbar-status">online</span>'
-        '</div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-
-
-def render_heading(
-    eyebrow: str,
-    title: str,
-    description: str = "",
-    right_text: str = "",
-) -> None:
-    description_html = (
-        f'<div class="page-description">{esc(description)}</div>'
-        if description
-        else ""
-    )
-
-    right_html = (
-        f'<div class="mono">{esc(right_text)}</div>'
-        if right_text
-        else ""
-    )
-
-    st.markdown(
-        '<div class="section-heading">'
-        '<div>'
-        f'<div class="eyebrow">{esc(eyebrow)}</div>'
-        f'<h1 class="page-title">{esc(title)}</h1>'
-        f'{description_html}'
-        '</div>'
-        f'{right_html}'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-
-
-def render_metric_grid(
-    metrics: list[tuple[str, str, str, str]],
-) -> None:
-    tiles = []
-
-    for label, value, tone, foot in metrics:
-        tiles.append(
-            '<div class="metric-tile">'
-            f'<div class="metric-label">{esc(label)}</div>'
-            f'<div class="metric-value {esc(tone)}">{esc(value)}</div>'
-            f'<div class="metric-foot">{esc(foot)}</div>'
-            '</div>'
+def metric_strip(items):
+    """items: list of (label, value, is_wip)."""
+    cells = ""
+    for label, value, is_wip in items:
+        vclass = "metric-v wip" if is_wip else "metric-v"
+        cells += (
+            f'<div class="metric"><div class="metric-k">{esc(label)}</div>'
+            f'<div class="{vclass}">{esc(value)}</div></div>'
         )
-
-    st.markdown(
-        f'<div class="metric-grid">{"".join(tiles)}</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown(f'<div class="metrics">{cells}</div>', unsafe_allow_html=True)
 
 
-# =============================================================================
-# Event functions
-# =============================================================================
-
-def classify_event(event: dict) -> tuple[str, str]:
+def classify_event(event: dict):
+    """
+    Returns (css_class, pill_label). NEW/DEVELOPING/SIGNAL depend on the
+    event-persistence schema, which is shipping INCREMENTALLY (e.g. first_seen_at
+    may exist before last_updated_at / status / article_count). We only trust the
+    classification when the WHOLE set is present; otherwise we show the WIP marker
+    rather than silently mislabelling everything as one tier.
+    """
     status = event.get("status")
     first_seen = event.get("first_seen_at")
     last_updated = event.get("last_updated_at")
     article_count = event.get("article_count")
 
-    if any(
-        value is None
-        for value in (
-            status,
-            first_seen,
-            last_updated,
-            article_count,
-        )
-    ):
-        return "signal", "wip"
+    # Require the full set before classifying. A NEW event legitimately has
+    # first_seen == last_updated, so we can't use "they differ" as presence —
+    # we check the raw fields are all non-None instead.
+    fields_ready = (
+        status is not None
+        and first_seen is not None
+        and last_updated is not None
+        and article_count is not None
+    )
+    if not fields_ready:
+        return "k-signal", "wip"
 
     if status == "closed":
-        return "signal", "signal"
-
+        return "k-signal", "signal"
     if first_seen == last_updated:
-        return "new", "new"
-
-    if safe_int(article_count) <= 1:
-        return "signal", "signal"
-
-    return "developing", "developing"
+        return "k-new", "new"
+    if article_count <= 1:
+        return "k-signal", "signal"
+    return "k-developing", "developing"
 
 
-def event_matches_query(
-    event: dict,
-    query: str,
-) -> bool:
+SORT_FIELDS = {"Last updated": "last_updated_at", "Article count": "article_count"}
+
+
+def sort_events(events: list[dict], field: str, descending: bool) -> list[dict]:
+    def key_fn(e: dict):
+        return e.get("article_count") or 0 if field == "article_count" else e.get("last_updated_at") or ""
+
+    return sorted(events, key=key_fn, reverse=descending)
+
+
+def render_sort_controls(key_prefix: str) -> tuple[str, bool]:
+    st.markdown('<div class="sec-label">Sort by</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        label = st.selectbox(
+            "Sort by",
+            list(SORT_FIELDS),
+            label_visibility="collapsed",
+            key=f"{key_prefix}_sort_field",
+        )
+    with col2:
+        dir_key = f"{key_prefix}_sort_dir"
+        descending = st.toggle(
+            "⬇ Desc" if st.session_state.get(dir_key, True) else "⬆ Asc",
+            value=True,
+            key=dir_key,
+        )
+    return SORT_FIELDS[label], descending
+
+
+def event_matches_query(event: dict, query: str) -> bool:
+    """True if every whitespace-separated word in query appears somewhere in
+    the event's name, summary, entity names, or domains (case-insensitive)."""
     words = query.lower().split()
-
     if not words:
         return True
 
-    entities = safe_list(event.get("entities"))
-
-    entity_names = [
-        str(entity.get("name") or "")
-        for entity in entities
-        if isinstance(entity, dict)
-    ]
-
-    domains = [
-        str(domain)
-        for domain in safe_list(event.get("domains"))
-    ]
-
-    haystack = " ".join(
-        [
-            str(event.get("name") or ""),
-            str(event.get("summary") or ""),
-            " ".join(entity_names),
-            " ".join(domains),
-        ]
-    ).lower()
+    entities = event.get("entities") or []
+    haystack = " ".join([
+        event.get("name") or "",
+        event.get("summary") or "",
+        " ".join(e.get("name", "") for e in entities if isinstance(e, dict)),
+        " ".join(event.get("domains") or []),
+    ]).lower()
 
     return all(word in haystack for word in words)
 
 
-def event_sort_key(
-    event: dict,
-    sort_label: str,
-):
-    if sort_label == "Article count":
-        return safe_int(event.get("article_count"))
+def render_event_timeline(timeline: list[dict]):
+    for entry in reversed(timeline):  # most recent first, matches rest of the app
+        ts = (entry.get("timestamp") or "").replace("T", " ")[:16] or "Unknown time"
+        articles_added = entry.get("articles_added") or 0
+        sources_added = entry.get("sources_added") or 0
+        names = entry.get("source_names") or []
 
-    return event.get("last_updated_at") or ""
-
-
-def render_event_timeline(timeline: list[dict]) -> None:
-    for entry in reversed(timeline):
-        entry = safe_dict(entry)
-
-        event_type = entry.get("type")
-        timestamp = format_timestamp(entry.get("timestamp"))
-        articles_added = safe_int(entry.get("articles_added"))
-        sources_added = safe_int(entry.get("sources_added"))
-        names = safe_list(entry.get("source_names"))
-
-        if event_type == "created":
-            label = (
-                f"Event created · {articles_added} article"
-                f"{'s' if articles_added != 1 else ''} · "
-                f"{sources_added} source"
-                f"{'s' if sources_added != 1 else ''}"
+        if entry["type"] == "created":
+            marker, headline = "🟢", (
+                f"Event created · {articles_added} article{'s' if articles_added != 1 else ''}"
+                f" · {sources_added} source{'s' if sources_added != 1 else ''}"
             )
         else:
-            parts = []
-
+            bits = []
             if articles_added:
-                parts.append(
-                    f"+{articles_added} article"
-                    f"{'s' if articles_added != 1 else ''}"
-                )
-
+                bits.append(f"+{articles_added} article{'s' if articles_added != 1 else ''}")
             if sources_added:
-                source_text = (
-                    f"+{sources_added} source"
-                    f"{'s' if sources_added != 1 else ''}"
+                bits.append(
+                    f"+{sources_added} source{'s' if sources_added != 1 else ''}"
+                    + (f" ({', '.join(names[:3])})" if names else "")
                 )
+            marker, headline = "🔵", (" · ".join(bits) or "Matched, no new corroboration")
 
-                if names:
-                    source_text += f" · {', '.join(map(str, names[:3]))}"
-
-                parts.append(source_text)
-
-            label = " · ".join(parts) or "Matched, no new corroboration"
-
-        st.markdown(
-            f"**{esc(timestamp)}**  \n"
-            f"{esc(label)}"
-        )
-
+        st.markdown(f"**{marker} {ts}** — {headline}")
         if entry.get("delta_text"):
-            st.markdown(f"> {esc(entry.get('delta_text'))}")
+            st.markdown(f"> {esc(entry['delta_text'])}")
 
 
-def render_event_card(event: dict) -> None:
-    state_class, state_label = classify_event(event)
+def render_event_card(event: dict):
+    css_class, label = classify_event(event)
+    pill_map = {
+        "new":        '<span class="pill new">● New</span>',
+        "developing": '<span class="pill developing">◐ Developing</span>',
+        "signal":     '<span class="pill signal">○ Signal</span>',
+        "wip":        '<span class="pill wip">⚙ novelty · wip</span>',
+    }
+    pill = pill_map.get(label, "")
+    
+    name = esc(event.get("name") or "Untitled event")
+    summary = esc((event.get("summary") or "No summary available")[:280])
+    links = event.get("article_links") or []
 
-    status_text = {
-        "new": "new",
-        "developing": "developing",
-        "signal": "signal",
-        "wip": "schema pending",
-    }.get(state_label, "signal")
-
-    title = esc(event.get("name") or "Untitled event")
-    summary = esc(
-        str(event.get("summary") or "No summary available")[:320]
-    )
-
+    # New-schema fields, shown as WIP when absent.
+    entities = event.get("entities")
     source_count = event.get("source_count")
     article_count = event.get("article_count")
+    delta = event.get("delta_text")
 
     if isinstance(source_count, int) and isinstance(article_count, int):
-        source_text = (
-            f"{source_count} source"
-            f"{'s' if source_count != 1 else ''} · "
-            f"{article_count} article"
-            f"{'s' if article_count != 1 else ''}"
+        corro = (
+            f'<span class="corro">{source_count} source{"s" if source_count != 1 else ""}'
+            f' · {article_count} article{"s" if article_count != 1 else ""}</span>'
         )
     else:
-        source_text = "corroboration unavailable"
+        corro = f'<span class="corro wip">🚧 {len(links)} link{"s" if len(links) != 1 else ""}</span>'
 
-    entities = [
-        entity
-        for entity in safe_list(event.get("entities"))
-        if isinstance(entity, dict)
-    ]
+    if isinstance(entities, list) and entities:
+        ent_html = '<div class="entities">' + "".join(
+            f'<span class="ent">{esc(e.get("name"))}</span>' for e in entities[:8]
+        ) + "</div>"
+    else:
+        ent_html = '<div class="entities"><span class="pill wip">🚧 entities · wip</span></div>'
 
-    entity_html = ""
+    delta_html = f'<div class="card-delta"><strong>What\'s new:</strong> {esc(delta)}</div>' if delta else ""
 
-    if entities:
-        entity_html = (
-            '<div class="chips">'
-            + "".join(
-                f'<span class="entity-chip">'
-                f'{esc(entity.get("name"))}'
-                '</span>'
-                for entity in entities[:8]
-            )
-            + "</div>"
-        )
+    links_html = "".join(
+        f'<div><a href="{esc(l.get("url"))}" target="_blank" rel="noopener noreferrer">↗ {esc(l.get("label", "Open article"))}</a></div>'
+        for l in links
+    ) or '<div class="none">No linked articles</div>'
 
-    delta_html = ""
-
-    if event.get("delta_text"):
-        delta_html = (
-            '<div class="card-delta">'
-            '<strong>Latest change</strong><br>'
-            f'{esc(event.get("delta_text"))}'
-            '</div>'
-        )
-
-    links = [
-        link
-        for link in safe_list(event.get("article_links"))
-        if isinstance(link, dict)
-    ]
-
-    links_html = ""
-
-    for link in links[:5]:
-        url = str(link.get("url") or "").strip()
-
-        if not url:
-            continue
-
-        links_html += (
-            f'<a class="article-link" href="{esc(url)}" '
-            'target="_blank" rel="noopener noreferrer">'
-            f'↗ {esc(link.get("label") or "open article")}'
-            '</a><br>'
-        )
-
-    if not links_html:
-        links_html = '<span class="mono">no linked articles</span>'
+    kicker_html = " · ".join(part for part in [pill, corro] if part)
 
     st.markdown(
-        f'<div class="intel-card {state_class}">'
-        '<div class="card-topline">'
-        f'<div class="card-meta">{esc(source_text)}</div>'
-        f'<span class="status-chip {state_class}">'
-        f'{esc(status_text)}'
-        '</span>'
-        '</div>'
-        f'<div class="card-title">{title}</div>'
+        f'<div class="card {css_class}">'
+        f'<div class="kicker">{kicker_html}</div>'
+        f'<div class="card-title">{name}</div>'
         f'<div class="card-summary">{summary}</div>'
-        f'{delta_html}'
-        f'{entity_html}'
-        '<div class="card-footer">'
-        '<div class="source-count">'
-        f'last update · {esc(format_timestamp(event.get("last_updated_at")))}'
-        '</div>'
-        f'<div>{links_html}</div>'
-        '</div>'
-        '</div>',
+        f"{delta_html}"
+        f"{ent_html}"
+        f'<div class="links">{links_html}</div>'
+        "</div>",
         unsafe_allow_html=True,
     )
 
-    timeline = [
-        entry
-        for entry in safe_list(event.get("timeline"))
-        if isinstance(entry, dict)
-    ]
-
+    timeline = event.get("timeline") or []
     if timeline:
-        update_count = sum(
-            1
-            for entry in timeline
-            if entry.get("type") == "update"
-        )
-
-        with st.expander(
-            f"Timeline · {update_count} update"
-            f"{'s' if update_count != 1 else ''}"
-        ):
+        update_count = sum(1 for e in timeline if e["type"] == "update")
+        with st.expander(f"📈 Timeline ({update_count} update{'s' if update_count != 1 else ''})"):
             render_event_timeline(timeline)
 
 
-# =============================================================================
-# Article functions
-# =============================================================================
+def render_source_card(source: dict):
+    name = esc(source.get("name") or "Unnamed source")
+    category = esc(source.get("category") or "uncategorized")
+    tier = esc(source.get("tier") or "unknown tier")
+    region = esc(source.get("region") or "")
+    url = source.get("url") or ""
+    label = esc(source.get("link_label") or source.get("name") or "Source")
+    tags = source.get("source_tags") or []
+
+    meta = f"{category} · {tier}" + (f" · {region}" if region else "")
+    tags_html = ('<div class="tags">' + "".join(f'<span class="tag">{esc(t)}</span>' for t in tags) + "</div>") if tags else ""
+    link_html = (
+        f'<div class="links"><a href="{esc(url)}" target="_blank" rel="noopener noreferrer">↗ {label}</a></div>'
+        if url else '<div class="links"><span class="none">No URL available</span></div>'
+    )
+
+    st.markdown(
+        '<div class="card">'
+        f'<div class="kicker"><span>{meta}</span></div>'
+        f'<div class="card-title">{name}</div>'
+        f"{link_html}"
+        f"{tags_html}"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
 
 METRIC_LABELS = {
     "immediacy": "Immediacy",
@@ -1308,702 +529,178 @@ METRIC_LABELS = {
     "reverberance": "Reverberance",
     "novelty": "Novelty",
 }
-
 ARTICLE_SORT_OPTIONS = ["Total"] + list(METRIC_LABELS.values())
-
-ARTICLE_SORT_KEYS = {
-    "Total": None,
-    **{
-        label: key
-        for key, label in METRIC_LABELS.items()
-    },
-}
+ARTICLE_SORT_KEYS = {"Total": None, **{label: key for key, label in METRIC_LABELS.items()}}
 
 
-def score_tier(value: int, maximum: int) -> str:
-    ratio = value / maximum if maximum else 0
-
+def score_tier(value: int, max_value: int) -> str:
+    """Bands mirror the scoring rubric's own guidance (prompts/article_scoring.txt):
+    most standard news scores below 50/100, only paradigm-shifting events above 80/100."""
+    ratio = value / max_value if max_value else 0
     if ratio > 0.8:
         return "high"
-
     if ratio >= 0.5:
         return "mid"
-
     return "low"
 
 
-def render_score_meters(metrics: dict) -> str:
-    blocks = []
+def sort_articles(articles: list[dict], metric: str | None) -> list[dict]:
+    def key_fn(a: dict):
+        if metric is None:
+            return a.get("score") or 0
+        return (a.get("metrics") or {}).get(metric) or 0
 
-    for key, label in METRIC_LABELS.items():
-        value = max(
-            0,
-            min(20, safe_int(metrics.get(key))),
-        )
-
-        tier = score_tier(value, 20)
-        width = round((value / 20) * 100)
-
-        blocks.append(
-            '<div class="score-meter">'
-            f'<div class="score-label">{esc(label)}</div>'
-            '<div class="score-track">'
-            f'<div class="score-fill {tier}" '
-            f'style="width:{width}%"></div>'
-            '</div>'
-            f'<div class="score-number">{value}</div>'
-            '</div>'
-        )
-
-    return "".join(blocks)
+    return sorted(articles, key=key_fn, reverse=True)
 
 
-def render_article_card(article: dict) -> None:
+def render_article_card(article: dict):
     title = esc(article.get("title") or "Untitled article")
-    summary = esc(
-        article.get("ai_summary") or "No AI summary available"
-    )
-
+    ai_summary = esc(article.get("ai_summary") or "No AI summary available")
     source = esc(article.get("source") or "Unknown source")
     category = esc(article.get("category") or "")
-    score = max(
-        0,
-        min(100, safe_int(article.get("score"))),
-    )
-
-    score_class = score_tier(score, 100)
-    metrics = safe_dict(article.get("metrics"))
-
-    tags = [
-        tag
-        for tag in safe_list(article.get("article_tags"))
-        if tag is not None
-    ]
-
-    tags_html = ""
-
-    if tags:
-        tags_html = (
-            '<div class="chips">'
-            + "".join(
-                f'<span class="tag-chip">{esc(tag)}</span>'
-                for tag in tags
-            )
-            + '</div>'
-        )
-
-    link = str(article.get("link") or "").strip()
-
-    if link:
-        link_html = (
-            f'<a class="article-link" href="{esc(link)}" '
-            'target="_blank" rel="noopener noreferrer">'
-            '↗ read source'
-            '</a>'
-        )
-    else:
-        link_html = '<span class="mono">no source link</span>'
+    link = article.get("link") or ""
+    score = article.get("score") or 0
+    metrics = article.get("metrics") or {}
+    tags = article.get("article_tags") or []
 
     meta = f"{source} · {category}" if category else source
+    score_pill = f'<span class="pill score-{score_tier(score, 100)}">{score}/100</span>'
+
+    meters_html = "".join(
+        f'<div class="metric-meter">'
+        f'<span class="metric-label">{label}</span>'
+        f'<div class="metric-track tier-{score_tier(metrics.get(key) or 0, 20)}">'
+        f'<div class="metric-fill tier-{score_tier(metrics.get(key) or 0, 20)}" '
+        f'style="width:{round((metrics.get(key) or 0) / 20 * 100)}%"></div>'
+        f"</div>"
+        f'<span class="metric-value">{metrics.get(key) or 0}</span>'
+        f"</div>"
+        for key, label in METRIC_LABELS.items()
+    )
+
+    tags_html = ('<div class="tags">' + "".join(f'<span class="tag">{esc(t)}</span>' for t in tags) + "</div>") if tags else ""
+
+    link_html = (
+        f'<div class="links"><a href="{esc(link)}" target="_blank" rel="noopener noreferrer">↗ Read article</a></div>'
+        if link else '<div class="links"><span class="none">No link available</span></div>'
+    )
 
     st.markdown(
-        '<div class="intel-card">'
-        '<div class="score-header">'
-        f'<div class="card-meta">{meta}</div>'
-        f'<span class="score-chip {score_class}">'
-        f'{score}/100'
-        '</span>'
-        '</div>'
+        '<div class="card">'
+        f'<div class="kicker"><span>{meta}</span>{score_pill}</div>'
         f'<div class="card-title">{title}</div>'
-        f'<div class="card-summary">{summary}</div>'
-        f'{render_score_meters(metrics)}'
-        f'{tags_html}'
-        '<div class="card-footer">'
-        f'<div class="source-count">{link_html}</div>'
-        '<div class="mono">impact profile</div>'
-        '</div>'
-        '</div>',
+        f'<div class="card-summary">{ai_summary}</div>'
+        f'<div class="metrics-row">{meters_html}</div>'
+        f"{tags_html}"
+        f"{link_html}"
+        "</div>",
         unsafe_allow_html=True,
     )
 
+def render_artifacts(date_str: str, briefing_content: str):
+    raw = services.get_raw_articles(date_str)
+    article_count = len(raw) if isinstance(raw, (list, dict)) else None
+    new_count, developing_count = services.get_event_stats_for_date(date_str)
 
-# =============================================================================
-# Source functions
-# =============================================================================
+    metric_strip([
+        ("Edition", date_str, False),
+        ("Articles", str(article_count) if article_count is not None else "—", False),
+        ("New events", str(new_count) if new_count is not None else "—", False),
+        ("Developing events", str(developing_count) if developing_count is not None else "—", False),
+    ])
 
-def render_sources(sources: list[dict]) -> None:
-    cards = []
-
-    for source in sources:
-        source = safe_dict(source)
-
-        name = esc(source.get("name") or "Unnamed source")
-        category = esc(
-            source.get("category") or "uncategorized"
-        )
-        tier = esc(source.get("tier") or "unknown tier")
-        region = esc(source.get("region") or "")
-        url = str(source.get("url") or "").strip()
-
-        meta = f"{category} · {tier}"
-
-        if region:
-            meta += f" · {region}"
-
-        tags = [
-            tag
-            for tag in safe_list(source.get("source_tags"))
-            if tag is not None
-        ]
-
-        tags_html = ""
-
-        if tags:
-            tags_html = (
-                '<div class="chips">'
-                + "".join(
-                    f'<span class="tag-chip">{esc(tag)}</span>'
-                    for tag in tags[:6]
-                )
-                + '</div>'
-            )
-
-        if url:
-            link_html = (
-                f'<a href="{esc(url)}" target="_blank" '
-                'rel="noopener noreferrer">'
-                f'↗ {esc(source.get("link_label") or "open source")}'
-                '</a>'
-            )
-        else:
-            link_html = '<span class="mono">no source url</span>'
-
-        cards.append(
-            '<div class="source-card">'
-            f'<div class="source-meta">{esc(meta)}</div>'
-            f'<div class="source-name">{name}</div>'
-            f'{tags_html}'
-            f'{link_html}'
-            '</div>'
-        )
-
-    st.markdown(
-        f'<div class="source-grid">{"".join(cards)}</div>',
-        unsafe_allow_html=True,
-    )
-
-
-# =============================================================================
-# Pages
-# =============================================================================
-
-def render_briefings_page() -> None:
-    render_topbar("briefings")
-
-    files = load_with_placeholder(
-        render_briefing_loading_state,
-        lambda: services.get_briefing_files(),
-    )
-
-    files = files or []
-
-    render_heading(
-        "Daily intelligence",
-        "Briefings",
-        "Read the latest synthesized intelligence edition and inspect "
-        "the evidence behind it.",
-        f"{len(files)} editions available",
-    )
-
-    if not files:
-        render_warning(
-            "No briefing files were returned. Check your storage "
-            "configuration and credentials."
-        )
-        render_empty(
-            "No briefings published yet. "
-            "The pipeline writes one after each scheduled run."
-        )
-        return
-
-    selected = st.selectbox(
-        "Edition",
-        files,
-        format_func=services.get_briefing_date,
-        label_visibility="collapsed",
-        key="briefing_edition",
-    )
-
-    date_str = services.get_briefing_date(selected)
-
-    try:
-        briefing_content = services.briefing_loader(selected)
-    except Exception:
-        logger.exception(
-            "Unable to load briefing %s.",
-            selected,
-        )
-        briefing_content = None
-
-    try:
-        raw_articles = services.get_raw_articles(date_str)
-    except Exception:
-        logger.exception(
-            "Unable to load raw articles for %s.",
-            date_str,
-        )
-        raw_articles = None
-
-    try:
-        new_count, developing_count = (
-            services.get_event_stats_for_date(date_str)
-        )
-    except Exception:
-        logger.exception(
-            "Unable to load event statistics for %s.",
-            date_str,
-        )
-        new_count, developing_count = None, None
-
-    article_count = (
-        len(raw_articles)
-        if isinstance(raw_articles, (list, dict))
-        else None
-    )
-
-    render_metric_grid(
-        [
-            (
-                "Edition",
-                date_str,
-                "blue",
-                "selected briefing",
-            ),
-            (
-                "Articles",
-                (
-                    str(article_count)
-                    if article_count is not None
-                    else "—"
-                ),
-                "",
-                "raw article records",
-            ),
-            (
-                "New events",
-                (
-                    str(new_count)
-                    if new_count is not None
-                    else "—"
-                ),
-                "cyan",
-                "first seen in edition",
-            ),
-            (
-                "Developing",
-                (
-                    str(developing_count)
-                    if developing_count is not None
-                    else "—"
-                ),
-                "amber",
-                "continued activity",
-            ),
-        ]
-    )
-
-    tab_briefing, tab_articles = st.tabs(
-        ["Briefing", "Articles"]
-    )
-
-    with tab_briefing:
+    tab_brief, tab_articles = st.tabs(["🧠 Briefing","📰 Articles"])
+    with tab_brief:
         if briefing_content:
             st.markdown(briefing_content)
         else:
-            render_empty("This briefing is empty.")
-
+            st.markdown('<div class="empty">This briefing is empty.</div>', unsafe_allow_html=True)
     with tab_articles:
-        articles = (
-            raw_articles
-            if isinstance(raw_articles, list)
-            else []
-        )
-
-        if not articles:
-            render_empty(
-                f"No raw article data stored for {date_str}."
-            )
-            return
-
-        sort_label = st.selectbox(
-            "Article ordering",
-            ARTICLE_SORT_OPTIONS,
-            label_visibility="collapsed",
-            key="article_ordering",
-        )
-
-        metric = ARTICLE_SORT_KEYS.get(sort_label)
-
-        def article_sort_key(article: dict) -> int:
-            if metric is None:
-                return safe_int(article.get("score"))
-
-            return safe_int(
-                safe_dict(article.get("metrics")).get(metric)
-            )
-
-        for article in sorted(
-            articles,
-            key=article_sort_key,
-            reverse=True,
-        ):
-            if isinstance(article, dict):
+        articles = raw if isinstance(raw, list) else []
+        if articles:
+            st.markdown('<div class="sec-label">Sort by</div>', unsafe_allow_html=True)
+            sort_label = st.segmented_control(
+                "Sort by",
+                ARTICLE_SORT_OPTIONS,
+                default="Total",
+                label_visibility="collapsed",
+            ) or "Total"
+            for article in sort_articles(articles, ARTICLE_SORT_KEYS[sort_label]):
                 render_article_card(article)
+        else:
+            st.markdown(f'<div class="empty">No raw article data stored for {esc(date_str)}.</div>', unsafe_allow_html=True)
 
 
-def render_monitor_page() -> None:
-    render_topbar("live monitor")
+# ─────────────────────────────────────────────────────────────────────────────
+# App
+# ─────────────────────────────────────────────────────────────────────────────
+hero()
 
-    all_events = load_with_placeholder(
-        render_event_loading_state,
-        lambda: services.get_live_events(),
-    )
+page = st.segmented_control(
+    "Navigation",
+    ["Briefings", "Live Monitor", "Explorer"],
+    default="Briefings",
+    required=True,
+    label_visibility="collapsed",
+)
 
-    all_events = [
-        event
-        for event in (all_events or [])
-        if isinstance(event, dict)
-    ]
+# ── Briefings ────────────────────────────────────────────────────────────────
+if page == "Briefings":
+    files = services.get_briefing_files()
+    if not files:
+        st.markdown('<div class="empty">No briefings published yet. The pipeline writes one after each scheduled run.</div>', unsafe_allow_html=True)
+    else:
+        selected = st.selectbox("Select a briefing", files, format_func=services.get_briefing_date)
+        if selected:
+            date = services.get_briefing_date(selected)
+            render_artifacts(date, services.briefing_loader(selected))
 
-    render_heading(
-        "Continuous tracking",
-        "Live monitor",
-        "Follow open events as new articles and sources are attached "
-        "across ingestion runs.",
-        f"{len(all_events)} open events",
-    )
+# ── Live Monitor — tracks open events as they develop across runs ────────────
+elif page == "Live Monitor":
+    all_events = services.get_live_events()
+    # From the full open set, not the search/domain-filtered one, so the
+    # button row itself doesn't shift around as the user filters.
+    domain_options = sorted({d for ev in all_events for d in (ev.get("domains") or [])})
 
     query = st.text_input(
-        "Search events",
-        placeholder="Search event, entity, domain, or summary",
+        "Search live events",
+        placeholder="🔎 Search by name, summary, entity, or domain…",
         label_visibility="collapsed",
-        key="event_search",
     )
+    events = [ev for ev in all_events if event_matches_query(ev, query)] if query else all_events
 
-    filtered_events = [
-        event
-        for event in all_events
-        if event_matches_query(event, query)
-    ]
-
-    domains = sorted(
-        {
-            str(domain)
-            for event in all_events
-            for domain in safe_list(event.get("domains"))
-            if domain
-        }
-    )
-
-    selected_domains = []
-
-    if domains:
-        selected_domains = st.multiselect(
-            "Domain filter",
-            domains,
-            placeholder="All domains",
-            key="event_domains",
-        )
-
-        if selected_domains:
-            filtered_events = [
-                event
-                for event in filtered_events
-                if any(
-                    domain in selected_domains
-                    for domain in safe_list(event.get("domains"))
-                )
-            ]
-
-    col_sort, col_direction = st.columns([2, 1])
-
-    with col_sort:
-        sort_label = st.selectbox(
-            "Order",
-            ["Last updated", "Article count"],
+    selected_domains = domain_options
+    if domain_options:
+        st.markdown('<div class="sec-label">Filter by domain</div>', unsafe_allow_html=True)
+        selected_domains = st.segmented_control(
+            "Filter by domain",
+            domain_options,
+            selection_mode="multi",
+            default=None,
             label_visibility="collapsed",
-            key="event_sort",
-        )
+        ) or domain_options
+        # Nothing pressed (or everything pressed) both mean "no filter" —
+        # only a genuine proper subset narrows the list.
+        if selected_domains and len(selected_domains) < len(domain_options):
+            events = [ev for ev in events if any(d in selected_domains for d in (ev.get("domains") or []))]
 
-    with col_direction:
-        descending = st.toggle(
-            "Newest first",
-            value=True,
-            key="event_descending",
-        )
+    sort_field, sort_desc = render_sort_controls("live_monitor")
+    events = sort_events(events, sort_field, sort_desc)
 
-    filtered_events = sorted(
-        filtered_events,
-        key=lambda event: event_sort_key(
-            event,
-            sort_label,
-        ),
-        reverse=descending,
-    )
+    if not events:
+        filtered = bool(query) or (selected_domains and len(selected_domains) < len(domain_options))
+        empty_msg = "No open events match your filters." if filtered else "No open events being tracked right now."
+        st.markdown(f'<div class="empty">{esc(empty_msg)}</div>', unsafe_allow_html=True)
+    else:
+        for ev in events:
+            render_event_card(ev)
 
-    new_count = sum(
-        1
-        for event in filtered_events
-        if classify_event(event)[1] == "new"
-    )
-
-    developing_count = sum(
-        1
-        for event in filtered_events
-        if classify_event(event)[1] == "developing"
-    )
-
-    render_metric_grid(
-        [
-            (
-                "Visible",
-                str(len(filtered_events)),
-                "blue",
-                "events after filters",
-            ),
-            (
-                "New",
-                str(new_count),
-                "cyan",
-                "first-seen events",
-            ),
-            (
-                "Developing",
-                str(developing_count),
-                "amber",
-                "multi-source activity",
-            ),
-            (
-                "Domains",
-                str(len(domains)),
-                "",
-                "registered in result set",
-            ),
-        ]
-    )
-
-    if not filtered_events:
-        render_empty(
-            "No open events match the current search and filters."
-        )
-        return
-
-    for event in filtered_events:
-        render_event_card(event)
-
-
-def render_explorer_page() -> None:
-    render_topbar("source explorer")
-
-    sources = load_with_placeholder(
-        render_source_loading_state,
-        lambda: services.get_sources(),
-    )
-
-    sources = [
-        source
-        for source in (sources or [])
-        if isinstance(source, dict)
-    ]
-
-    render_heading(
-        "Feed registry",
-        "Source explorer",
-        "Inspect the sources used by the ingestion pipeline, including "
-        "category, tier, region, and tags.",
-        f"{len(sources)} registered sources",
-    )
-
-    if not sources:
-        render_warning(
-            "No sources were returned. The database may be unavailable "
-            "or the source registry may be empty."
-        )
-        render_empty("No source records available.")
-        return
-
-    search = st.text_input(
-        "Search sources",
-        placeholder="Search source name, category, region, or tag",
-        label_visibility="collapsed",
-        key="source_search",
-    ).lower()
-
-    if search:
-        filtered = []
-
-        for source in sources:
-            searchable = " ".join(
-                [
-                    str(source.get("name") or ""),
-                    str(source.get("category") or ""),
-                    str(source.get("tier") or ""),
-                    str(source.get("region") or ""),
-                    " ".join(
-                        str(tag)
-                        for tag in safe_list(
-                            source.get("source_tags")
-                        )
-                    ),
-                ]
-            ).lower()
-
-            if search in searchable:
-                filtered.append(source)
-
-        sources = filtered
-
-    if not sources:
-        render_empty("No sources match the current search.")
-        return
-
-    render_metric_grid(
-        [
-            (
-                "Visible",
-                str(len(sources)),
-                "blue",
-                "after search",
-            ),
-            (
-                "Categories",
-                str(
-                    len(
-                        {
-                            source.get("category")
-                            for source in sources
-                            if source.get("category")
-                        }
-                    )
-                ),
-                "cyan",
-                "source classes",
-            ),
-            (
-                "Regions",
-                str(
-                    len(
-                        {
-                            source.get("region")
-                            for source in sources
-                            if source.get("region")
-                        }
-                    )
-                ),
-                "amber",
-                "geographic coverage",
-            ),
-            (
-                "Tagged",
-                str(
-                    sum(
-                        bool(source.get("source_tags"))
-                        for source in sources
-                    )
-                ),
-                "",
-                "sources with metadata",
-            ),
-        ]
-    )
-
-    render_sources(sources)
-
-
-# =============================================================================
-# Application shell
-# =============================================================================
-
-if "page" not in st.session_state:
-    st.session_state.page = "Briefings"
-
-with st.sidebar:
-    st.markdown(
-        '<div class="brand">'
-        '<div class="brand-mark">◈</div>'
-        '<div>'
-        '<div class="brand-name">ISOLATE</div>'
-        '<div class="brand-subtitle">control surface</div>'
-        '</div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("---")
-
-    st.markdown(
-        '<div class="mono">WORKSPACE</div>',
-        unsafe_allow_html=True,
-    )
-
-    if st.button(
-        "▣  Briefings",
-        use_container_width=True,
-        type=(
-            "primary"
-            if st.session_state.page == "Briefings"
-            else "secondary"
-        ),
-    ):
-        st.session_state.page = "Briefings"
-        st.rerun()
-
-    if st.button(
-        "◌  Live monitor",
-        use_container_width=True,
-        type=(
-            "primary"
-            if st.session_state.page == "Live Monitor"
-            else "secondary"
-        ),
-    ):
-        st.session_state.page = "Live Monitor"
-        st.rerun()
-
-    if st.button(
-        "⌁  Source explorer",
-        use_container_width=True,
-        type=(
-            "primary"
-            if st.session_state.page == "Explorer"
-            else "secondary"
-        ),
-    ):
-        st.session_state.page = "Explorer"
-        st.rerun()
-
-    st.markdown("---")
-
-    st.markdown(
-        '<div class="mono">SYSTEM</div>'
-        '<div class="mono" style="margin-top:0.55rem;">'
-        'storage · database · pipeline'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown(
-        '<div class="topbar-context" style="margin-top:0.8rem;">'
-        '<span class="status-dot"></span>'
-        '<span class="topbar-status">interface ready</span>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-
-
-if st.session_state.page == "Briefings":
-    render_briefings_page()
-elif st.session_state.page == "Live Monitor":
-    render_monitor_page()
-elif st.session_state.page == "Explorer":
-    render_explorer_page()
+# ── Explorer ─────────────────────────────────────────────────────────────────
+elif page == "Explorer":
+    sources = services.get_sources()
+    st.markdown('<div class="sec-label">Sources · feed registry</div>', unsafe_allow_html=True)
+    if sources:
+        for s in sources:
+            render_source_card(s)
+    else:
+        st.markdown('<div class="empty">No sources found, or the database is unavailable.</div>', unsafe_allow_html=True)
