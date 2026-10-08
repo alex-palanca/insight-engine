@@ -8,7 +8,7 @@ from config import env_ini as env
 from utils.hashing import generate_article_id
 from utils.text_utils import normalize_text, normalize_url
 import logging
-from datetime import datetime, timedelta, date, time as dt_time
+from datetime import datetime, timedelta, date,timezone, time as dt_time
 
 
 logger = logging.getLogger(__name__)
@@ -179,7 +179,7 @@ class NeonDatabaseService:
         if days_old < 0:
             raise ValueError("days_old must be non-negative")
 
-        cutoff = datetime.now() - timedelta(days=days_old)
+        cutoff = datetime.now(tz=timezone.utc) - timedelta(days=days_old)
 
         with self._SessionMarker() as session:
             try:
@@ -189,7 +189,7 @@ class NeonDatabaseService:
                     .filter(Event.last_updated_at < cutoff)
                     .update({
                         Event.status: "closed",
-                        Event.closed_at: datetime.now(),
+                        Event.closed_at: datetime.now(tz=timezone.utc),
                     })
                 )
                 session.commit()
@@ -477,6 +477,9 @@ class NeonDatabaseService:
         if not articles_data:
             return
 
+        uploaded_count = 0
+        skipped_count = 0
+
         with self._SessionMarker() as session:
             try:
                 for item in articles_data:
@@ -506,19 +509,27 @@ class NeonDatabaseService:
                         article_tags=item.get("article_tags", []),
                         raw_summary=item.get("summary"),
                         source_id=source_obj.id,
-                        collected_at=datetime.now()
+                        collected_at=datetime.now(tz=timezone.utc)
                     )
 
                     upsert_op = insert_op.on_conflict_do_nothing()
-                    session.execute(upsert_op)
+                    result = session.execute(upsert_op)
+
+                    inserted_rows = result.rowcount or 0
+                    uploaded_count += inserted_rows
+                    skipped_count += 1 - inserted_rows
 
                 session.commit()
-                logger.info("Processed %s bronze articles to Neon.", len(articles_data))
+                logger.info("Bronze ingestion finished: %s article(s) uploaded, %s article(s) skipped as duplicates, out of %s received.",
+                    uploaded_count,
+                    skipped_count,
+                    len(articles_data),
+                )
 
-            except Exception as exc:
+            except Exception:
                 session.rollback()
                 logger.exception("Bronze batch operation failed. Transaction rolled back.")
-                raise exc
+                raise
 
     def save_silver_data(self, enriched_articles: list):
         """
@@ -528,6 +539,7 @@ class NeonDatabaseService:
         if not enriched_articles:
             return
 
+        updated_count = 0
         with self._SessionMarker() as session:
             try:
                 for item in enriched_articles:
@@ -548,7 +560,9 @@ class NeonDatabaseService:
                         article.justification = item.get("justification", article.justification)
                         existing_tags = getattr(article, "article_tags", None)
                         article.article_tags = item.get("article_tags", existing_tags)
-                        article.enriched_at = datetime.now()
+                        article.enriched_at = datetime.now(tz=timezone.utc)
+
+                        updated_count += 1
                     else:
                         logger.warning(
                             "Article with link '%s' was not found in DB. Skipping silver update.",
@@ -556,12 +570,12 @@ class NeonDatabaseService:
                         )
 
                 session.commit()
-                logger.info("Synchronized %s silver articles to Neon.", len(enriched_articles))
+                logger.info("Silver ingestion finished: %s article(s) updated out of %s enriched.",updated_count ,len(enriched_articles))
 
-            except Exception as exc:
+            except Exception:
                 session.rollback()
                 logger.exception("Silver batch operation failed. Transaction rolled back.")
-                raise exc
+                raise
 
     def obtain_articles(self, stage: str = "bronze", min_score: int = 0) -> list:
         """
@@ -570,7 +584,7 @@ class NeonDatabaseService:
         """
         with self._SessionMarker() as session:
             try:
-                today = datetime.now().date()
+                today = datetime.now(tz=timezone.utc).date()
                 articles_data = []
 
                 if stage == "silver":
@@ -612,9 +626,9 @@ class NeonDatabaseService:
                 logger.info("Retrieved %s articles from the database for stage '%s'.", len(articles_data), stage)
                 return articles_data
 
-            except Exception as exc:
+            except Exception:
                 logger.exception("Failed to retrieve articles for stage '%s'.", stage)
-                raise exc
+                raise
 
 
 def sync_sources(feeds: dict) -> None:
@@ -641,7 +655,7 @@ def update_stale_events(days_old: int = 7) -> int:
         raise
 
 
-def save_articles(articles: list = None, stage: str = "bronze"):
+def save_articles(articles: list | None = None, stage: str = "bronze"):
     """
     Public-facing function to save a batch of articles to the database.
     Options : raw (bronze) or enriched (silver) data. Defaults to bronze.
@@ -652,9 +666,9 @@ def save_articles(articles: list = None, stage: str = "bronze"):
             db_service.save_bronze_data(articles)
         if stage == "silver":
             db_service.save_silver_data(articles)
-    except Exception as exc:
+    except Exception:
         logger.exception("Failed to save articles to the database for stage '%s'.", stage)
-        raise exc
+        raise
 
 def get_articles(stage: str = "bronze", min_score: int = 0) -> list:
     """
@@ -664,9 +678,9 @@ def get_articles(stage: str = "bronze", min_score: int = 0) -> list:
     try:
         db_service = NeonDatabaseService()
         return db_service.obtain_articles(stage, min_score)
-    except Exception as exc:
+    except Exception:
         logger.exception("Failed to retrieve articles from the database for stage '%s'.", stage)
-        raise exc
+        raise
 
 
 def update_events_score() -> int:

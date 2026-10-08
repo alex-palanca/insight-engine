@@ -20,7 +20,10 @@ def ingest(
     db.sync_sources(feeds)
 
     logger.info("Starting article collection.")
-    cleaned_articles = rss_collector.collect_articles(feeds,300,50)
+    if min_date and max_date:
+        cleaned_articles = rss_collector.collect_articles(feeds,300,50,min_date,max_date)
+    else:
+        cleaned_articles = rss_collector.collect_articles(feeds,300,50)
 
     logger.info("Saving cleaned articles to Neon.")
     db.save_articles(cleaned_articles)
