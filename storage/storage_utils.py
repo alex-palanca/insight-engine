@@ -10,12 +10,12 @@ cloud = S3Storage()
 logger = logging.getLogger(__name__)
 
 
-def upload_articles(date: str, content):
-    if date == "today":
-        date = str(today)
+def upload_articles(upload_date_str: str, content):
+    if upload_date_str == "today":
+        upload_date_str = str(today)
     cloud.upload_content(
         content,
-        cloud.article_key(date)
+        cloud.article_key(upload_date_str)
     )
 
 

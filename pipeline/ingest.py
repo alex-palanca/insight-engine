@@ -1,12 +1,18 @@
 import logging
-from config import feed_loader
-import ingestion.rss_collector as rss_collector
+from datetime import datetime,date
 from storage import db_service as db
-import storage.storage_utils as bucket
+from storage import storage_utils as bucket
+from config import feed_loader
+from ingestion import rss_collector
+
 
 logger = logging.getLogger(__name__) 
 
-def ingest():
+def ingest(
+        upload_date_str: str = "today",
+        min_date: datetime | None = None,
+        max_date: datetime | None = None
+):
     logger.info("Loading feeds.")
     feeds = feed_loader.load_feeds()
 
@@ -14,11 +20,14 @@ def ingest():
     db.sync_sources(feeds)
 
     logger.info("Starting article collection.")
-    cleaned_articles = rss_collector.collect_articles(feeds,300,50)
+    if min_date and max_date:
+        cleaned_articles = rss_collector.collect_articles(feeds,300,50,min_date,max_date)
+    else:
+        cleaned_articles = rss_collector.collect_articles(feeds,300,50)
 
     logger.info("Saving cleaned articles to Neon.")
     db.save_articles(cleaned_articles)
     logger.info("Saving cleaned articles to AWS.")
-    bucket.upload_articles(date="today",content=cleaned_articles)
+    bucket.upload_articles(upload_date_str,content=cleaned_articles)
 
 
