@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime,date
+from datetime import datetime
 from storage import db_service as db
 from storage import storage_utils as bucket
 from config import feed_loader

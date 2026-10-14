@@ -535,15 +535,19 @@ class NeonDatabaseService:
                 logger.exception("Silver batch operation failed. Transaction rolled back.")
                 raise
 
-    def obtain_articles(self, stage: str = "bronze", min_score: int = 0) -> list:
+    def obtain_articles(
+        self, 
+        stage: str = "bronze", 
+        min_score: int = 0,
+    ) -> list:
         """
         Retrieves today's articles from the database and maps them back into
         the dictionary format expected by the markdown report generator.
         """
         with self._SessionMarker() as session:
             try:
-                today = datetime.now(tz=timezone.utc).date()
                 articles_data = []
+                today = datetime.now(tz=timezone.utc).date()
 
                 if stage == "silver":
                     query_results = session.query(Article).join(Source).filter(
@@ -628,7 +632,10 @@ def save_articles(articles: list | None = None, stage: str = "bronze"):
         logger.exception("Failed to save articles to the database for stage '%s'.", stage)
         raise
 
-def get_articles(stage: str = "bronze", min_score: int = 0) -> list:
+def get_articles(
+    stage: str = "bronze", 
+    min_score: int = 0,
+) -> list:
     """
     Public-facing function to retrieve articles from the database.
     Options : raw (bronze) or enriched (silver) data. Defaults to bronze.
@@ -638,21 +645,5 @@ def get_articles(stage: str = "bronze", min_score: int = 0) -> list:
         return db_service.obtain_articles(stage, min_score)
     except Exception:
         logger.exception("Failed to retrieve articles from the database for stage '%s'.", stage)
-<<<<<<< HEAD
-        raise exc
-=======
         raise
 
-
-def update_events_score() -> int:
-    """
-    Public-facing helper to backfill null article scores with the highest-rated
-    article already attached to each event.
-    """
-    try:
-        db_service = NeonDatabaseService()
-        return db_service.backfill_event_scores_from_highest_article()
-    except Exception:
-        logger.exception("Failed to backfill event article scores.")
-        raise
->>>>>>> 90af9f4 (fix: solved backfill ingestion malfunction)
