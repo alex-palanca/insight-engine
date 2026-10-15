@@ -647,3 +647,16 @@ def get_articles(
         logger.exception("Failed to retrieve articles from the database for stage '%s'.", stage)
         raise
 
+
+def update_events_score() -> int:
+    """
+    Public-facing helper to backfill null article scores with the highest-rated
+    article already attached to each event.
+    """
+    try:
+        db_service = NeonDatabaseService()
+        return db_service.backfill_event_scores_from_highest_article()
+    except Exception:
+        logger.exception("Failed to retrieve articles from the database")
+        raise
+
