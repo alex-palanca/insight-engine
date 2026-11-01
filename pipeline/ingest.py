@@ -1,10 +1,9 @@
 import logging
 from datetime import datetime
-from storage import db_service as db
-from storage import storage_utils as bucket
+
 from config import feed_loader
 from ingestion import rss_collector
-
+from storage import bucket, db
 
 logger = logging.getLogger(__name__) 
 

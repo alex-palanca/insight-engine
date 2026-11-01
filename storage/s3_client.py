@@ -1,6 +1,8 @@
-import boto3
-from config import env_ini as env
 import json
+
+import boto3
+
+from config import env_ini as env
 
 
 # S3Storage class for interacting with AWS S3

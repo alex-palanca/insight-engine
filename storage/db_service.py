@@ -1,15 +1,27 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, create_engine, func, or_
-from sqlalchemy.dialects.postgresql import JSONB
+import logging
+from contextlib import contextmanager
+from datetime import date, datetime, timedelta, timezone
+from datetime import time as dt_time
+
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    create_engine,
+    func,
+    or_,
+)
+from sqlalchemy.dialects.postgresql import JSONB, insert
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker, selectinload
+from sqlalchemy.orm import declarative_base, relationship, selectinload, sessionmaker
 
 from config import env_ini as env
 from utils.hashing import generate_article_id
 from utils.text_utils import normalize_text, normalize_url
-import logging
-from datetime import datetime, timedelta, date,timezone, time as dt_time
-
 
 logger = logging.getLogger(__name__)
 
@@ -146,6 +158,20 @@ class NeonDatabaseService:
         )
 
         self._SessionMarker = sessionmaker(bind=self.engine, expire_on_commit=False)
+
+    @contextmanager
+    def share_session(self):
+        """
+        Returns a context manager for a session that can be shared across multiple
+        operations. The caller is responsible for committing or rolling back the
+        transaction.
+        """
+        with self._SessionMarker() as session:
+            try:
+                yield session
+            except Exception:
+                session.rollback()
+                raise
 
     def initialize_schema(self):
         """
@@ -591,7 +617,6 @@ class NeonDatabaseService:
             except Exception:
                 logger.exception("Failed to retrieve articles for stage '%s'.", stage)
                 raise
-
 
 def sync_sources(feeds: dict) -> None:
     """

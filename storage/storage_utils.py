@@ -4,7 +4,6 @@ from datetime import date
 
 from storage.s3_client import S3Storage
 
-
 today = date.today()
 cloud = S3Storage()
 logger = logging.getLogger(__name__)
