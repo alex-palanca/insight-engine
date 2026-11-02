@@ -1,8 +1,9 @@
 import logging
 from contextlib import contextmanager
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from datetime import time as dt_time
 
+from sklearn import metrics
 from sqlalchemy import (
     Boolean,
     Column,
@@ -205,7 +206,7 @@ class NeonDatabaseService:
         if days_old < 0:
             raise ValueError("days_old must be non-negative")
 
-        cutoff = datetime.now(tz=timezone.utc) - timedelta(days=days_old)
+        cutoff = datetime.now(tz=UTC) - timedelta(days=days_old)
 
         with self._SessionMarker() as session:
             try:
@@ -215,7 +216,7 @@ class NeonDatabaseService:
                     .filter(Event.last_updated_at < cutoff)
                     .update({
                         Event.status: "closed",
-                        Event.closed_at: datetime.now(tz=timezone.utc),
+                        Event.closed_at: datetime.now(tz=UTC),
                     })
                 )
                 session.commit()
@@ -453,17 +454,21 @@ class NeonDatabaseService:
                 logger.exception("Failed to sync sources from feeds.yaml.")
                 raise
 
-    def save_bronze_data(self, articles_data: list):
+    def save_bronze_data(self, articles_data: list)->dict:
         """
         Takes a list of raw article dictionaries from rss_collector.py, extracts/upserts sources,
         and saves unique articles with optimal batch queries.
         """
+        metrics = {
+        "raw_articles_submitted_to_db": len(articles_data),
+        "sources_created": 0,
+        "raw_articles_saved": 0,
+        "raw_articles_duplicate": 0,
+        "raw_articles_db_failed": 0,
+        }
         if not articles_data:
             return
-
-        uploaded_count = 0
-        skipped_count = 0
-
+        
         with self._SessionMarker() as session:
             try:
                 for item in articles_data:
@@ -480,6 +485,7 @@ class NeonDatabaseService:
                         )
                         session.add(source_obj)
                         session.flush()
+                        metrics["sources_created"] += 1
 
                     article_title = normalize_text(item.get("title", ""))
                     article_link = normalize_url(item.get("link", ""))
@@ -493,37 +499,47 @@ class NeonDatabaseService:
                         article_tags=item.get("article_tags", []),
                         raw_summary=item.get("summary"),
                         source_id=source_obj.id,
-                        collected_at=datetime.now(tz=timezone.utc)
+                        collected_at=datetime.now(tz=UTC)
                     )
 
                     upsert_op = insert_op.on_conflict_do_nothing()
                     result = session.execute(upsert_op)
 
                     inserted_rows = result.rowcount or 0
-                    uploaded_count += inserted_rows
-                    skipped_count += 1 - inserted_rows
+                    metrics["raw_articles_saved"] += inserted_rows
+                    metrics["raw_articles_duplicate"] += 1 - inserted_rows
 
                 session.commit()
                 logger.info("Bronze ingestion finished: %s article(s) uploaded, %s article(s) skipped as duplicates, out of %s received.",
-                    uploaded_count,
-                    skipped_count,
+                    metrics["raw_articles_saved"],
+                    metrics["raw_articles_duplicate"],
                     len(articles_data),
                 )
 
             except Exception:
                 session.rollback()
+                metrics["raw_articles_db_failed"] = len(articles_data)
+                metrics["raw_articles_saved"] = 0
+                metrics["raw_articles_duplicate"] = 0
                 logger.exception("Bronze batch operation failed. Transaction rolled back.")
                 raise
+        return metrics
 
-    def save_silver_data(self, enriched_articles: list):
+    def save_silver_data(self, enriched_articles: list)-> dict:
         """
         Takes a list of AI-enriched article dictionaries and updates the existing
         Bronze records in the database with their new Silver metrics.
         """
+        metrics = {
+        "enriched_articles_submitted_to_db": len(enriched_articles),
+        "enriched_articles_updated": 0,
+        "articles_not_found": 0,
+        "enriched_articles_db_failed": 0,
+        }
+
         if not enriched_articles:
             return
 
-        updated_count = 0
         with self._SessionMarker() as session:
             try:
                 for item in enriched_articles:
@@ -544,23 +560,27 @@ class NeonDatabaseService:
                         article.justification = item.get("justification", article.justification)
                         existing_tags = getattr(article, "article_tags", None)
                         article.article_tags = item.get("article_tags", existing_tags)
-                        article.enriched_at = datetime.now(tz=timezone.utc)
+                        article.enriched_at = datetime.now(tz=UTC)
 
-                        updated_count += 1
+                        metrics["enriched_articles_updated"] += 1
                     else:
+                        metrics["articles_not_found"] += 1
                         logger.warning(
                             "Article with link '%s' was not found in DB. Skipping silver update.",
                             item["link"],
                         )
 
                 session.commit()
-                logger.info("Silver ingestion finished: %s article(s) updated out of %s enriched.",updated_count ,len(enriched_articles))
+                logger.info("Silver ingestion finished: %s article(s) updated out of %s enriched.",metrics["enriched_articles_updated"] ,len(enriched_articles))
 
             except Exception:
                 session.rollback()
+                metrics["enriched_articles_db_failed"] = len(enriched_articles)
+                metrics["enriched_articles_updated"] = 0
+                metrics["articles_not_found"] = 0
                 logger.exception("Silver batch operation failed. Transaction rolled back.")
                 raise
-
+        return metrics
     def obtain_articles(
         self, 
         stage: str = "bronze", 
@@ -573,7 +593,7 @@ class NeonDatabaseService:
         with self._SessionMarker() as session:
             try:
                 articles_data = []
-                today = datetime.now(tz=timezone.utc).date()
+                today = datetime.now(tz=UTC).date()
 
                 if stage == "silver":
                     query_results = session.query(Article).join(Source).filter(
@@ -642,7 +662,7 @@ def update_stale_events(days_old: int = 7) -> int:
         raise
 
 
-def save_articles(articles: list | None = None, stage: str = "bronze"):
+def save_articles(articles: list | None = None, stage: str = "bronze")-> dict:
     """
     Public-facing function to save a batch of articles to the database.
     Options : raw (bronze) or enriched (silver) data. Defaults to bronze.
@@ -650,12 +670,14 @@ def save_articles(articles: list | None = None, stage: str = "bronze"):
     try:
         db_service = NeonDatabaseService()
         if stage == "bronze":
-            db_service.save_bronze_data(articles)
+            metrics = db_service.save_bronze_data(articles)
         if stage == "silver":
-            db_service.save_silver_data(articles)
+            metrics = db_service.save_silver_data(articles)
     except Exception:
         logger.exception("Failed to save articles to the database for stage '%s'.", stage)
         raise
+    
+    return metrics
 
 def get_articles(
     stage: str = "bronze", 

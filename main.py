@@ -1,17 +1,16 @@
-import asyncio
-
-from config import env_ini # noqa: F401
-import logging
 import argparse
-from config.logging_config import setup_logging
+import asyncio
+import logging
 
-from pipeline.ingest import ingest
-from pipeline.enrich import enrich
+from config import env_ini  # noqa: F401
+from config.logging_config import setup_logging
+from pipeline.assemble import assemble
+from pipeline.backfill import backfill
 from pipeline.cluster import cluster
 from pipeline.describe import describe
-from pipeline.assemble import assemble
+from pipeline.enrich import enrich
+from pipeline.ingest import ingest
 from pipeline.synthesize import synthesize
-from pipeline.backfill import backfill
 
 logger = logging.getLogger("isolate_pipeline")
 
