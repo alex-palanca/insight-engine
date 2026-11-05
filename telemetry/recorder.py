@@ -1,11 +1,10 @@
-import datetime
 import logging
-import uuid
+from datetime import UTC, datetime
 
 from sqlalchemy import Column, DateTime, Integer, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 
-from storage.db_service import Base, share_session
+from storage.db_service import Base, NeonDatabaseService
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +28,8 @@ class StageRun(Base):
     """
     __tablename__ = "log_stage"
 
-    run_id = Column(Integer, nullable=False)
-    stage_name = Column(Text, nullable=False)
+    run_id = Column(Integer, nullable=False, primary_key=True)
+    stage_name = Column(Text, nullable=False, primary_key=True)
     status = Column(Text, nullable=False, default="running")
     started_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     finished_at = Column(DateTime(timezone=True), nullable=True)
@@ -46,8 +45,8 @@ class TelemetryRecorder:
     - translating Python exceptions into telemetry status
     - ensuring telemetry is recorded even if the pipeline fails
     """
-    def __init__(self):
-        pass
+    def __init__(self, db_service: NeonDatabaseService | None = None):
+        self._db = db_service or NeonDatabaseService()
 
     def get_or_create_current_run_id(self) -> str:
         """
@@ -57,7 +56,7 @@ class TelemetryRecorder:
         to attach to the same logical pipeline execution.
         """
         try:
-            with share_session() as session:
+            with self._db.share_session() as session:
                 run = (
                     session.query(PipelineRun)
                     .filter(PipelineRun.status == "running")
@@ -68,11 +67,15 @@ class TelemetryRecorder:
                 if run:
                     return str(run.run_id)
 
-                run = PipelineRun(status="running")
+                run = PipelineRun(
+                    status="running",
+                    started_at=datetime.now(tz=UTC),
+                )
+
                 session.add(run)
                 session.flush()
 
-                logger.info("Started pipeline run %s.", run.run_id)
+                logger.info("Started recording pipeline run %s.", run.run_id)
                 return str(run.run_id)
 
         except Exception:
@@ -89,15 +92,16 @@ class TelemetryRecorder:
             return
 
         try:
-            with share_session() as session:
-                run = session.get(PipelineRun, uuid.UUID(run_id))
+            with self._db.share_session() as session:
+                run = session.get(PipelineRun, run_id)
 
                 if not run:
                     logger.warning("Cannot finish unknown pipeline run %s.", run_id)
                     return
 
                 run.status = status
-                run.finished_at = datetime.now(datetime.UTC)
+                run.finished_at = datetime.now(tz=UTC)
+                logger.info("Finished recording pipeline run %s.", run.run_id)
 
         except Exception:
             logger.exception("Failed to finish pipeline run telemetry.")
@@ -107,24 +111,24 @@ class TelemetryRecorder:
         run_id: str,
         stage_name: str
     ) -> str:
-        """Create a StageRun row and return its ID."""
+        """Create a StageRun row."""
         if not run_id:
             return ""
 
         try:
-            with share_session() as session:
+            with self._db.share_session() as session:
                 stage = StageRun(
-                    pipeline_run_id=run_id,
+                    run_id=run_id,
                     stage_name=stage_name,
                     status="running",
                     metrics={},
-                    started_at=datetime.now(datetime.UTC),
+                    started_at=datetime.now(tz=UTC),
                 )
 
                 session.add(stage)
                 session.flush()
+                logger.info("Started recording stage %s for run %s.", stage_name, run_id)
 
-                return str(stage.id)
 
         except Exception:
             logger.exception("Failed to start telemetry for stage %s.", stage_name)
@@ -132,27 +136,35 @@ class TelemetryRecorder:
 
     def finish_stage(
         self,
-        stage_run_id: str,
+        run_id: str,
+        stage_name: str,
         status: str,
         metrics: dict
     ) -> None:
         """Mark a stage attempt as finished."""
-        if not stage_run_id:
+        if not run_id:
             return
 
         try:
-            with share_session() as session:
-                stage = session.get(StageRun, uuid.UUID(stage_run_id))
+            with self._db.share_session() as session:
+                stage = session.get(
+                    StageRun, 
+                    {
+                        "run_id": int(run_id),
+                        "stage_name": stage_name,
+                    }
+                )
 
                 if not stage:
-                    logger.warning("Cannot finish unknown stage run %s.", stage_run_id)
+                    logger.warning("Cannot finish unknown stage run %s.", run_id)
                     return
 
                 stage.status = status
-                stage.finished_at = datetime.now(datetime.UTC)
+                stage.finished_at = datetime.now(tz=UTC)
                 current_metrics = stage.metrics or {}
                 current_metrics.update(metrics)
                 stage.metrics = current_metrics
+                logger.info("Finished recording stage %s for run %s.", stage_name, run_id)
 
         except Exception:
-            logger.exception("Failed to finish telemetry for stage run %s.", stage_run_id)
+            logger.exception("Failed to finish telemetry for stage run %s.", run_id)

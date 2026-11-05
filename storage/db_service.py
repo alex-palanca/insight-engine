@@ -170,6 +170,7 @@ class NeonDatabaseService:
         with self._SessionMarker() as session:
             try:
                 yield session
+                session.commit()
             except Exception:
                 session.rollback()
                 raise

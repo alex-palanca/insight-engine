@@ -11,10 +11,13 @@ from pipeline.describe import describe
 from pipeline.enrich import enrich
 from pipeline.ingest import ingest
 from pipeline.synthesize import synthesize
+from telemetry.recorder import TelemetryRecorder
 
 logger = logging.getLogger("isolate_pipeline")
+recorder = TelemetryRecorder()
 
 def main():
+    run_id = recorder.get_or_create_current_run_id()
     setup_logging()
     parser = argparse.ArgumentParser(description="ISOLATE Intelligence Pipeline")
     parser.add_argument(
@@ -38,7 +41,7 @@ def main():
     # Core pipeline jobs
     if args.stage in ['ingest', 'ing','all']:
         logger.info("Running ingestion stage.")
-        ingest()
+        ingest(run_id,recorder)
     
     if args.stage in ['enrich', 'enrichment','all']:
         logger.info("Running enrichment stage.")
@@ -65,6 +68,7 @@ def main():
         logger.info("Running backfill for selected dates.")
         backfill(args.min_date,args.max_date)
 
+    recorder.finish_run(run_id, status="success")
 
 if __name__ == "__main__":
   
