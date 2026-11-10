@@ -60,7 +60,7 @@ def main():
         
         if args.stage in ['enrich', 'enrichment','all']:
             logger.info("Running enrichment stage.")
-            enrich()
+            enrich(run_id,recorder)
         
         if args.stage in ['cluster', 'events','all']:
             logger.info("Running clustering and linking stage.")

@@ -72,12 +72,32 @@ async def process_batch(batch: list[dict], batch_id: int) -> list[dict]:
     return batch
 
 
-async def enrich_articles_pipeline(articles: list[dict]) -> list[dict]:
+async def enrich_articles_pipeline(articles: list[dict]) -> tuple[list[dict], dict]:
     """The main orchestrator function."""
+
+    metrics = {
+    "articles_received": len(articles),
+    "articles_enriched": 0,
+    "full_text_scraped": 0,
+    "fallback_summary_used": 0,
+    "llm_batches": 0,
+    "llm_batches_succeeded": 0,
+    "llm_batches_failed": 0,
+    "articles_scored": 0,
+    "articles_without_score": 0,
+    "scrape_success_rate": 0.0,
+    "llm_batch_success_rate": 0.0,
+    }
     logger.info("Starting concurrent scraping for %s articles.", len(articles))
     async with aiohttp.ClientSession() as session:
         tasks = [fetch_full_article(session, article) for article in articles]
         scraped_articles = await asyncio.gather(*tasks)
+
+    for article in scraped_articles:
+        if article.get("content_to_evaluate") != article.get("summary", "No content available."):
+            metrics["full_text_scraped"] += 1
+        else:
+            metrics["fallback_summary_used"] += 1
 
     enriched_articles = []
 
@@ -85,11 +105,39 @@ async def enrich_articles_pipeline(articles: list[dict]) -> list[dict]:
         batch = scraped_articles[i:i + BATCH_SIZE]
         batch_id = i // BATCH_SIZE + 1
 
+        metrics["llm_batches"] += 1
+
         processed_batch = await process_batch(batch, batch_id)
         enriched_articles.extend(processed_batch)
+
+        scored_articles = [
+            article
+            for article in processed_batch
+            if article.get("score", 0) > 0
+        ]
+
+        if scored_articles:
+            metrics["llm_batches_succeeded"] += 1
+        else:
+            metrics["llm_batches_failed"] += 1
+
+        metrics["articles_scored"] += len(scored_articles)
+        metrics["articles_without_score"] += len(processed_batch) - len(scored_articles)
 
         if i + BATCH_SIZE < len(scraped_articles):
             await asyncio.sleep(RATE_LIMIT_DELAY)
 
+    metrics["articles_enriched"] = len(enriched_articles)
+    metrics["scrape_success_rate"] = (
+        metrics["full_text_scraped"] / metrics["articles_received"]
+        if metrics["articles_received"]
+        else 0.0
+    )
+    metrics["llm_batch_success_rate"] = (
+        metrics["llm_batches_succeeded"] / metrics["llm_batches"]
+        if metrics["llm_batches"]
+        else 0.0
+    )
+
     enriched_articles.sort(key=lambda x: x.get("score", 0), reverse=True)
-    return enriched_articles
+    return enriched_articles, metrics

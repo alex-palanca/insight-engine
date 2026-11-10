@@ -27,7 +27,10 @@ output/briefings/*
 !output/briefings/.gitkeep
 
 # Environment variables
+<<<<<<< Updated upstream
 .env
+=======
+>>>>>>> Stashed changes
 .env.prod
 .env.dev
 

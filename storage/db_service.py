@@ -619,6 +619,7 @@ class NeonDatabaseService:
                     query_results = session.query(Article).join(Source).filter(
                         Article.enriched_at.is_(None),
                         func.date(Article.collected_at) == today,
+                        Article.ai_summary.is_(None),
                     ).order_by(Article.published.desc()).all()
 
                     for db_article in query_results:
