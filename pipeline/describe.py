@@ -1,11 +1,21 @@
 import logging
-import storage.db_service as db
-from processing.event_enrichment import describe_event_update, create_event_metadata, enrich_new_event_with_gemini, get_event_articles, get_new_unprocessed_events, update_event_with_gemini
+
+from processing.event_enrichment import (
+    create_event_metadata,
+    describe_event_update,
+    enrich_new_event_with_gemini,
+    get_event_articles,
+    get_new_unprocessed_events,
+    update_event_with_gemini,
+)
+from storage.db_service import get_db_service
 
 logger = logging.getLogger(__name__) 
-db_service = db.NeonDatabaseService()
+
 
 async def describe():
+    """ Describe events in the database using Gemini and update their metadata."""
+    db_service = get_db_service()
     logger.info("Phase 1 - Describing change in delta events.")
     delta_events = db_service.fetch_pending_event_updates()
     logger.info("Updating %s developing events with newly attached articles.", len(delta_events))

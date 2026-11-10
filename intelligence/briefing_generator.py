@@ -1,21 +1,33 @@
 import logging
+import re
 import time
 from datetime import datetime
-from typing import Optional
+from urllib.parse import urlparse
 
-from config import env_ini as env# noqa: F401
-from utils.prompt_loader import load_prompt
 from google import genai
+from google.genai import types
 from google.genai.errors import APIError
 
-from urllib.parse import urlparse
-from google.genai import types
-import re
+from config import env_ini as env
 from utils.text_utils import build_link_label
-
 
 logger = logging.getLogger(__name__)
 
+_client: genai.Client | None = None
+
+def get_client() -> genai.Client:
+    global _client
+
+    if _client is None:
+        key = env.get_env_var("GOOGLE_API_KEY")
+        if not key:
+            raise ValueError(
+                "GOOGLE_API_KEY is not set in the environment variables "
+                "or Streamlit secrets."
+            )
+        _client = genai.Client(api_key=key)
+
+    return _client
 FALLBACK_MODELS = [
     "gemini-3.8-flash",
     "gemini-3.7-flash",
@@ -30,32 +42,6 @@ REF_PATTERN = re.compile(r"\[(A\d+)\]")
  
 class BriefingGenerationError(RuntimeError):
     """Raised when synthesis fails on every model, so the scheduled run fails loudly."""
-
-def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:
-    """Return a secret from Streamlit or environment variables."""
-    try:
-        import streamlit as st
-        from streamlit.errors import StreamlitSecretNotFoundError
-
-        if hasattr(st, "secrets"):
-            try:
-                return st.secrets.get(name, env.get_env_var(name))
-            except StreamlitSecretNotFoundError:
-                return env.get_env_var(name)
-    except ModuleNotFoundError:
-        pass
-
-    return env.get_env_var(name)
-
-
-# Set up global client initialization for this module
-key = get_secret("GOOGLE_API_KEY")
-if not key:
-    raise ValueError(
-        "GOOGLE_API_KEY is not set in the environment variables or Streamlit secrets."
-    )
-
-client = genai.Client(api_key=key)
 
 def build_prompt(
     prompt: str,
@@ -189,6 +175,7 @@ def generate_briefing(prompt: str,
     it upstream: a failed run must exit non-zero so the scheduled workflow
     reports failure instead of publishing an error message as a briefing.
     """
+    client = get_client()
     for model_name in FALLBACK_MODELS:
         for attempt in range(1, MAX_ATTEMPTS + 1):
             try:

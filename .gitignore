@@ -28,6 +28,8 @@ output/briefings/*
 
 # Environment variables
 .env
+.env.prod
+.env.dev
 
 # Logs
 *.log

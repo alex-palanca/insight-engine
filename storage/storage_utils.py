@@ -4,14 +4,23 @@ from datetime import date
 
 from storage.s3_client import S3Storage
 
-today = date.today()
-cloud = S3Storage()
 logger = logging.getLogger(__name__)
+today = date.today()
 
+_cloud: S3Storage | None = None
+
+def get_cloud() -> S3Storage:
+    global _cloud
+
+    if _cloud is None:
+        _cloud = S3Storage()
+
+    return _cloud
 
 def upload_articles(upload_date_str: str, content):
     if upload_date_str == "today":
         upload_date_str = str(today)
+    cloud = get_cloud()
     cloud.upload_content(
         content,
         cloud.article_key(upload_date_str)
@@ -19,6 +28,7 @@ def upload_articles(upload_date_str: str, content):
 
 
 def upload_briefing(date: str, file_input):
+    cloud = get_cloud()
     cloud.upload_content(
         file_input,
         cloud.briefing_key(date)
@@ -26,6 +36,7 @@ def upload_briefing(date: str, file_input):
 
 
 def upload_markdown(date: str, content):
+    cloud = get_cloud()
     cloud.upload_content(
         content,
         cloud.markdown_key(date)
@@ -33,6 +44,7 @@ def upload_markdown(date: str, content):
 
 
 def upload_id_to_url(date: str, id_to_url: dict[str, str]):
+    cloud = get_cloud()
     cloud.upload_content(
         json.dumps(id_to_url, indent=2, ensure_ascii=False),
         cloud.id_to_url_key(date)
@@ -40,6 +52,7 @@ def upload_id_to_url(date: str, id_to_url: dict[str, str]):
 
 
 def obtain_markdown(date: str):
+    cloud = get_cloud()
     markdown = cloud.get_file_content(
         cloud.markdown_key(date)
     )
@@ -47,6 +60,7 @@ def obtain_markdown(date: str):
 
 
 def download_id_to_url(date: str) -> dict[str, str]:
+    cloud = get_cloud()
     content = cloud.get_file_content(
         cloud.id_to_url_key(date)
     )
@@ -54,6 +68,7 @@ def download_id_to_url(date: str) -> dict[str, str]:
 
 
 def download_articles(date: str):
+    cloud = get_cloud()
     cloud.download_file(
         f"output/articles/{date}.json",
         cloud.article_key(date)
@@ -61,6 +76,7 @@ def download_articles(date: str):
 
 
 def download_briefing(date: str):
+    cloud = get_cloud()
     cloud.download_file(
         f"output/briefings/IB_{date}.md",
         cloud.briefing_key(date)
@@ -88,6 +104,7 @@ def get_recent_briefings(limit: int = 2, before: str | None = None) -> list[str]
         skipped with a warning: partial history weakens repetition checking
         but must never fail the synthesis run.
     """
+    cloud = get_cloud()
     try:
         keys = sorted(cloud.list_files("briefings"), reverse=True)
     except Exception:

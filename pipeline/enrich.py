@@ -9,12 +9,13 @@ from telemetry.recorder import TelemetryRecorder
 
 logger = logging.getLogger(__name__) 
 
-recorder = TelemetryRecorder()
+
 
 def enrich(
     upload_date_str: str = "today",
 ):
     """Enrich articles from the database and save to Neon and AWS."""
+    recorder = TelemetryRecorder()
     run_id = recorder.get_or_create_current_run_id()
 
     metrics: dict = {"duration_ms": 0}

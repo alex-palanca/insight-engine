@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from sqlalchemy import Column, DateTime, Integer, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 
-from storage.db_service import Base, NeonDatabaseService
+from storage.db_service import Base, NeonDatabaseService, get_db_service
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class TelemetryRecorder:
     - ensuring telemetry is recorded even if the pipeline fails
     """
     def __init__(self, db_service: NeonDatabaseService | None = None):
-        self._db = db_service or NeonDatabaseService()
+        self._db = db_service or get_db_service()
 
     def get_or_create_current_run_id(self) -> str:
         """

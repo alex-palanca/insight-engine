@@ -3,7 +3,6 @@ from contextlib import contextmanager
 from datetime import UTC, date, datetime, timedelta
 from datetime import time as dt_time
 
-from sklearn import metrics
 from sqlalchemy import (
     Boolean,
     Column,
@@ -639,12 +638,22 @@ class NeonDatabaseService:
                 logger.exception("Failed to retrieve articles for stage '%s'.", stage)
                 raise
 
+_db_service: NeonDatabaseService | None = None
+
+def get_db_service() -> NeonDatabaseService:
+    global _db_service
+
+    if _db_service is None:
+        _db_service = NeonDatabaseService()
+
+    return _db_service
+
 def sync_sources(feeds: dict) -> None:
     """
     Public-facing function to upsert the sources table from a loaded feeds.yaml dict.
     """
     try:
-        db_service = NeonDatabaseService()
+        db_service = get_db_service()
         db_service.sync_sources_from_feeds(feeds)
     except Exception:
         logger.exception("Failed to sync sources from feeds.")
@@ -656,7 +665,7 @@ def update_stale_events(days_old: int = 7) -> int:
     Public-facing helper to close open events whose last_updated_at is older than the threshold.
     """
     try:
-        db_service = NeonDatabaseService()
+        db_service = get_db_service()
         return db_service.update_stale_events_status(days_old=days_old)
     except Exception:
         logger.exception("Failed to update stale event statuses.")
@@ -669,7 +678,7 @@ def save_articles(articles: list | None = None, stage: str = "bronze")-> dict:
     Options : raw (bronze) or enriched (silver) data. Defaults to bronze.
     """
     try:
-        db_service = NeonDatabaseService()
+        db_service = get_db_service()
         if stage == "bronze":
             metrics = db_service.save_bronze_data(articles)
         if stage == "silver":
@@ -689,7 +698,7 @@ def get_articles(
     Options : raw (bronze) or enriched (silver) data. Defaults to bronze.
     """
     try:
-        db_service = NeonDatabaseService()
+        db_service = get_db_service()
         return db_service.obtain_articles(stage, min_score)
     except Exception:
         logger.exception("Failed to retrieve articles from the database for stage '%s'.", stage)
@@ -702,7 +711,7 @@ def update_events_score() -> int:
     article already attached to each event.
     """
     try:
-        db_service = NeonDatabaseService()
+        db_service = get_db_service()
         return db_service.backfill_event_scores_from_highest_article()
     except Exception:
         logger.exception("Failed to retrieve articles from the database")

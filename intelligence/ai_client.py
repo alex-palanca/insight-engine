@@ -1,26 +1,32 @@
-# summarizer/ai_client.py
 import asyncio
 import logging
 
-import config.env_ini as env
 from google import genai
 from google.genai import types
 from google.genai.errors import APIError
-from utils import prompt_loader
 
+import config.env_ini as env
 from config.score_system import BatchEvaluation
+from utils import prompt_loader
 
 logging.getLogger("google_genai.models").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
-# Set up global client initialization for this module
-key = env.get_env_var("GOOGLE_API_KEY")
-if not key:
-    raise ValueError(
-        "GOOGLE_API_KEY is not set in the environment variables or Streamlit secrets."
-    )
+_client: genai.Client | None = None
 
-client = genai.Client(api_key=key)
+def get_client() -> genai.Client:
+    global _client
+
+    if _client is None:
+        key = env.get_env_var("GOOGLE_API_KEY")
+        if not key:
+            raise ValueError(
+                "GOOGLE_API_KEY is not set in the environment variables "
+                "or Streamlit secrets."
+            )
+        _client = genai.Client(api_key=key)
+
+    return _client
 
 FALLBACK_MODELS = [
     "gemini-3.5-flash-lite",
@@ -37,6 +43,8 @@ async def async_evaluate_batch(batch_text: str) -> BatchEvaluation | None:
     If a model suffers a temporary 503 overload, it automatically fails over
     to backup models before giving up.
     """
+    client = get_client()
+    
     for model_name in FALLBACK_MODELS:
         try:
             response = await client.aio.models.generate_content(
