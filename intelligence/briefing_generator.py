@@ -166,8 +166,9 @@ def resolve_citations(briefing: str, id_to_url: dict[str, str]) -> str:
     return resolved
 
 def generate_briefing(prompt: str, 
-                      id_to_url: dict[str, str],
-                      temperature: float = 0.35) -> str:
+    id_to_url: dict[str, str],
+    temperature: float = 0.35
+) -> tuple[str, dict]:
     """
     Generates the briefing, retrying each model with backoff before falling back.
  
@@ -175,9 +176,24 @@ def generate_briefing(prompt: str,
     it upstream: a failed run must exit non-zero so the scheduled workflow
     reports failure instead of publishing an error message as a briefing.
     """
+    metrics = {
+    "model": None,
+    "models_attempted": 0,
+    "attempts_used": 0,
+    "rate_limit_errors": 0,
+    "service_errors": 0,
+    "unexpected_errors": 0,
+    "tokens_used": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    }
+    
     client = get_client()
     for model_name in FALLBACK_MODELS:
+        metrics["models_attempted"] += 1
+        logger.info("Attempting briefing synthesis with model %s.", model_name)
         for attempt in range(1, MAX_ATTEMPTS + 1):
+            metrics["attempts_used"] += 1
             try:
                 response = client.models.generate_content(
                     model=model_name,
@@ -190,12 +206,23 @@ def generate_briefing(prompt: str,
                     # failure, not a briefing. Retrying the same model won't help.
                     logger.warning("Model %s returned no text; falling back.", model_name)
                     break
+
+                usage = getattr(response, "usage", None)
+                if usage:
+                    metrics["prompt_tokens"] = getattr(usage, "prompt_token_count", 0) or 0
+                    metrics["completion_tokens"] = getattr(usage, "candidates_token_count", 0) or 0
+                    metrics["tokens_used"] = getattr(usage, "total_token_count", 0) or 0
  
                 logger.info("Briefing generated with model %s.", model_name)
-                return resolve_citations(text, id_to_url)
+                metrics["model"] = model_name
+                return resolve_citations(text, id_to_url),metrics
  
             except APIError as api_err:
                 code = getattr(api_err, "code", None)
+                if code ==429:
+                    metrics["rate_limit_errors"] += 1
+                if code == 503:
+                    metrics["service_errors"] += 1
                 if code not in (429, 503):
                     # 400/403/404 are deterministic; retrying is pointless.
                     logger.error("Non-retryable API error on %s (%s): %s",
@@ -208,6 +235,7 @@ def generate_briefing(prompt: str,
                 time.sleep(wait)
  
             except Exception:
+                metrics["unexpected_errors"] += 1
                 logger.exception("Unexpected failure on %s (attempt %d).", model_name, attempt)
                 time.sleep(5 * attempt)
  

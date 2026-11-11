@@ -93,7 +93,10 @@ def main():
         
         if args.stage in ['synthesize', 'synth','all']:
             logger.info("Running synthesis stage.")
-            synthesize()
+            synthesize(
+                run_id,
+                recorder
+            )
 
         # Adittional jobs
         if args.stage == 'backfill':
