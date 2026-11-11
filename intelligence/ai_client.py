@@ -1,28 +1,35 @@
-# summarizer/ai_client.py
 import asyncio
 import logging
 
-import config.env_ini as env
 from google import genai
 from google.genai import types
 from google.genai.errors import APIError
-from utils import prompt_loader
 
+import config.env_ini as env
 from config.score_system import BatchEvaluation
+from utils import prompt_loader
 
 logging.getLogger("google_genai.models").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
-# Set up global client initialization for this module
-key = env.get_env_var("GOOGLE_API_KEY")
-if not key:
-    raise ValueError(
-        "GOOGLE_API_KEY is not set in the environment variables or Streamlit secrets."
-    )
+_client: genai.Client | None = None
 
-client = genai.Client(api_key=key)
+def get_client() -> genai.Client:
+    global _client
+
+    if _client is None:
+        key = env.get_env_var("GOOGLE_API_KEY")
+        if not key:
+            raise ValueError(
+                "GOOGLE_API_KEY is not set in the environment variables "
+                "or Streamlit secrets."
+            )
+        _client = genai.Client(api_key=key)
+
+    return _client
 
 FALLBACK_MODELS = [
+    "gemini-3.5-flash-lite",
     "gemini-3.1-flash-lite",
     "gemini-2.5-flash-lite",
     "gemini-2.5-flash",
@@ -30,12 +37,16 @@ FALLBACK_MODELS = [
 ]
 
 
-async def async_evaluate_batch(batch_text: str) -> BatchEvaluation | None:
+async def async_evaluate_batch(batch_text: str) -> tuple[BatchEvaluation | None, str | None, dict]:
     """
     Sends a batch of articles to Gemini.
-    If a model suffers a temporary 503 overload, it automatically fails over
-    to backup models before giving up.
+
+    Returns:
+        A tuple of (evaluation result, model actually used).
+        Both values are None if every fallback model failed.
     """
+    client = get_client()
+    
     for model_name in FALLBACK_MODELS:
         try:
             response = await client.aio.models.generate_content(
@@ -48,7 +59,15 @@ async def async_evaluate_batch(batch_text: str) -> BatchEvaluation | None:
                     temperature=0.1
                 ),
             )
-            return BatchEvaluation.model_validate_json(response.text)
+
+            usage = getattr(response, "usage_metadata", None)
+            token_usage = {
+                "prompt_tokens": getattr(usage, "prompt_token_count", 0) or 0,
+                "completion_tokens": getattr(usage, "candidates_token_count", 0) or 0,
+                "total_tokens": getattr(usage, "total_token_count", 0) or 0,
+            }
+
+            return BatchEvaluation.model_validate_json(response.text), model_name, token_usage
 
         except APIError as api_err:
             if api_err.code == 503:
@@ -74,4 +93,5 @@ async def async_evaluate_batch(batch_text: str) -> BatchEvaluation | None:
             break
 
     logger.error("All fallback models were exhausted. Batch evaluation skipped.")
-    return None
+    
+    return None,None, None

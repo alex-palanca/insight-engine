@@ -1,25 +1,39 @@
 import logging
+import re
 import time
 from datetime import datetime
-from typing import Optional
+from urllib.parse import urlparse
 
-from config import env_ini as env# noqa: F401
-from utils.prompt_loader import load_prompt
 from google import genai
+from google.genai import types
 from google.genai.errors import APIError
 
-from urllib.parse import urlparse
-from google.genai import types
-import re
+from config import env_ini as env
 from utils.text_utils import build_link_label
-
 
 logger = logging.getLogger(__name__)
 
+_client: genai.Client | None = None
+
+def get_client() -> genai.Client:
+    global _client
+
+    if _client is None:
+        key = env.get_env_var("GOOGLE_API_KEY")
+        if not key:
+            raise ValueError(
+                "GOOGLE_API_KEY is not set in the environment variables "
+                "or Streamlit secrets."
+            )
+        _client = genai.Client(api_key=key)
+
+    return _client
 FALLBACK_MODELS = [
+    "gemini-3.8-flash",
+    "gemini-3.7-flash",
+    "gemini-3.6-flash",
     "gemini-3.5-flash",
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite"
+    "gemini-2.5-flash"
 ]
 
 MAX_ATTEMPTS = 3
@@ -28,32 +42,6 @@ REF_PATTERN = re.compile(r"\[(A\d+)\]")
  
 class BriefingGenerationError(RuntimeError):
     """Raised when synthesis fails on every model, so the scheduled run fails loudly."""
-
-def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:
-    """Return a secret from Streamlit or environment variables."""
-    try:
-        import streamlit as st
-        from streamlit.errors import StreamlitSecretNotFoundError
-
-        if hasattr(st, "secrets"):
-            try:
-                return st.secrets.get(name, env.get_env_var(name))
-            except StreamlitSecretNotFoundError:
-                return env.get_env_var(name)
-    except ModuleNotFoundError:
-        pass
-
-    return env.get_env_var(name)
-
-
-# Set up global client initialization for this module
-key = get_secret("GOOGLE_API_KEY")
-if not key:
-    raise ValueError(
-        "GOOGLE_API_KEY is not set in the environment variables or Streamlit secrets."
-    )
-
-client = genai.Client(api_key=key)
 
 def build_prompt(
     prompt: str,
@@ -178,8 +166,9 @@ def resolve_citations(briefing: str, id_to_url: dict[str, str]) -> str:
     return resolved
 
 def generate_briefing(prompt: str, 
-                      id_to_url: dict[str, str],
-                      temperature: float = 0.35) -> str:
+    id_to_url: dict[str, str],
+    temperature: float = 0.35
+) -> tuple[str, dict]:
     """
     Generates the briefing, retrying each model with backoff before falling back.
  
@@ -187,8 +176,24 @@ def generate_briefing(prompt: str,
     it upstream: a failed run must exit non-zero so the scheduled workflow
     reports failure instead of publishing an error message as a briefing.
     """
+    metrics = {
+    "model": None,
+    "models_attempted": 0,
+    "attempts_used": 0,
+    "rate_limit_errors": 0,
+    "service_errors": 0,
+    "unexpected_errors": 0,
+    "tokens_used": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    }
+    
+    client = get_client()
     for model_name in FALLBACK_MODELS:
+        metrics["models_attempted"] += 1
+        logger.info("Attempting briefing synthesis with model %s.", model_name)
         for attempt in range(1, MAX_ATTEMPTS + 1):
+            metrics["attempts_used"] += 1
             try:
                 response = client.models.generate_content(
                     model=model_name,
@@ -201,12 +206,23 @@ def generate_briefing(prompt: str,
                     # failure, not a briefing. Retrying the same model won't help.
                     logger.warning("Model %s returned no text; falling back.", model_name)
                     break
+
+                usage = getattr(response, "usage", None)
+                if usage:
+                    metrics["prompt_tokens"] = getattr(usage, "prompt_token_count", 0) or 0
+                    metrics["completion_tokens"] = getattr(usage, "candidates_token_count", 0) or 0
+                    metrics["tokens_used"] = getattr(usage, "total_token_count", 0) or 0
  
                 logger.info("Briefing generated with model %s.", model_name)
-                return resolve_citations(text, id_to_url)
+                metrics["model"] = model_name
+                return resolve_citations(text, id_to_url),metrics
  
             except APIError as api_err:
                 code = getattr(api_err, "code", None)
+                if code ==429:
+                    metrics["rate_limit_errors"] += 1
+                if code == 503:
+                    metrics["service_errors"] += 1
                 if code not in (429, 503):
                     # 400/403/404 are deterministic; retrying is pointless.
                     logger.error("Non-retryable API error on %s (%s): %s",
@@ -219,6 +235,7 @@ def generate_briefing(prompt: str,
                 time.sleep(wait)
  
             except Exception:
+                metrics["unexpected_errors"] += 1
                 logger.exception("Unexpected failure on %s (attempt %d).", model_name, attempt)
                 time.sleep(5 * attempt)
  

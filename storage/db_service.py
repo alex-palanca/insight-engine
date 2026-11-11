@@ -1,15 +1,27 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, create_engine, func, or_
-from sqlalchemy.dialects.postgresql import JSONB
+import logging
+from contextlib import contextmanager
+from datetime import UTC, date, datetime, timedelta
+from datetime import time as dt_time
+
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    create_engine,
+    func,
+    or_,
+)
+from sqlalchemy.dialects.postgresql import JSONB, insert
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker, selectinload
+from sqlalchemy.orm import declarative_base, relationship, selectinload, sessionmaker
 
 from config import env_ini as env
 from utils.hashing import generate_article_id
 from utils.text_utils import normalize_text, normalize_url
-import logging
-from datetime import datetime, timedelta, date, time as dt_time
-
 
 logger = logging.getLogger(__name__)
 
@@ -140,12 +152,29 @@ class NeonDatabaseService:
 
         self.engine = create_engine(
             self.db_url,
-            pool_size=5,
-            max_overflow=10,
-            pool_timeout=30
+            pool_size=2,
+            max_overflow=3,
+            pool_timeout=30,
+            pool_recycle=280,
+            pool_pre_ping=True,
         )
 
         self._SessionMarker = sessionmaker(bind=self.engine, expire_on_commit=False)
+
+    @contextmanager
+    def share_session(self):
+        """
+        Returns a context manager for a session that can be shared across multiple
+        operations. The caller is responsible for committing or rolling back the
+        transaction.
+        """
+        with self._SessionMarker() as session:
+            try:
+                yield session
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise
 
     def initialize_schema(self):
         """
@@ -171,7 +200,7 @@ class NeonDatabaseService:
                 session.rollback()
                 raise
 
-    def update_stale_events_status(self, days_old: int = 7) -> int:
+    def update_stale_events_status(self, days_old: int = 7) -> dict:
         """
         Close open events that have not been updated for the provided number of days.
         This helps prevent stale, dormant events from remaining active.
@@ -179,7 +208,7 @@ class NeonDatabaseService:
         if days_old < 0:
             raise ValueError("days_old must be non-negative")
 
-        cutoff = datetime.now() - timedelta(days=days_old)
+        cutoff = datetime.now(tz=UTC) - timedelta(days=days_old)
 
         with self._SessionMarker() as session:
             try:
@@ -189,7 +218,7 @@ class NeonDatabaseService:
                     .filter(Event.last_updated_at < cutoff)
                     .update({
                         Event.status: "closed",
-                        Event.closed_at: datetime.now(),
+                        Event.closed_at: datetime.now(tz=UTC),
                     })
                 )
                 session.commit()
@@ -198,54 +227,14 @@ class NeonDatabaseService:
                     updated_count,
                     days_old,
                 )
-                return updated_count
+
+                return {"closed_events": updated_count}
 
             except Exception:
                 session.rollback()
                 logger.exception("Failed to close stale events.")
                 raise
 
-    def backfill_event_scores_from_highest_article(self) -> int:
-        """
-        Fill in null article scores for an event using the highest-rated article
-        already attached to that event.
-        """
-        with self._SessionMarker() as session:
-            try:
-                events = (
-                    session.query(Event)
-                    .options(selectinload(Event.articles))
-                    .all()
-                )
-
-                updated_count = 0
-                for event in events:
-                    if not event.articles:
-                        continue
-
-                    highest_score = max(
-                        (article.score for article in event.articles if article.score is not None),
-                        default=None,
-                    )
-                    if highest_score is None:
-                        continue
-
-                    for article in event.articles:
-                        if Event.score is None:
-                            Event.score = highest_score
-                            updated_count += 1
-
-                session.commit()
-                logger.info(
-                    "Backfilled scores for %s articles using the highest-rated article in each event.",
-                    updated_count,
-                )
-                return updated_count
-
-            except Exception:
-                session.rollback()
-                logger.exception("Failed to backfill event article scores.")
-                raise
 
     def get_delta_events(self, day) -> list[dict]:
         """
@@ -469,14 +458,21 @@ class NeonDatabaseService:
                 logger.exception("Failed to sync sources from feeds.yaml.")
                 raise
 
-    def save_bronze_data(self, articles_data: list):
+    def save_bronze_data(self, articles_data: list)->dict:
         """
         Takes a list of raw article dictionaries from rss_collector.py, extracts/upserts sources,
         and saves unique articles with optimal batch queries.
         """
+        metrics = {
+        "raw_articles_submitted_to_db": len(articles_data),
+        "sources_created": 0,
+        "raw_articles_saved": 0,
+        "raw_articles_duplicate": 0,
+        "raw_articles_db_failed": 0,
+        }
         if not articles_data:
             return
-
+        
         with self._SessionMarker() as session:
             try:
                 for item in articles_data:
@@ -493,6 +489,7 @@ class NeonDatabaseService:
                         )
                         session.add(source_obj)
                         session.flush()
+                        metrics["sources_created"] += 1
 
                     article_title = normalize_text(item.get("title", ""))
                     article_link = normalize_url(item.get("link", ""))
@@ -506,25 +503,44 @@ class NeonDatabaseService:
                         article_tags=item.get("article_tags", []),
                         raw_summary=item.get("summary"),
                         source_id=source_obj.id,
-                        collected_at=datetime.now()
+                        collected_at=datetime.now(tz=UTC)
                     )
 
                     upsert_op = insert_op.on_conflict_do_nothing()
-                    session.execute(upsert_op)
+                    result = session.execute(upsert_op)
+
+                    inserted_rows = result.rowcount or 0
+                    metrics["raw_articles_saved"] += inserted_rows
+                    metrics["raw_articles_duplicate"] += 1 - inserted_rows
 
                 session.commit()
-                logger.info("Processed %s bronze articles to Neon.", len(articles_data))
+                logger.info("Bronze ingestion finished: %s article(s) uploaded, %s article(s) skipped as duplicates, out of %s received.",
+                    metrics["raw_articles_saved"],
+                    metrics["raw_articles_duplicate"],
+                    len(articles_data),
+                )
 
-            except Exception as exc:
+            except Exception:
                 session.rollback()
+                metrics["raw_articles_db_failed"] = len(articles_data)
+                metrics["raw_articles_saved"] = 0
+                metrics["raw_articles_duplicate"] = 0
                 logger.exception("Bronze batch operation failed. Transaction rolled back.")
-                raise exc
+                raise
+        return metrics
 
-    def save_silver_data(self, enriched_articles: list):
+    def save_silver_data(self, enriched_articles: list)-> dict:
         """
         Takes a list of AI-enriched article dictionaries and updates the existing
         Bronze records in the database with their new Silver metrics.
         """
+        metrics = {
+        "enriched_articles_submitted_to_db": len(enriched_articles),
+        "enriched_articles_updated": 0,
+        "articles_not_found": 0,
+        "enriched_articles_db_failed": 0,
+        }
+
         if not enriched_articles:
             return
 
@@ -548,30 +564,41 @@ class NeonDatabaseService:
                         article.justification = item.get("justification", article.justification)
                         existing_tags = getattr(article, "article_tags", None)
                         article.article_tags = item.get("article_tags", existing_tags)
-                        article.enriched_at = datetime.now()
+                        article.enriched_at = datetime.now(tz=UTC)
+                        article.article_read = item.get("article_read", article.article_read)
+
+                        metrics["enriched_articles_updated"] += 1
                     else:
+                        metrics["articles_not_found"] += 1
                         logger.warning(
                             "Article with link '%s' was not found in DB. Skipping silver update.",
                             item["link"],
                         )
 
                 session.commit()
-                logger.info("Synchronized %s silver articles to Neon.", len(enriched_articles))
+                logger.info("Silver ingestion finished: %s article(s) updated out of %s enriched.",metrics["enriched_articles_updated"] ,len(enriched_articles))
 
-            except Exception as exc:
+            except Exception:
                 session.rollback()
+                metrics["enriched_articles_db_failed"] = len(enriched_articles)
+                metrics["enriched_articles_updated"] = 0
+                metrics["articles_not_found"] = 0
                 logger.exception("Silver batch operation failed. Transaction rolled back.")
-                raise exc
-
-    def obtain_articles(self, stage: str = "bronze", min_score: int = 0) -> list:
+                raise
+        return metrics
+    def obtain_articles(
+        self, 
+        stage: str = "bronze", 
+        min_score: int = 0,
+    ) -> list:
         """
         Retrieves today's articles from the database and maps them back into
         the dictionary format expected by the markdown report generator.
         """
         with self._SessionMarker() as session:
             try:
-                today = datetime.now().date()
                 articles_data = []
+                today = datetime.now(tz=UTC).date()
 
                 if stage == "silver":
                     query_results = session.query(Article).join(Source).filter(
@@ -597,6 +624,7 @@ class NeonDatabaseService:
                     query_results = session.query(Article).join(Source).filter(
                         Article.enriched_at.is_(None),
                         func.date(Article.collected_at) == today,
+                        Article.ai_summary.is_(None),
                     ).order_by(Article.published.desc()).all()
 
                     for db_article in query_results:
@@ -612,17 +640,26 @@ class NeonDatabaseService:
                 logger.info("Retrieved %s articles from the database for stage '%s'.", len(articles_data), stage)
                 return articles_data
 
-            except Exception as exc:
+            except Exception:
                 logger.exception("Failed to retrieve articles for stage '%s'.", stage)
-                raise exc
+                raise
 
+_db_service: NeonDatabaseService | None = None
+
+def get_db_service() -> NeonDatabaseService:
+    global _db_service
+
+    if _db_service is None:
+        _db_service = NeonDatabaseService()
+
+    return _db_service
 
 def sync_sources(feeds: dict) -> None:
     """
     Public-facing function to upsert the sources table from a loaded feeds.yaml dict.
     """
     try:
-        db_service = NeonDatabaseService()
+        db_service = get_db_service()
         db_service.sync_sources_from_feeds(feeds)
     except Exception:
         logger.exception("Failed to sync sources from feeds.")
@@ -634,39 +671,44 @@ def update_stale_events(days_old: int = 7) -> int:
     Public-facing helper to close open events whose last_updated_at is older than the threshold.
     """
     try:
-        db_service = NeonDatabaseService()
+        db_service = get_db_service()
         return db_service.update_stale_events_status(days_old=days_old)
     except Exception:
         logger.exception("Failed to update stale event statuses.")
         raise
 
 
-def save_articles(articles: list = None, stage: str = "bronze"):
+def save_articles(articles: list | None = None, stage: str = "bronze")-> dict:
     """
     Public-facing function to save a batch of articles to the database.
     Options : raw (bronze) or enriched (silver) data. Defaults to bronze.
     """
     try:
-        db_service = NeonDatabaseService()
+        db_service = get_db_service()
         if stage == "bronze":
-            db_service.save_bronze_data(articles)
+            metrics = db_service.save_bronze_data(articles)
         if stage == "silver":
-            db_service.save_silver_data(articles)
-    except Exception as exc:
+            metrics = db_service.save_silver_data(articles)
+    except Exception:
         logger.exception("Failed to save articles to the database for stage '%s'.", stage)
-        raise exc
+        raise
+    
+    return metrics
 
-def get_articles(stage: str = "bronze", min_score: int = 0) -> list:
+def get_articles(
+    stage: str = "bronze", 
+    min_score: int = 0,
+) -> list:
     """
     Public-facing function to retrieve articles from the database.
     Options : raw (bronze) or enriched (silver) data. Defaults to bronze.
     """
     try:
-        db_service = NeonDatabaseService()
+        db_service = get_db_service()
         return db_service.obtain_articles(stage, min_score)
-    except Exception as exc:
+    except Exception:
         logger.exception("Failed to retrieve articles from the database for stage '%s'.", stage)
-        raise exc
+        raise
 
 
 def update_events_score() -> int:
@@ -675,8 +717,9 @@ def update_events_score() -> int:
     article already attached to each event.
     """
     try:
-        db_service = NeonDatabaseService()
+        db_service = get_db_service()
         return db_service.backfill_event_scores_from_highest_article()
     except Exception:
-        logger.exception("Failed to backfill event article scores.")
+        logger.exception("Failed to retrieve articles from the database")
         raise
+

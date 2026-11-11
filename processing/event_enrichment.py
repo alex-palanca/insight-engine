@@ -1,26 +1,36 @@
 import asyncio
 import json
 import logging
-from typing import Optional
 
-import config.env_ini as env
 from google import genai
 from google.genai import types
 from google.genai.errors import APIError
 from pydantic import BaseModel
 
-from models.event_metadata import EventCreate, EventUpdate as EventUpdatePayload, EVENT_CREATE_PROMPT, EVENT_UPDATE_PROMPT
-from storage.db_service import Event, EventUpdate as EventUpdateRecord
-from storage.db_service import NeonDatabaseService
+import config.env_ini as env
+from models.event_metadata import EVENT_CREATE_PROMPT, EVENT_UPDATE_PROMPT, EventCreate
+from models.event_metadata import EventUpdate as EventUpdatePayload
+from storage.db_service import Event, NeonDatabaseService
+from storage.db_service import EventUpdate as EventUpdateRecord
 
 RATE_LIMIT_DELAY = 4.5  # 60 seconds / 15 requests = 4 seconds. We use 4.5 to be safe.
 logger = logging.getLogger(__name__)
 
-key = env.get_env_var("GOOGLE_API_KEY")
-if not key:
-    raise ValueError("GOOGLE_API_KEY is not set in environment variables.")
+_client: genai.Client | None = None
 
-client = genai.Client(api_key=key)
+def get_client() -> genai.Client:
+    global _client
+
+    if _client is None:
+        key = env.get_env_var("GOOGLE_API_KEY")
+        if not key:
+            raise ValueError(
+                "GOOGLE_API_KEY is not set in the environment variables "
+                "or Streamlit secrets."
+            )
+        _client = genai.Client(api_key=key)
+
+    return _client
 
 FALLBACK_MODELS = [
     "gemini-3.1-flash-lite",
@@ -50,7 +60,7 @@ def format_articles_context(articles: list) -> str:
     return "\n".join(context_lines)
 
 
-async def enrich_new_event_with_gemini(event_id: int, articles: list) -> Optional[EventCreate]:
+async def enrich_new_event_with_gemini(event_id: int, articles: list) -> EventCreate | None:
     """
     Sends a brand-new event's articles to Gemini to generate its canonical representation,
     using new_event.txt.
@@ -64,7 +74,7 @@ async def enrich_new_event_with_gemini(event_id: int, articles: list) -> Optiona
     return await _generate_structured_content(event_id, EVENT_CREATE_PROMPT, contents, EventCreate)
 
 
-async def update_event_with_gemini(event_id: int, existing_summary: str, articles: list) -> Optional[EventUpdatePayload]:
+async def update_event_with_gemini(event_id: int, existing_summary: str, articles: list) -> EventUpdatePayload | None:
     """
     Sends an open event's existing summary plus newly attached articles to Gemini to determine
     whether the canonical representation needs to change, using update_event.txt.
@@ -81,14 +91,14 @@ async def update_event_with_gemini(event_id: int, existing_summary: str, article
     return await _generate_structured_content(event_id, EVENT_UPDATE_PROMPT, contents, EventUpdatePayload)
 
 
-async def _generate_structured_content(event_id: int, system_instruction: str, contents: str, response_schema: type[BaseModel]) -> Optional[BaseModel]:
+async def _generate_structured_content(event_id: int, system_instruction: str, contents: str, response_schema: type[BaseModel]) -> BaseModel | None:
     """
     Sends a system instruction plus dynamic contents to Gemini and parses the response into the
     given schema. Includes automatic fallback to backup models on 503 errors.
     """
     for model_name in FALLBACK_MODELS:
         try:
-            response = await client.aio.models.generate_content(
+            response = await get_client().aio.models.generate_content(
                 model=model_name,
                 contents=contents,
                 config=types.GenerateContentConfig(
@@ -170,7 +180,7 @@ def get_new_unprocessed_events(db_service: NeonDatabaseService) -> list:
 
     with db_service._SessionMarker() as session:
         try:
-            events = session.query(Event).filter(Event.summary == None).all()   # noqa: E711
+            events = session.query(Event).filter(Event.summary == None).all()
 
             event_data = []
             for event in events:
@@ -187,7 +197,7 @@ def get_new_unprocessed_events(db_service: NeonDatabaseService) -> list:
             return []
 
 
-def get_event(db_service: NeonDatabaseService, event_id: int) -> Optional[dict]:
+def get_event(db_service: NeonDatabaseService, event_id: int) -> dict | None:
     """
     Retrieves a single event record from the database.
     """

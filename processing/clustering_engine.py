@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session
 import utils.text_utils as ut
 from storage.db_service import Article, Event, NeonDatabaseService
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -194,6 +193,8 @@ def match_and_attach_articles(score: int, **hyperparameters) -> dict:
             logger.info("%s articles matched open events.",len(matches))
             now = datetime.now()
 
+            matched_articles = []
+
             for event_idx, article_indices in matches.items():
                 event = open_events[event_idx]
                 matched_articles = [articles[idx] for idx in article_indices]
@@ -224,10 +225,12 @@ def match_and_attach_articles(score: int, **hyperparameters) -> dict:
             session.commit()
             logger.info("Successfully attached %s articles to open events.",len(matched_articles))
 
-        except Exception as exc:
+            return {"matched_articles": len(matches), "open_events": len(open_events), "unclustered_articles": len(articles)}
+
+        except Exception:
             session.rollback()
             logger.exception("Article-to-event matching failed. Transaction rolled back.")
-            raise exc
+            raise
 
 
 def events_clustering(score: int, **hyperparameters):
@@ -272,7 +275,9 @@ def events_clustering(score: int, **hyperparameters):
             session.commit()
             logger.info("Created %s events from %s articles.", events_created, len(articles))
 
-        except Exception as exc:
+            return {"events_created": events_created, "unclustered_articles": len(articles)}
+
+        except Exception:
             session.rollback()
             logger.exception("Clustering coordination failed. Transaction rolled back.")
-            raise exc
+            raise

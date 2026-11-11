@@ -1,21 +1,12 @@
 name: Daily Intelligence Briefing
  
 on:
-  schedule:
-    - cron: "47 4 * * *"    # 06:47 Madrid (CEST) / 05:47 (CET)
-    - cron: "13 15 * * *"   # 17:13 Madrid (CEST) / 16:13 (CET)
   workflow_dispatch:
- 
-# A late run must not overlap the next scheduled one: events persist across
-# runs, so two concurrent pipelines would both mutate the same events.
-# Queue the second run, don't kill the first mid-transaction.
+
 concurrency:
   group: daily-briefing
   cancel-in-progress: false
  
-# Reusable setup is repeated per job because each job is a fresh runner.
-# Stages hand off through Postgres and S3, not local files, so a clean
-# runner per stage is fine.
 env:
   PYTHON_VERSION: "3.12"
  
@@ -42,7 +33,7 @@ jobs:
         run: python main.py ingest
  
   enrich:
-    needs: ingest              # only runs if ingest SUCCEEDED
+    needs: ingest              
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -86,7 +77,7 @@ jobs:
   describe:
     needs: cluster
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -136,7 +127,7 @@ jobs:
   synthesize:
     needs: assemble
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
