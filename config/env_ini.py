@@ -13,10 +13,9 @@ def load_environment(env: str) -> str:
         raise ValueError(f"Unknown APP_ENV: {env}. Use 'dev' or 'prod'.")
 
     env_file = PROJECT_ROOT / f".env.{env}"
-    if not env_file.exists():
-        raise FileNotFoundError(f"Missing environment file: {env_file}")
-
-    load_dotenv(dotenv_path=env_file, override=False)
+    if env_file.exists():
+        load_dotenv(dotenv_path=env_file, override=False)
+        
     os.environ["APP_ENV"] = env
     return env
 
