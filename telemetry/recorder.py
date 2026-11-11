@@ -85,7 +85,8 @@ class TelemetryRecorder:
     def finish_run(
         self,
         run_id: str,
-        status: str
+        status: str,
+        metrics: dict | None = None
     ) -> None:
         """Mark the pipeline run as finished."""
         if not run_id:
@@ -101,6 +102,7 @@ class TelemetryRecorder:
 
                 run.status = status
                 run.finished_at = datetime.now(tz=UTC)
+                run.metrics = metrics
                 logger.info("Finished recording pipeline run %s.", run.run_id)
 
         except Exception:

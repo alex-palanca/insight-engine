@@ -46,6 +46,7 @@ def main():
     logger.info(f"Loading {args.env} environment.")
     env = env_ini.load_environment(args.env)
     logger.info(f"Running pipeline in {env} environment.")
+    completed_stages: list[str] = []
 
     recorder = TelemetryRecorder()
     run_id = recorder.get_or_create_current_run_id()
@@ -58,14 +59,15 @@ def main():
                 run_id,
                 recorder
             )
-            
-        
+            completed_stages.append("ingest")
+
         if args.stage in ['enrich', 'enrichment','all']:
             logger.info("Running enrichment stage.")
             enrich(
                 run_id,
                 recorder
             )
+            completed_stages.append("enrich")
         
         if args.stage in ['cluster', 'events','all']:
             logger.info("Running clustering and linking stage.")
@@ -76,6 +78,7 @@ def main():
                 max_df=0.85, 
                 min_df=2
             )
+            completed_stages.append("cluster")
 
         if args.stage in ['describe','all']:
             logger.info("Running events processing stage.")
@@ -83,6 +86,7 @@ def main():
                 run_id,
                 recorder
             )
+            completed_stages.append("describe")
 
         if args.stage in ['assemble','all']:
             logger.info("Running assemble stage.")
@@ -90,23 +94,33 @@ def main():
                 run_id,
                 recorder
             )
-        
+            completed_stages.append("assemble")
+
         if args.stage in ['synthesize', 'synth','all']:
             logger.info("Running synthesis stage.")
             synthesize(
                 run_id,
                 recorder
             )
+            completed_stages.append("synthesize")
 
         # Adittional jobs
         if args.stage == 'backfill':
             logger.info("Running backfill for selected dates.")
             backfill(args.min_date,args.max_date)
 
-        recorder.finish_run(run_id, status="success")
+        recorder.finish_run(
+            run_id, 
+            status="success",
+            metrics={"completed_stages": completed_stages}
+        )
     except Exception:
         logger.exception("Pipeline failed.")
-        recorder.finish_run(run_id, status="failed")
+        recorder.finish_run(
+            run_id, 
+            status="failed",
+            metrics={"completed_stages": completed_stages}
+        )
         raise
 
 if __name__ == "__main__":
