@@ -37,7 +37,7 @@ FALLBACK_MODELS = [
 ]
 
 
-async def async_evaluate_batch(batch_text: str) -> tuple[BatchEvaluation | None, str | None]:
+async def async_evaluate_batch(batch_text: str) -> tuple[BatchEvaluation | None, str | None, dict]:
     """
     Sends a batch of articles to Gemini.
 
@@ -59,7 +59,15 @@ async def async_evaluate_batch(batch_text: str) -> tuple[BatchEvaluation | None,
                     temperature=0.1
                 ),
             )
-            return BatchEvaluation.model_validate_json(response.text), model_name
+
+            usage = getattr(response, "usage_metadata", None)
+            token_usage = {
+                "prompt_tokens": getattr(usage, "prompt_token_count", 0) or 0,
+                "completion_tokens": getattr(usage, "candidates_token_count", 0) or 0,
+                "total_tokens": getattr(usage, "total_token_count", 0) or 0,
+            }
+
+            return BatchEvaluation.model_validate_json(response.text), model_name, token_usage
 
         except APIError as api_err:
             if api_err.code == 503:
@@ -86,4 +94,4 @@ async def async_evaluate_batch(batch_text: str) -> tuple[BatchEvaluation | None,
 
     logger.error("All fallback models were exhausted. Batch evaluation skipped.")
     
-    return None,None
+    return None,None, None

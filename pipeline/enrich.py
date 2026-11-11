@@ -21,7 +21,7 @@ def enrich(
     started_at = time.perf_counter()
 
     recorder.start_stage(run_id, "enrich")
-    
+
     try:
         logger.info("Enriching and scoring articles.")
         articles = db.get_articles()

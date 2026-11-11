@@ -565,6 +565,7 @@ class NeonDatabaseService:
                         existing_tags = getattr(article, "article_tags", None)
                         article.article_tags = item.get("article_tags", existing_tags)
                         article.enriched_at = datetime.now(tz=UTC)
+                        article.article_read = item.get("article_read", article.article_read)
 
                         metrics["enriched_articles_updated"] += 1
                     else:
