@@ -55,16 +55,28 @@ def main():
         # Core pipeline jobs
         if args.stage in ['ingest', 'ing','all']:
             logger.info("Running ingestion stage.")
-            ingest(run_id,recorder)
+            ingest(
+                run_id,
+                recorder
+            )
             
         
         if args.stage in ['enrich', 'enrichment','all']:
             logger.info("Running enrichment stage.")
-            enrich(run_id,recorder)
+            enrich(
+                run_id,
+                recorder
+            )
         
         if args.stage in ['cluster', 'events','all']:
             logger.info("Running clustering and linking stage.")
-            cluster(similarity_threshold=0.375, max_df=0.85, min_df=2)
+            cluster(
+                run_id, 
+                recorder,
+                similarity_threshold=0.375, 
+                max_df=0.85, 
+                min_df=2
+            )
 
         if args.stage in ['describe','all']:
             logger.info("Running events processing stage.")

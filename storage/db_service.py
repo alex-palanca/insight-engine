@@ -198,7 +198,7 @@ class NeonDatabaseService:
                 session.rollback()
                 raise
 
-    def update_stale_events_status(self, days_old: int = 7) -> int:
+    def update_stale_events_status(self, days_old: int = 7) -> dict:
         """
         Close open events that have not been updated for the provided number of days.
         This helps prevent stale, dormant events from remaining active.
@@ -225,12 +225,14 @@ class NeonDatabaseService:
                     updated_count,
                     days_old,
                 )
-                return updated_count
+
+                return {"closed_events": updated_count}
 
             except Exception:
                 session.rollback()
                 logger.exception("Failed to close stale events.")
                 raise
+
 
     def get_delta_events(self, day) -> list[dict]:
         """
