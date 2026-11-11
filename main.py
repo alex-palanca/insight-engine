@@ -104,16 +104,17 @@ def main():
             )
             completed_stages.append("synthesize")
 
+            recorder.finish_run(
+            run_id, 
+            status="success",
+            metrics={"completed_stages": completed_stages}
+            )
+
         # Adittional jobs
         if args.stage == 'backfill':
             logger.info("Running backfill for selected dates.")
             backfill(args.min_date,args.max_date)
 
-        recorder.finish_run(
-            run_id, 
-            status="success",
-            metrics={"completed_stages": completed_stages}
-        )
     except Exception:
         logger.exception("Pipeline failed.")
         recorder.finish_run(
