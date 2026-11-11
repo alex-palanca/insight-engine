@@ -37,11 +37,13 @@ FALLBACK_MODELS = [
 ]
 
 
-async def async_evaluate_batch(batch_text: str) -> BatchEvaluation | None:
+async def async_evaluate_batch(batch_text: str) -> tuple[BatchEvaluation | None, str | None]:
     """
     Sends a batch of articles to Gemini.
-    If a model suffers a temporary 503 overload, it automatically fails over
-    to backup models before giving up.
+
+    Returns:
+        A tuple of (evaluation result, model actually used).
+        Both values are None if every fallback model failed.
     """
     client = get_client()
     
@@ -57,7 +59,7 @@ async def async_evaluate_batch(batch_text: str) -> BatchEvaluation | None:
                     temperature=0.1
                 ),
             )
-            return BatchEvaluation.model_validate_json(response.text)
+            return BatchEvaluation.model_validate_json(response.text), model_name
 
         except APIError as api_err:
             if api_err.code == 503:
@@ -83,4 +85,5 @@ async def async_evaluate_batch(batch_text: str) -> BatchEvaluation | None:
             break
 
     logger.error("All fallback models were exhausted. Batch evaluation skipped.")
-    return None
+    
+    return None,None

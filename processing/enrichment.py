@@ -35,7 +35,10 @@ async def fetch_full_article(session: aiohttp.ClientSession, article: dict) -> d
     return enriched_article
 
 
-async def process_batch(batch: list[dict], batch_id: int) -> list[dict]:
+async def process_batch(
+        batch: list[dict], 
+        batch_id: int
+) -> tuple[list[dict], str | None]:
     """Formats a batch into a prompt, calls the AI, and maps the scores back to the articles."""
     logger.info("Processing LLM batch %s.", batch_id)
 
@@ -51,7 +54,7 @@ async def process_batch(batch: list[dict], batch_id: int) -> list[dict]:
         batch_prompt += f"Title: {article.get('title')}\n"
         batch_prompt += f"Content: {article.get('content_to_evaluate')[:3000]}\n"
 
-    evaluation_result = await async_evaluate_batch(batch_prompt)
+    evaluation_result, model_used = await async_evaluate_batch(batch_prompt)
 
     if evaluation_result and isinstance(evaluation_result, BatchEvaluation):
         for eval_data in evaluation_result.evaluations:
@@ -69,7 +72,7 @@ async def process_batch(batch: list[dict], batch_id: int) -> list[dict]:
                 }
                 batch[idx]["article_tags"] = eval_data.tags
 
-    return batch
+    return batch, model_used
 
 
 async def enrich_articles_pipeline(articles: list[dict]) -> tuple[list[dict], dict]:
@@ -87,6 +90,8 @@ async def enrich_articles_pipeline(articles: list[dict]) -> tuple[list[dict], di
     "articles_without_score": 0,
     "scrape_success_rate": 0.0,
     "llm_batch_success_rate": 0.0,
+    "models_used": [],
+    "models_usage": {}
     }
     logger.info("Starting concurrent scraping for %s articles.", len(articles))
     async with aiohttp.ClientSession() as session:
@@ -107,8 +112,16 @@ async def enrich_articles_pipeline(articles: list[dict]) -> tuple[list[dict], di
 
         metrics["llm_batches"] += 1
 
-        processed_batch = await process_batch(batch, batch_id)
+        processed_batch, model_used = await process_batch(batch, batch_id)
         enriched_articles.extend(processed_batch)
+
+        if model_used:
+            if model_used not in metrics["models_used"]:
+                metrics["models_used"].append(model_used)
+
+            metrics["models_usage"][model_used] = (
+                metrics["models_usage"].get(model_used, 0) + 1
+            )
 
         scored_articles = [
             article
