@@ -86,7 +86,10 @@ def main():
 
         if args.stage in ['assemble','all']:
             logger.info("Running assemble stage.")
-            assemble()
+            assemble(
+                run_id,
+                recorder
+            )
         
         if args.stage in ['synthesize', 'synth','all']:
             logger.info("Running synthesis stage.")
