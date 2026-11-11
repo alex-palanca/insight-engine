@@ -152,9 +152,11 @@ class NeonDatabaseService:
 
         self.engine = create_engine(
             self.db_url,
-            pool_size=5,
-            max_overflow=10,
-            pool_timeout=30
+            pool_size=2,
+            max_overflow=3,
+            pool_timeout=30,
+            pool_recycle=280,
+            pool_pre_ping=True,
         )
 
         self._SessionMarker = sessionmaker(bind=self.engine, expire_on_commit=False)
