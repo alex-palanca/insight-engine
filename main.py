@@ -1,5 +1,4 @@
 import argparse
-import asyncio
 import logging
 
 from config import env_ini
@@ -80,7 +79,10 @@ def main():
 
         if args.stage in ['describe','all']:
             logger.info("Running events processing stage.")
-            asyncio.run(describe())
+            describe(
+                run_id,
+                recorder
+            )
 
         if args.stage in ['assemble','all']:
             logger.info("Running assemble stage.")
