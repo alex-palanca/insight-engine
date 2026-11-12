@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 def enrich(
     run_id: str,
     recorder: TelemetryRecorder,
-    upload_date_str: str = "today",
+    upload_date_str: str = "today"
 ):
     """Enrich articles from the database and save to Neon and AWS."""
     run_id = recorder.get_or_create_current_run_id()
@@ -26,7 +26,7 @@ def enrich(
         logger.info("Enriching and scoring articles.")
         articles = db.get_articles()
         if articles:
-            enriched_articles,enrich_metrics = asyncio.run(enrich_articles_pipeline(articles))
+            enriched_articles,enrich_metrics = asyncio.run(enrich_articles_pipeline(articles,"article_scoring.txt"))
             metrics.update(enrich_metrics)
             
             logger.info("Saving enriched articles to Neon.")

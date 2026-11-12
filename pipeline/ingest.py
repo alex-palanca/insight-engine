@@ -1,9 +1,11 @@
+import asyncio
 import logging
 import time
 from datetime import datetime
 
 from config import feed_loader
 from ingestion import rss_collector
+from processing.filtering import filter_articles_pipeline
 from storage import db_service as db
 from storage import storage_utils as bucket
 from telemetry.recorder import TelemetryRecorder
@@ -35,18 +37,25 @@ def ingest(
 
         logger.info("Starting article collection.")
         if min_date and max_date:
-            cleaned_articles, collector_metrics = rss_collector.collect_articles(feeds,300,50,min_date,max_date)
+            cleaned_articles, collector_metrics = rss_collector.collect_articles(feeds,30,5,min_date,max_date)
         else:
-            cleaned_articles, collector_metrics = rss_collector.collect_articles(feeds,300,50)
+            cleaned_articles, collector_metrics = rss_collector.collect_articles(feeds,30,5)
 
         metrics.update(collector_metrics)
 
+        kept_articles, dropped_articles = asyncio.run(filter_articles_pipeline(cleaned_articles, "article_filter.txt"))
+        metrics["kept_articles"] = len(kept_articles)
+        metrics["dropped_articles"] = len(dropped_articles)
+
         logger.info("Saving cleaned articles to Neon.")
-        db_metrics = db.save_articles(cleaned_articles)
+        db_metrics = db.save_articles(kept_articles)
         metrics.update(db_metrics)
         
         logger.info("Saving cleaned articles to AWS.")
-        bucket.upload_articles(upload_date_str,content=cleaned_articles)
+        bucket.upload_articles(upload_date_str,content=kept_articles)
+
+        logger.info("Saving discarded articles to AWS.")
+        bucket.upload_discarded_articles(upload_date_str,content=dropped_articles)
         
         metrics["duration_ms"] = int((time.perf_counter() - started_at) * 1000)
 

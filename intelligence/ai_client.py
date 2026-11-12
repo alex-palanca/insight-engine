@@ -4,9 +4,9 @@ import logging
 from google import genai
 from google.genai import types
 from google.genai.errors import APIError
+from pydantic import BaseModel
 
 import config.env_ini as env
-from config.score_system import BatchEvaluation
 from utils import prompt_loader
 
 logging.getLogger("google_genai.models").setLevel(logging.WARNING)
@@ -37,7 +37,11 @@ FALLBACK_MODELS = [
 ]
 
 
-async def async_evaluate_batch(batch_text: str) -> tuple[BatchEvaluation | None, str | None, dict]:
+async def async_evaluate_batch(
+        batch_text: str,
+        prompt: str,
+        response_schema: type[BaseModel]
+) -> tuple[BaseModel | None, str | None, dict]:
     """
     Sends a batch of articles to Gemini.
 
@@ -53,9 +57,9 @@ async def async_evaluate_batch(batch_text: str) -> tuple[BatchEvaluation | None,
                 model=model_name,
                 contents=batch_text,
                 config=types.GenerateContentConfig(
-                    system_instruction=prompt_loader.load_prompt("article_scoring.txt"),
+                    system_instruction=prompt_loader.load_prompt(prompt),
                     response_mime_type="application/json",
-                    response_schema=BatchEvaluation,
+                    response_schema=response_schema,
                     temperature=0.1
                 ),
             )
@@ -67,7 +71,7 @@ async def async_evaluate_batch(batch_text: str) -> tuple[BatchEvaluation | None,
                 "total_tokens": getattr(usage, "total_token_count", 0) or 0,
             }
 
-            return BatchEvaluation.model_validate_json(response.text), model_name, token_usage
+            return response_schema.model_validate_json(response.text), model_name, token_usage
 
         except APIError as api_err:
             if api_err.code == 503:

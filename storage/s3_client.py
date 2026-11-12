@@ -69,6 +69,10 @@ class S3Storage:
         return f"articles/{date}.json"
 
     @staticmethod
+    def discarded_article_key(date: str):
+        return f"discarded_articles/{date}.json"
+
+    @staticmethod
     def briefing_key(date: str):
         return f"briefings/IB_{date}.md"
 
