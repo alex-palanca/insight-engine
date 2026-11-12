@@ -8,6 +8,7 @@ from ingestion import rss_collector
 from processing.filtering import filter_articles_pipeline
 from storage import db_service as db
 from storage import storage_utils as bucket
+from storage.db_service import check_article_duplicates
 from telemetry.recorder import TelemetryRecorder
 
 logger = logging.getLogger(__name__) 
@@ -43,7 +44,12 @@ def ingest(
 
         metrics.update(collector_metrics)
 
-        kept_articles, dropped_articles = asyncio.run(filter_articles_pipeline(cleaned_articles, "article_filter.txt"))
+        new_articles, duplicate_articles, duplication_metrics = check_article_duplicates(cleaned_articles)
+        metrics.update(duplication_metrics)
+        metrics["new_articles"] = len(new_articles)
+        metrics["duplicate_articles"] = len(duplicate_articles)
+
+        kept_articles, dropped_articles = asyncio.run(filter_articles_pipeline(new_articles, "article_filter.txt"))
         metrics["kept_articles"] = len(kept_articles)
         metrics["dropped_articles"] = len(dropped_articles)
 
