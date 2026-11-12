@@ -76,6 +76,7 @@ async def filter_articles_pipeline(
         if i + BATCH_SIZE < len(articles):
             await asyncio.sleep(RATE_LIMIT_DELAY)
 
+
     logger.info(
         "Filtering complete: %s kept, %s dropped.",
         len(kept_articles),
