@@ -617,6 +617,7 @@ class NeonDatabaseService:
         if not enriched_articles:
             return
 
+        updated_count = 0
         with self._SessionMarker() as session:
             try:
                 for item in enriched_articles:

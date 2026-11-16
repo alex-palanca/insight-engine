@@ -124,6 +124,12 @@ def main():
         )
         raise
 
+    # Adittional jobs
+    if args.stage == 'backfill':
+        logger.info("Running backfill for selected dates.")
+        backfill(args.min_date,args.max_date)
+
+
 if __name__ == "__main__":
   
     main()
