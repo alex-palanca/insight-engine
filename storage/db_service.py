@@ -14,6 +14,7 @@ from sqlalchemy import (
     create_engine,
     func,
     or_,
+    select,
 )
 from sqlalchemy.dialects.postgresql import JSONB, insert
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
@@ -132,6 +133,7 @@ class Article(Base):
     justification = Column(Text, nullable=True)
     article_read = Column(Boolean, default=False)
     enriched_at = Column(DateTime, nullable=True)
+    ai_model = Column(String,nullable=True)
 
     source_id = Column(Integer, ForeignKey("sources.id", ondelete="CASCADE"), nullable=False)
     source = relationship("Source", back_populates="articles")
@@ -458,6 +460,77 @@ class NeonDatabaseService:
                 logger.exception("Failed to sync sources from feeds.yaml.")
                 raise
 
+    def check_duplicates(self, articles_data: list)-> tuple[list[dict], list[dict], dict]:
+        """
+        Checks which collected articles already exist in the database.
+
+        Uses the same deterministic content_id generated during bronze ingestion.
+
+        Returns:
+            A tuple of (new_articles, existing_articles, metrics).
+        """
+        metrics = {
+            "new_articles": 0,
+            "duplicate_articles": 0,
+        }
+
+        if not articles_data:
+            return [], [], metrics
+
+        candidates: list[tuple[dict, str]] = []
+
+        for article in articles_data:
+            article_title = normalize_text(article.get("title", ""))
+            article_link = normalize_url(article.get("link", ""))
+            deterministic_uuid = generate_article_id(article_title, article_link)
+
+            article["content_id"] = deterministic_uuid
+
+            candidates.append((article, deterministic_uuid))
+
+        if not candidates:
+            return [], [], metrics
+
+        content_ids = [content_id for _, content_id in candidates]
+
+        with self._SessionMarker() as session:
+            try:
+                existing_content_ids = set(
+                    session.scalars(
+                        select(Article.content_id).where(
+                            Article.content_id.in_(content_ids)
+                        )
+                    ).all()
+                )
+
+            except Exception:
+                logger.exception(
+                    "Failed to check duplicate articles in the database."
+                )
+                raise
+
+        new_articles = []
+        existing_articles = []
+
+        for article, content_id in candidates:
+            if content_id in existing_content_ids:
+                article["duplicate_status"] = "duplicate"
+                existing_articles.append(article)
+            else:
+                article["duplicate_status"] = "new"
+                new_articles.append(article)
+
+        metrics["new_articles"] = len(new_articles)
+        metrics["duplicate_articles"] = len(existing_articles)
+
+        logger.info(
+            "Duplicate check complete: %s new, %s duplicates.",
+            metrics["new_articles"],
+            metrics["duplicate_articles"],
+        )
+
+        return new_articles, existing_articles, metrics
+
     def save_bronze_data(self, articles_data: list)->dict:
         """
         Takes a list of raw article dictionaries from rss_collector.py, extracts/upserts sources,
@@ -559,6 +632,7 @@ class NeonDatabaseService:
 
                     if article:
                         article.ai_summary = item.get("ai_summary", article.ai_summary)
+                        article.ai_model = item.get("ai_model", article.ai_model)
                         article.score = item.get("score", article.score)
                         article.metrics = item.get("metrics", article.metrics)
                         article.justification = item.get("justification", article.justification)
@@ -622,7 +696,6 @@ class NeonDatabaseService:
 
                 if stage == "bronze":
                     query_results = session.query(Article).join(Source).filter(
-                        Article.enriched_at.is_(None),
                         func.date(Article.collected_at) == today,
                         Article.ai_summary.is_(None),
                     ).order_by(Article.published.desc()).all()
@@ -722,4 +795,27 @@ def update_events_score() -> int:
     except Exception:
         logger.exception("Failed to retrieve articles from the database")
         raise
+
+def check_article_duplicates(
+    articles_data: list[dict],
+) -> tuple[list[dict], list[dict], dict]:
+    """
+    Public-facing helper to partition collected articles into new and
+    already-ingested articles before LLM filtering.
+
+    Returns:
+        A tuple of (new_articles, duplicate_articles, metrics).
+    """
+    try:
+        db_service = get_db_service()
+
+        if not db_service:
+            raise RuntimeError("Database service is unavailable.")
+
+        return db_service.check_duplicates(articles_data)
+
+    except Exception:
+        logger.exception("Failed to check articles for duplicates.")
+        raise
+
 

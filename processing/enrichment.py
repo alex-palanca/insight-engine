@@ -37,15 +37,17 @@ async def fetch_full_article(session: aiohttp.ClientSession, article: dict) -> d
 
 async def process_batch(
         batch: list[dict], 
-        batch_id: int
-) -> tuple[list[dict], str | None, dict | None]:
-    """Formats a batch into a prompt, calls the AI, and maps the scores back to the articles."""
+        batch_id: int,
+        prompt: str
+) -> list[dict]:
+    """Formats a batch into a prompt, calls an LLM model, and maps the scores back to the articles."""
+
     logger.info("Processing LLM batch %s.", batch_id)
 
     for article in batch:
-        article.setdefault("score", 0)
-        article.setdefault("ai_summary", "")
-        article.setdefault("justification", "")
+        article.setdefault("score", None)
+        article.setdefault("ai_summary", None)
+        article.setdefault("justification", None)
         article.setdefault("metrics", {})
 
     batch_prompt = ""
@@ -54,12 +56,13 @@ async def process_batch(
         batch_prompt += f"Title: {article.get('title')}\n"
         batch_prompt += f"Content: {article.get('content_to_evaluate')[:3000]}\n"
 
-    evaluation_result, model_used, token_usage = await async_evaluate_batch(batch_prompt)
+    evaluation_result, model_used, token_usage = await async_evaluate_batch(batch_prompt, prompt, BatchEvaluation)
 
     if evaluation_result and isinstance(evaluation_result, BatchEvaluation):
         for eval_data in evaluation_result.evaluations:
             idx = eval_data.article_index
             if 0 <= idx < len(batch):
+                batch[idx]["ai_model"] = model_used
                 batch[idx]["score"] = eval_data.total_score
                 batch[idx]["ai_summary"] = eval_data.ai_summary
                 batch[idx]["justification"] = eval_data.justification
@@ -75,7 +78,10 @@ async def process_batch(
     return batch, model_used, token_usage
 
 
-async def enrich_articles_pipeline(articles: list[dict]) -> tuple[list[dict], dict]:
+async def enrich_articles_pipeline(
+        articles: list[dict],
+        prompt: str
+) -> tuple[list[dict], dict]:
     """The main orchestrator function."""
 
     metrics = {
@@ -115,7 +121,7 @@ async def enrich_articles_pipeline(articles: list[dict]) -> tuple[list[dict], di
 
         metrics["llm_batches"] += 1
 
-        processed_batch, model_used, token_usage = await process_batch(batch, batch_id)
+        processed_batch, model_used, token_usage = await process_batch(batch, batch_id, prompt)
         enriched_articles.extend(processed_batch)
 
         if model_used:

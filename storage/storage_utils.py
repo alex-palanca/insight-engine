@@ -26,6 +26,15 @@ def upload_articles(upload_date_str: str, content):
         cloud.article_key(upload_date_str)
     )
 
+def upload_discarded_articles(upload_date_str: str, content):
+    if upload_date_str == "today":
+        upload_date_str = str(today)
+    cloud = get_cloud()
+    cloud.upload_content(
+        content,
+        cloud.discarded_article_key(upload_date_str)
+    )
+
 
 def upload_briefing(date: str, file_input):
     cloud = get_cloud()

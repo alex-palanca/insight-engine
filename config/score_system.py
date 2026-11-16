@@ -1,8 +1,12 @@
 # config/scoring.py
+from typing import Literal
+
 from pydantic import BaseModel, Field, computed_field
+
 
 class ArticleScore(BaseModel):
     article_index: int = Field(
+        ge=0,
         description="The index of the article from the batch (e.g., 0, 1, 2) to map it back."
     )
     immediacy: int = Field(ge=0,le=20,description="Score 0-20: Does this affect markets, policy, or operations today/this week?")
@@ -31,4 +35,30 @@ class ArticleScore(BaseModel):
 class BatchEvaluation(BaseModel):
     evaluations: list[ArticleScore] = Field(
         description="A list of evaluations, one for each article provided in the prompt."
+    )
+
+class ArticleFilter(BaseModel):
+    article_index: int = Field(
+        ge=0,
+        description="The index of the article from the batch (e.g., 0, 1, 2) to map it back.",
+    )
+
+    decision: Literal["keep", "drop"] = Field(
+        description=(
+            "'keep' if the article deserves further enrichment; "
+            "'drop' if the article has no use enriching and keeping"
+            "for future analysis is not worth the cost. "
+            "When uncertain, choose 'keep'."
+        )
+    )
+
+    reason: str = Field(
+        min_length=1,
+        description="One short sentence explaining the filtering decision.",
+    )
+
+
+class BatchFilterEvaluation(BaseModel):
+    evaluations: list[ArticleFilter] = Field(
+        description="One filtering decision for each article in the input batch."
     )

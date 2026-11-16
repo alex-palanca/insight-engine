@@ -28,12 +28,17 @@ def get_client() -> genai.Client:
         _client = genai.Client(api_key=key)
 
     return _client
+
 FALLBACK_MODELS = [
+    "gemini-4-hydrogen",
     "gemini-3.8-flash",
     "gemini-3.7-flash",
     "gemini-3.6-flash",
     "gemini-3.5-flash",
-    "gemini-2.5-flash"
+    "gemini-2.5-flash",
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-2.5-flash-lite",
 ]
 
 MAX_ATTEMPTS = 3
@@ -223,16 +228,18 @@ def generate_briefing(prompt: str,
                     metrics["rate_limit_errors"] += 1
                 if code == 503:
                     metrics["service_errors"] += 1
+                    sleep = 5 * attempt
+                    time.sleep(sleep)
                 if code not in (429, 503):
                     # 400/403/404 are deterministic; retrying is pointless.
                     logger.error("Non-retryable API error on %s (%s): %s",
                                  model_name, code, api_err.message)
                     break
                 # 429 is project-wide quota, so backing off beats switching models.
-                wait = (60 if code == 429 else 5) * attempt
+                sleep = (60 if code == 429 else 5) * attempt
                 logger.warning("Model %s returned %s. Retry %d/%d in %ds.",
-                               model_name, code, attempt, MAX_ATTEMPTS, wait)
-                time.sleep(wait)
+                               model_name, code, attempt, MAX_ATTEMPTS, sleep)
+                time.sleep(sleep)
  
             except Exception:
                 metrics["unexpected_errors"] += 1
