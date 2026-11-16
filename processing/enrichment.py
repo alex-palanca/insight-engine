@@ -45,9 +45,9 @@ async def process_batch(
     logger.info("Processing LLM batch %s.", batch_id)
 
     for article in batch:
-        article.setdefault("score", 0)
-        article.setdefault("ai_summary", "")
-        article.setdefault("justification", "")
+        article.setdefault("score", None)
+        article.setdefault("ai_summary", None)
+        article.setdefault("justification", None)
         article.setdefault("metrics", {})
 
     batch_prompt = ""
