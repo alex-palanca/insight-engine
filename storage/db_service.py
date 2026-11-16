@@ -133,6 +133,7 @@ class Article(Base):
     justification = Column(Text, nullable=True)
     article_read = Column(Boolean, default=False)
     enriched_at = Column(DateTime, nullable=True)
+    ai_model = Column(String,nullable=True)
 
     source_id = Column(Integer, ForeignKey("sources.id", ondelete="CASCADE"), nullable=False)
     source = relationship("Source", back_populates="articles")
@@ -631,6 +632,7 @@ class NeonDatabaseService:
 
                     if article:
                         article.ai_summary = item.get("ai_summary", article.ai_summary)
+                        article.ai_model = item.get("ai_model", article.ai_model)
                         article.score = item.get("score", article.score)
                         article.metrics = item.get("metrics", article.metrics)
                         article.justification = item.get("justification", article.justification)
@@ -694,7 +696,6 @@ class NeonDatabaseService:
 
                 if stage == "bronze":
                     query_results = session.query(Article).join(Source).filter(
-                        Article.enriched_at.is_(None),
                         func.date(Article.collected_at) == today,
                         Article.ai_summary.is_(None),
                     ).order_by(Article.published.desc()).all()

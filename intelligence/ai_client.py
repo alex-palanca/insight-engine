@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 _client: genai.Client | None = None
 
+MAX_MODEL_ATTEMPTS = 5
+
 def get_client() -> genai.Client:
     global _client
 
@@ -31,9 +33,8 @@ def get_client() -> genai.Client:
 FALLBACK_MODELS = [
     "gemini-3.5-flash-lite",
     "gemini-3.1-flash-lite",
-    "gemini-2.5-flash-lite",
-    "gemini-2.5-flash",
-    "gemini-3-flash"
+    "gemini-3.5-flash",
+    "gemini-2.5-flash"
 ]
 
 
@@ -52,49 +53,56 @@ async def async_evaluate_batch(
     client = get_client()
     
     for model_name in FALLBACK_MODELS:
-        try:
-            response = await client.aio.models.generate_content(
-                model=model_name,
-                contents=batch_text,
-                config=types.GenerateContentConfig(
-                    system_instruction=prompt_loader.load_prompt(prompt),
-                    response_mime_type="application/json",
-                    response_schema=response_schema,
-                    temperature=0.1
-                ),
-            )
+        for attempt in range(MAX_MODEL_ATTEMPTS):
+            try:
+                response = await client.aio.models.generate_content(
+                    model=model_name,
+                    contents=batch_text,
+                    config=types.GenerateContentConfig(
+                        system_instruction=prompt_loader.load_prompt(prompt),
+                        response_mime_type="application/json",
+                        response_schema=response_schema,
+                        temperature=0.1
+                    ),
+                )
 
-            usage = getattr(response, "usage_metadata", None)
-            token_usage = {
-                "prompt_tokens": getattr(usage, "prompt_token_count", 0) or 0,
-                "completion_tokens": getattr(usage, "candidates_token_count", 0) or 0,
-                "total_tokens": getattr(usage, "total_token_count", 0) or 0,
-            }
+                usage = getattr(response, "usage_metadata", None)
+                token_usage = {
+                    "prompt_tokens": getattr(usage, "prompt_token_count", 0) or 0,
+                    "completion_tokens": getattr(usage, "candidates_token_count", 0) or 0,
+                    "total_tokens": getattr(usage, "total_token_count", 0) or 0,
+                }
 
-            return response_schema.model_validate_json(response.text), model_name, token_usage
+                return response_schema.model_validate_json(response.text), model_name, token_usage
 
-        except APIError as api_err:
-            if api_err.code == 503:
-                logger.warning("Model %s is overloaded (503). Trying fallback model.", model_name)
-                await asyncio.sleep(0.5)
-                continue
+            except APIError as api_err:
+                if api_err.code == 503:
+                    if attempt < MAX_MODEL_ATTEMPTS:
+                        sleep = 2 * attempt
+                        logger.warning("Model %s is overloaded (503). Retrying in %s seconds.", model_name, sleep)
+                        await asyncio.sleep(sleep)
+                        continue
+                    else:
+                        logger.warning("Model %s is overloaded (503). Trying fallback model.", model_name)
+                        break
 
-            if api_err.code == 429:
-                logger.warning("Rate limit exceeded for model %s (429). Trying fallback model.", model_name)
-                await asyncio.sleep(0.5)
-                continue
 
-            logger.error(
-                "Critical Google API error on model %s (%s): %s",
-                model_name,
-                api_err.code,
-                api_err.message,
-            )
-            break
+                if api_err.code == 429:
+                    logger.warning("Rate limit exceeded for model %s (429). Trying fallback model.", model_name)
+                    await asyncio.sleep(0.5)
+                    break
 
-        except Exception:
-            logger.exception("Unexpected evaluation failure on model %s.", model_name)
-            break
+                logger.error(
+                    "Critical Google API error on model %s (%s): %s",
+                    model_name,
+                    api_err.code,
+                    api_err.message,
+                )
+                break
+
+            except Exception:
+                logger.exception("Unexpected evaluation failure on model %s.", model_name)
+                break
 
     logger.error("All fallback models were exhausted. Batch evaluation skipped.")
     

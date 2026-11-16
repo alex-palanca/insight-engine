@@ -28,7 +28,7 @@ def enrich(
         if articles:
             enriched_articles,enrich_metrics = asyncio.run(enrich_articles_pipeline(articles,"article_scoring.txt"))
             metrics.update(enrich_metrics)
-            
+            print(enriched_articles)
             logger.info("Saving enriched articles to Neon.")
             db_metrics = db.save_articles(enriched_articles, stage="silver")
             metrics.update(db_metrics)

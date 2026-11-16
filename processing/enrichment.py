@@ -62,6 +62,7 @@ async def process_batch(
         for eval_data in evaluation_result.evaluations:
             idx = eval_data.article_index
             if 0 <= idx < len(batch):
+                batch[idx]["ai_model"] = model_used
                 batch[idx]["score"] = eval_data.total_score
                 batch[idx]["ai_summary"] = eval_data.ai_summary
                 batch[idx]["justification"] = eval_data.justification
