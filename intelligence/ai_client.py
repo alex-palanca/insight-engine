@@ -1,78 +1,109 @@
-# summarizer/ai_client.py
 import asyncio
 import logging
 
-import config.env_ini as env
 from google import genai
 from google.genai import types
 from google.genai.errors import APIError
-from utils import prompt_loader
+from pydantic import BaseModel
 
-from config.score_system import BatchEvaluation
+import config.env_ini as env
+from utils import prompt_loader
 
 logging.getLogger("google_genai.models").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
-# Set up global client initialization for this module
-key = env.get_env_var("GOOGLE_API_KEY")
-if not key:
-    raise ValueError(
-        "GOOGLE_API_KEY is not set in the environment variables or Streamlit secrets."
-    )
+_client: genai.Client | None = None
 
-client = genai.Client(api_key=key)
+MAX_MODEL_ATTEMPTS = 5
+
+def get_client() -> genai.Client:
+    global _client
+
+    if _client is None:
+        key = env.get_env_var("GOOGLE_API_KEY")
+        if not key:
+            raise ValueError(
+                "GOOGLE_API_KEY is not set in the environment variables "
+                "or Streamlit secrets."
+            )
+        _client = genai.Client(api_key=key)
+
+    return _client
 
 FALLBACK_MODELS = [
     "gemini-3.5-flash-lite",
     "gemini-3.1-flash-lite",
-    "gemini-2.5-flash-lite",
-    "gemini-2.5-flash",
-    "gemini-3-flash"
+    "gemini-3.5-flash",
+    "gemini-2.5-flash"
 ]
 
 
-async def async_evaluate_batch(batch_text: str) -> BatchEvaluation | None:
+async def async_evaluate_batch(
+        batch_text: str,
+        prompt: str,
+        response_schema: type[BaseModel]
+) -> tuple[BaseModel | None, str | None, dict]:
     """
     Sends a batch of articles to Gemini.
-    If a model suffers a temporary 503 overload, it automatically fails over
-    to backup models before giving up.
+
+    Returns:
+        A tuple of (evaluation result, model actually used).
+        Both values are None if every fallback model failed.
     """
+    client = get_client()
+    
     for model_name in FALLBACK_MODELS:
-        try:
-            response = await client.aio.models.generate_content(
-                model=model_name,
-                contents=batch_text,
-                config=types.GenerateContentConfig(
-                    system_instruction=prompt_loader.load_prompt("article_scoring.txt"),
-                    response_mime_type="application/json",
-                    response_schema=BatchEvaluation,
-                    temperature=0.1
-                ),
-            )
-            return BatchEvaluation.model_validate_json(response.text)
+        for attempt in range(MAX_MODEL_ATTEMPTS):
+            try:
+                response = await client.aio.models.generate_content(
+                    model=model_name,
+                    contents=batch_text,
+                    config=types.GenerateContentConfig(
+                        system_instruction=prompt_loader.load_prompt(prompt),
+                        response_mime_type="application/json",
+                        response_schema=response_schema,
+                        temperature=0.1
+                    ),
+                )
 
-        except APIError as api_err:
-            if api_err.code == 503:
-                logger.warning("Model %s is overloaded (503). Trying fallback model.", model_name)
-                await asyncio.sleep(0.5)
-                continue
+                usage = getattr(response, "usage_metadata", None)
+                token_usage = {
+                    "prompt_tokens": getattr(usage, "prompt_token_count", 0) or 0,
+                    "completion_tokens": getattr(usage, "candidates_token_count", 0) or 0,
+                    "total_tokens": getattr(usage, "total_token_count", 0) or 0,
+                }
 
-            if api_err.code == 429:
-                logger.warning("Rate limit exceeded for model %s (429). Trying fallback model.", model_name)
-                await asyncio.sleep(0.5)
-                continue
+                return response_schema.model_validate_json(response.text), model_name, token_usage
 
-            logger.error(
-                "Critical Google API error on model %s (%s): %s",
-                model_name,
-                api_err.code,
-                api_err.message,
-            )
-            break
+            except APIError as api_err:
+                if api_err.code == 503:
+                    if attempt < MAX_MODEL_ATTEMPTS:
+                        sleep = 2 * attempt
+                        logger.warning("Model %s is overloaded (503). Retrying in %s seconds.", model_name, sleep)
+                        await asyncio.sleep(sleep)
+                        continue
+                    else:
+                        logger.warning("Model %s is overloaded (503). Trying fallback model.", model_name)
+                        break
 
-        except Exception:
-            logger.exception("Unexpected evaluation failure on model %s.", model_name)
-            break
+
+                if api_err.code == 429:
+                    logger.warning("Rate limit exceeded for model %s (429). Trying fallback model.", model_name)
+                    await asyncio.sleep(0.5)
+                    break
+
+                logger.error(
+                    "Critical Google API error on model %s (%s): %s",
+                    model_name,
+                    api_err.code,
+                    api_err.message,
+                )
+                break
+
+            except Exception:
+                logger.exception("Unexpected evaluation failure on model %s.", model_name)
+                break
 
     logger.error("All fallback models were exhausted. Batch evaluation skipped.")
-    return None
+    
+    return None,None, None

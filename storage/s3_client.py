@@ -1,6 +1,8 @@
-import boto3
-from config import env_ini as env
 import json
+
+import boto3
+
+from config import env_ini as env
 
 
 # S3Storage class for interacting with AWS S3
@@ -65,6 +67,10 @@ class S3Storage:
     @staticmethod
     def article_key(date: str):
         return f"articles/{date}.json"
+
+    @staticmethod
+    def discarded_article_key(date: str):
+        return f"discarded_articles/{date}.json"
 
     @staticmethod
     def briefing_key(date: str):
